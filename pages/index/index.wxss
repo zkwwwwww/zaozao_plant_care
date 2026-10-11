@@ -1,6 +1,88 @@
 /* pages/index/index.wxss */
 .container {
-  padding-bottom: 160rpx;
+  padding-bottom: 24rpx;
+}
+.container.has-add {
+  padding-bottom: 132rpx;
+}
+
+/* 小程序标识 */
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 28rpx 24rpx 20rpx;
+}
+.brand-logo {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 28rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.brand-text {
+  flex: 1;
+  min-width: 0;
+}
+.brand-name {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #26352c;
+}
+.brand-desc {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #6b7a70;
+}
+.brand-login {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8a9b90;
+}
+.brand-login.is-expired {
+  color: #9b6819;
+}
+.feature-row {
+  display: flex;
+  width: 100%;
+  margin-top: 22rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #eef1ef;
+}
+.feature-item {
+  flex: 1;
+  min-height: 88rpx;
+  text-align: center;
+  padding: 0 6rpx;
+}
+.feature-title {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #2e7d5b;
+}
+.feature-desc {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  line-height: 1.4;
+  color: #8a9b90;
+}
+.empty-logo {
+  display: block;
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 36rpx;
+  margin: 0 auto 20rpx;
+}
+.empty-sub {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #a3b0a8;
 }
 
 /* 统计 */
@@ -41,24 +123,6 @@
 .tip-text {
   font-size: 26rpx;
   color: #2e7d5b;
-}
-
-/* 区块标题 */
-.section-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 32rpx;
-  font-weight: 700;
-  margin-bottom: 20rpx;
-}
-.section-title.between {
-  margin-top: 8rpx;
-}
-.section-more {
-  font-size: 24rpx;
-  color: #2e7d5b;
-  font-weight: 400;
 }
 
 /* 待办行 */
@@ -102,6 +166,11 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+}
+.photo-wrap plant-thumb {
+  display: block;
+  width: 100%;
+  height: 300rpx;
 }
 .plant-card {
   width: 47.8%;
@@ -153,6 +222,11 @@
   font-size: 24rpx;
   color: #2e7d5b;
   font-weight: 600;
+  padding: 4rpx 0 4rpx 12rpx;
+}
+.is-masked {
+  letter-spacing: 2rpx;
+  color: #8a9b90;
 }
 .plant-meta {
   display: block;
@@ -184,8 +258,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 20rpx 24rpx 40rpx;
-  background: linear-gradient(180deg, rgba(244, 247, 245, 0), #f4f7f5 30%);
+  padding: 12rpx 24rpx;
+  background: linear-gradient(180deg, rgba(244, 247, 245, 0), #f4f7f5 28%);
   z-index: 10;
 }
 .add-btn {

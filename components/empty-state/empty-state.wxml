@@ -1,0 +1,6 @@
+<view class="empty-state {{compact?'compact':''}}">
+  <image class="illustration" src="{{image}}" mode="aspectFit"></image>
+  <text class="title">{{title}}</text>
+  <text class="description" wx:if="{{description}}">{{description}}</text>
+  <view class="action" wx:if="{{buttonText}}" bindtap="onAction">{{buttonText}}</view>
+</view>

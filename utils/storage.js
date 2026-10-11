@@ -55,6 +55,19 @@ function getEnvs() {
   return _read(KEYS.envs);
 }
 
+const DEFAULT_ENVS = [
+  { id: 'env_1', name: '室内明亮', lightIntensity: '5000', lightHours: '8' },
+  { id: 'env_2', name: '半阴散射光', lightIntensity: '3000', lightHours: '6' },
+  { id: 'env_3', name: '阳台直射', lightIntensity: '8000', lightHours: '10' },
+  { id: 'env_4', name: '弱光阴处', lightIntensity: '1500', lightHours: '4' }
+];
+
+function ensureDefaultEnvs() {
+  const v = wx.getStorageSync(KEYS.envs);
+  if (Array.isArray(v) && v.length) return;
+  _write(KEYS.envs, DEFAULT_ENVS.map(e => ({ ...e })));
+}
+
 function getEnv(id) {
   return getEnvs().find(e => e.id === id) || null;
 }
@@ -107,6 +120,7 @@ module.exports = {
   deletePlant,
   addRecord,
   getEnvs,
+  ensureDefaultEnvs,
   getEnv,
   saveEnv,
   deleteEnv,

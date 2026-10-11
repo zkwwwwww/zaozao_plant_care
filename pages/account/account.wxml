@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="card account-card">
+    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image class="avatar" src="{{avatarUrl || '/assets/icons/logo.png'}}" mode="aspectFill"></image>
+    </button>
+    <text class="avatar-hint">点头像，授权使用微信头像或从相册选择</text>
+
+    <view class="field">
+      <text class="field-label">昵称</text>
+      <input
+        class="nick-input"
+        type="nickname"
+        maxlength="32"
+        placeholder="点此使用微信昵称"
+        placeholder-class="nick-placeholder"
+        value="{{nickName}}"
+        bindinput="onNickname"
+        bindblur="onNickname"
+      />
+    </view>
+
+    <text class="account-id" wx:if="{{openidMask}}">{{openidMask}}</text>
+    <text class="account-note is-expired" wx:if="{{expired}}">本地登录已过期，请重新确认头像和昵称。</text>
+    <text class="account-note" wx:elif="{{!authorized}}">登录后才能查看和记录植物。请确认头像和昵称，账号会绑定当前微信，登录状态保留 7 天。</text>
+    <text class="account-note" wx:else>账号身份由当前微信自动绑定，登录状态保留 7 天。</text>
+
+    <view class="btn-primary {{submitting || loading ? 'is-disabled' : ''}}" bindtap="submit">{{authorized ? '更新资料' : (expired ? '重新登录' : '授权登录')}}</view>
+    <view class="btn-ghost" wx:if="{{authorized}}" bindtap="signOut">退出登录</view>
+  </view>
+
+  <view class="card status-card" wx:if="{{loading}}">正在读取微信账号…</view>
+  <view class="card status-card error" wx:elif="{{error}}">
+    <text>{{error}}</text>
+    <view class="retry" wx:if="{{cloudReady}}" bindtap="refresh">重试</view>
+  </view>
+</view>

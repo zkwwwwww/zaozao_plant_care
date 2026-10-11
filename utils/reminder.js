@@ -1,6 +1,7 @@
 // utils/reminder.js 季节浇水频率 + 施肥/换盆提醒
 // 用户规则：春、秋每10天浇一次水；夏每5天；冬每15天。也可为每株植物单独设置间隔。
 const format = require('./format');
+const UPCOMING_WINDOW_DAYS = 14;
 
 const SEASONS = [
   { key: 'spring', name: '春', months: [3, 4, 5], waterInterval: 10 },
@@ -45,12 +46,15 @@ function repotIntervalFor(plant) {
 
 // 从养护记录里取某类型最近一次日期，取不到则回退到 companionStart 或购买日
 function lastCareDate(plant, type) {
-  const records = (plant.records || []).filter(r => r.type === type);
+  const records = (plant.records || []).filter(r => r.type === type && format.toDate(r.date));
   let latest = '';
   for (const r of records) {
     if (r.date && r.date > latest) latest = r.date;
   }
-  return latest || plant.companionStart || plant.purchaseDate || '';
+  if (latest) return latest;
+  if (format.toDate(plant.companionStart)) return plant.companionStart;
+  if (format.toDate(plant.purchaseDate)) return plant.purchaseDate;
+  return '';
 }
 
 // 某植物某提醒项的下一次日期
@@ -71,8 +75,11 @@ function nextDueDate(plant, type) {
   return format.addDays(last, interval);
 }
 
-// 汇总某植物所有待办提醒（今天及以后 + 逾期），按到期日排序
-function plantTasks(plant) {
+// 汇总某植物待办：近期窗口内的未来任务 + 所有逾期任务
+function plantTasks(plant, options) {
+  const upcomingDays = options && Number.isFinite(Number(options.upcomingDays))
+    ? Math.max(0, Number(options.upcomingDays))
+    : UPCOMING_WINDOW_DAYS;
   const tasks = [];
   const defs = [
     { type: 'water', label: '浇水', lastType: '浇水' },
@@ -83,13 +90,14 @@ function plantTasks(plant) {
     const due = nextDueDate(plant, def.type);
     if (!due) continue;
     const info = format.dueInfo(due);
-    // 只看今天及之后，以及已逾期任务
-    if (format.diffDays(due, format.today()) >= 0 || info.overdue) {
+    const daysUntilDue = format.diffDays(format.today(), due);
+    if (info.overdue || (daysUntilDue >= 0 && daysUntilDue <= upcomingDays)) {
       tasks.push({
         type: def.type,
         label: def.label,
         due,
         dueText: info.text,
+        cls: info.cls,
         overdue: info.overdue
       });
     }
@@ -106,6 +114,7 @@ function seasonWaterText() {
 
 module.exports = {
   SEASONS,
+  UPCOMING_WINDOW_DAYS,
   currentSeason,
   waterIntervalFor,
   fertIntervalFor,

@@ -1,0 +1,11 @@
+:host {
+  display: inline-block;
+  flex: none;
+  width: auto;
+  line-height: 0;
+  vertical-align: top;
+}
+.thumb { display: block; background: #eef4f0; }
+.small { width: 72rpx; height: 72rpx; border-radius: 14rpx; }
+.medium { width: 112rpx; height: 112rpx; border-radius: 20rpx; }
+.large { width: 100%; height: 300rpx; }

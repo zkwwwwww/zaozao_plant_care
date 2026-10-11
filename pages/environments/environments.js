@@ -1,5 +1,6 @@
 // pages/environments/environments.js 生长环境分类列表
 const storage = require('../../utils/storage');
+const account = require('../../services/account');
 
 Page({
   data: {
@@ -7,6 +8,7 @@ Page({
   },
 
   onShow() {
+    if (!account.requireLogin()) return;
     this.load();
   },
 

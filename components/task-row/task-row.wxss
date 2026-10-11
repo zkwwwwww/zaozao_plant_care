@@ -1,0 +1,68 @@
+.task-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 104rpx;
+  gap: 24rpx;
+  border-bottom: 1rpx solid #f2f5f3;
+}
+.task-row:last-child { border-bottom: none; }
+.thumb {
+  display: block;
+  flex: 0 0 72rpx;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 14rpx;
+  background: #eef4f0;
+}
+.task-info {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.task-name,
+.task-date {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-name {
+  color: #26352c;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.task-date {
+  margin-top: 4rpx;
+  color: #8a9b90;
+  font-size: 22rpx;
+  line-height: 1.4;
+}
+.task-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 20rpx;
+  margin-left: 8rpx;
+}
+.tag { padding: 4rpx 14rpx; border-radius: 20rpx; font-size: 22rpx; line-height: 36rpx; white-space: nowrap; }
+.tag-green { background: #e2f2e9; color: #2e7d5b; }
+.tag-amber { background: #fdf3e0; color: #9b6819; }
+.tag-red { background: #fbe9e7; color: #b34e48; }
+.tag-gray { background: #eef1ef; color: #6b7a70; }
+.complete {
+  flex: 0 0 auto;
+  height: 32rpx;
+  padding: 0 12rpx;
+  border-radius: 16rpx;
+  background: #eef4f0;
+  color: #2e7d5b;
+  font-size: 20rpx;
+  line-height: 32rpx;
+  text-align: center;
+}

@@ -4,11 +4,11 @@
   <view class="card hero">
     <swiper class="hero-swiper" indicator-dots="{{photos.length>1}}" indicator-color="rgba(255,255,255,.5)" indicator-active-color="#fff" circular="{{photos.length>1}}">
       <swiper-item wx:for="{{photos}}" wx:key="*this">
-        <image class="hero-img" src="{{item}}" mode="aspectFill" bindtap="previewPhoto" data-src="{{item}}"></image>
+        <image class="hero-img" src="{{item}}" mode="aspectFit" bindtap="previewPhoto" data-src="{{item}}"></image>
       </swiper-item>
       <swiper-item wx:if="{{photos.length===0}}">
         <view class="hero-placeholder">
-          <text class="hp-icon">🪴</text>
+          <image class="hp-image" src="/assets/illustrations/plant-placeholder.png" mode="aspectFit"></image>
           <text class="hp-text">暂无照片</text>
         </view>
       </swiper-item>
@@ -75,15 +75,16 @@
 
   <!-- 待办提醒 -->
   <view class="card" wx:if="{{tasks.length>0}}">
-    <view class="section-title">下次养护提醒</view>
-    <view class="task-row" wx:for="{{tasks}}" wx:key="type">
-      <text class="task-emoji">{{item.type==='water'?'💧':item.type==='fertilize'?'🌱':'🪴'}}</text>
-      <view class="task-info">
-        <text class="task-name">{{item.label}}</text>
-        <text class="task-date">上次后下次到期 {{item.due}}</text>
-      </view>
-      <text class="tag {{item.overdue?'tag-red':'tag-green'}}">{{item.dueText}}</text>
-    </view>
+    <section-header title="下次养护提醒"></section-header>
+    <task-row
+      wx:for="{{tasks}}"
+      wx:key="type"
+      photo="{{plant.photos[0]}}"
+      title="{{item.label}}"
+      subtitle="下次到期 {{item.due}}"
+      status-text="{{item.dueText}}"
+      status-class="{{item.cls}}"
+    ></task-row>
   </view>
 
   <!-- 操作按钮 -->
@@ -98,7 +99,7 @@
 
   <!-- 养护记录时间线 -->
   <view class="card">
-    <view class="section-title">养护记录（{{records.length}}）</view>
+    <section-header title="养护记录（{{records.length}}）"></section-header>
     <view class="record-list" wx:if="{{records.length>0}}">
       <view class="record-item" wx:for="{{records}}" wx:key="id">
         <view class="record-dot"></view>
@@ -112,7 +113,13 @@
         </view>
       </view>
     </view>
-    <view class="empty small" wx:else>还没有记录，点击上方按钮添加</view>
+    <empty-state
+      wx:else
+      compact="{{true}}"
+      image="/assets/illustrations/empty-records.png"
+      title="还没有养护记录"
+      description="点击上方按钮，记下第一次浇水或观察"
+    ></empty-state>
   </view>
 
   <!-- 纪念弹层 -->
@@ -129,4 +136,11 @@
     </view>
   </view>
 
+</view>
+
+<view class="container" wx:elif="{{notFound}}">
+  <view class="empty">
+    <view>植物不存在或已被删除</view>
+    <button class="btn-ghost" bindtap="goBack">返回上一页</button>
+  </view>
 </view>

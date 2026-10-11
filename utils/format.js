@@ -6,7 +6,8 @@ function pad(n) {
 // 格式化 YYYY-MM-DD
 function fmtDate(d) {
   if (!d) return '';
-  const date = typeof d === 'string' ? new Date(d.replace(/-/g, '/')) : new Date(d);
+  const date = typeof d === 'string' ? toDate(d) : new Date(d);
+  if (!date || Number.isNaN(date.getTime())) return '';
   return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
 }
 
@@ -15,10 +16,20 @@ function today() {
   return fmtDate(new Date());
 }
 
-// 字符串日期转 Date（兼容 iOS 需把 - 换成 /）
+// 字符串日期转本地中午的 Date，避免夏令时边界影响日历日计算
 function toDate(str) {
   if (!str) return null;
-  return new Date(String(str).replace(/-/g, '/'));
+  if (str instanceof Date) return Number.isNaN(str.getTime()) ? null : new Date(str);
+  const matched = String(str).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!matched) return null;
+  const year = Number(matched[1]);
+  const month = Number(matched[2]);
+  const day = Number(matched[3]);
+  const date = new Date(year, month - 1, day, 12, 0, 0, 0);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+  return date;
 }
 
 // 两个 YYYY-MM-DD 之间的天数差（b - a）
@@ -26,12 +37,15 @@ function diffDays(a, b) {
   const da = toDate(a);
   const db = toDate(b);
   if (!da || !db) return 0;
-  return Math.round((db.getTime() - da.getTime()) / 86400000);
+  const utcA = Date.UTC(da.getFullYear(), da.getMonth(), da.getDate());
+  const utcB = Date.UTC(db.getFullYear(), db.getMonth(), db.getDate());
+  return Math.round((utcB - utcA) / 86400000);
 }
 
 // 根据某日期加 N 天，返回 YYYY-MM-DD
 function addDays(str, n) {
-  const d = toDate(str) || new Date();
+  const d = toDate(str);
+  if (!d || !Number.isFinite(Number(n))) return '';
   d.setDate(d.getDate() + n);
   return fmtDate(d);
 }
@@ -58,12 +72,12 @@ function companionText(startDate) {
 function dueInfo(dueDate) {
   if (!dueDate) return { text: '', cls: 'tag-gray', overdue: false };
   const diff = diffDays(today(), dueDate);
-  if (diff > 0) {
-    return { text: '逾期 ' + diff + ' 天', cls: 'tag-red', overdue: true };
+  if (diff < 0) {
+    return { text: '逾期 ' + (-diff) + ' 天', cls: 'tag-red', overdue: true };
   } else if (diff === 0) {
     return { text: '今天到期', cls: 'tag-amber', overdue: false };
   } else {
-    return { text: '还有 ' + (-diff) + ' 天', cls: 'tag-green', overdue: false };
+    return { text: '还有 ' + diff + ' 天', cls: 'tag-green', overdue: false };
   }
 }
 

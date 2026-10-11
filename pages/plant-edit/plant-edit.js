@@ -1,8 +1,10 @@
 // pages/plant-edit/plant-edit.js 新增 / 编辑植物
 const storage = require('../../utils/storage');
+const account = require('../../services/account');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
 const constants = require('../../utils/constants');
+const media = require('../../utils/media');
 
 Page({
   data: {
@@ -28,6 +30,11 @@ Page({
     envs: [],
     envIndex: 0,
     envName: '',
+    statusIndex: 0,
+    plantingIndex: 0,
+    purchaseIndex: 0,
+    isSavingPhoto: false,
+    isSubmitting: false,
     statusOptions: constants.STATUS_OPTIONS,
     plantingOptions: constants.PLANTING_OPTIONS,
     purchaseOptions: constants.PURCHASE_OPTIONS,
@@ -35,6 +42,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!account.requireLogin()) return;
     if (options.id) {
       const plant = storage.getPlant(options.id);
       if (plant) {
@@ -69,7 +77,10 @@ Page({
       envs,
       envIndex,
       envName: envs[envIndex] ? envs[envIndex].name : '',
-      'form.environmentId': envId
+      'form.environmentId': envId,
+      statusIndex: Math.max(0, constants.STATUS_OPTIONS.indexOf(this.data.form.status)),
+      plantingIndex: Math.max(0, constants.PLANTING_OPTIONS.indexOf(this.data.form.planting)),
+      purchaseIndex: Math.max(0, constants.PURCHASE_OPTIONS.indexOf(this.data.form.purchaseWay))
     });
   },
 
@@ -86,15 +97,27 @@ Page({
   },
 
   onStatus(e) {
-    this.setData({ 'form.status': constants.STATUS_OPTIONS[e.detail.value] });
+    const statusIndex = Number(e.detail.value);
+    this.setData({
+      statusIndex,
+      'form.status': constants.STATUS_OPTIONS[statusIndex]
+    });
   },
 
   onPlanting(e) {
-    this.setData({ 'form.planting': constants.PLANTING_OPTIONS[e.detail.value] });
+    const plantingIndex = Number(e.detail.value);
+    this.setData({
+      plantingIndex,
+      'form.planting': constants.PLANTING_OPTIONS[plantingIndex]
+    });
   },
 
   onPurchaseWay(e) {
-    this.setData({ 'form.purchaseWay': constants.PURCHASE_OPTIONS[e.detail.value] });
+    const purchaseIndex = Number(e.detail.value);
+    this.setData({
+      purchaseIndex,
+      'form.purchaseWay': constants.PURCHASE_OPTIONS[purchaseIndex]
+    });
   },
 
   onEnv(e) {
@@ -114,25 +137,34 @@ Page({
 
   // 选择/拍照并持久化图片
   addPhoto() {
+    if (this.data.isSavingPhoto || this.data.photos.length >= 9) return;
     wx.chooseMedia({
       count: 9 - this.data.photos.length,
       mediaType: ['image'],
       sizeType: ['compressed'],
-      success: (res) => {
+      success: async (res) => {
         const paths = res.tempFiles.map(f => f.tempFilePath);
-        // 将临时文件保存到本地缓存，避免重启后丢失
-        const saved = [];
-        paths.forEach(p => {
-          wx.getFileSystemManager().saveFile({
-            tempFilePath: p,
-            success: (r) => saved.push(r.savedFilePath),
-            fail: () => saved.push(p)
-          });
-        });
-        // saveFile 为异步，稍作延迟后统一更新
-        setTimeout(() => {
-          this.setData({ photos: this.data.photos.concat(saved) });
-        }, 300);
+        if (!paths.length) return;
+        this.setData({ isSavingPhoto: true });
+        wx.showLoading({ title: '保存照片中', mask: true });
+        try {
+          const result = await media.saveImages(paths);
+          if (result.savedPaths.length) {
+            this.setData({ photos: this.data.photos.concat(result.savedPaths) });
+          }
+          if (result.failedCount) {
+            wx.showToast({
+              title: result.failedCount + ' 张照片保存失败，请重试',
+              icon: 'none',
+              duration: 2500
+            });
+          }
+        } catch (error) {
+          wx.showToast({ title: '照片保存失败，请重试', icon: 'none' });
+        } finally {
+          wx.hideLoading();
+          this.setData({ isSavingPhoto: false });
+        }
       }
     });
   },
@@ -150,12 +182,20 @@ Page({
   },
 
   save() {
+    if (!account.requireLogin()) return;
+    if (this.data.isSavingPhoto) {
+      wx.showToast({ title: '照片仍在保存，请稍候', icon: 'none' });
+      return;
+    }
+    if (this.data.isSubmitting) return;
     const form = this.data.form;
     if (!form.name.trim()) {
       wx.showToast({ title: '请填写植物名称', icon: 'none' });
       return;
     }
+    this.setData({ isSubmitting: true });
     const now = format.today();
+    const existing = this.data.isEdit ? storage.getPlant(this.data.id) : null;
     const plant = {
       id: this.data.id || storage.genId('plant'),
       name: form.name.trim(),
@@ -166,27 +206,30 @@ Page({
       planting: form.planting,
       environmentId: form.environmentId,
       location: form.location.trim(),
-      companionStart: form.companionStart,
+      companionStart: form.companionStart || form.purchaseDate,
       purchaseDate: form.purchaseDate,
       description: form.description.trim(),
       photos: this.data.photos,
       customWaterInterval: form.customWaterInterval === '' ? 0 : Number(form.customWaterInterval),
       customFertInterval: form.customFertInterval === '' ? 0 : Number(form.customFertInterval),
       customRepotInterval: form.customRepotInterval === '' ? 0 : Number(form.customRepotInterval),
-      records: this.data.isEdit ? (storage.getPlant(this.data.id) || {}).records || [] : [],
-      memorialized: this.data.isEdit ? !!(storage.getPlant(this.data.id) || {}).memorialized : false,
+      records: existing ? existing.records || [] : [],
+      memorialized: existing ? !!existing.memorialized : false,
       updatedAt: now,
-      createdAt: this.data.isEdit ? (storage.getPlant(this.data.id) || {}).createdAt || now : now
+      createdAt: existing ? existing.createdAt || now : now
     };
 
-    storage.savePlant(plant);
-    wx.showToast({ title: this.data.isEdit ? '已保存' : '已添加', icon: 'success' });
-    setTimeout(() => {
+    try {
+      storage.savePlant(plant);
+      wx.showToast({ title: this.data.isEdit ? '已保存' : '已添加', icon: 'success' });
       if (this.data.isEdit) {
         wx.navigateBack();
       } else {
         wx.redirectTo({ url: '/pages/plant-detail/plant-detail?id=' + plant.id });
       }
-    }, 400);
+    } catch (error) {
+      this.setData({ isSubmitting: false });
+      wx.showToast({ title: '保存失败，请重试', icon: 'none' });
+    }
   }
 });
