@@ -1,0 +1,26 @@
+<view class="container">
+  <view class="env-tip card">
+    <text class="tip-text">为不同的生长环境分别设置光照强度（lux 勒克斯）与每日光照时长，分类管理各环境下的植物。</text>
+  </view>
+
+  <view class="env-card" wx:for="{{envs}}" wx:key="id" bindtap="goEdit" data-id="{{item.id}}">
+    <view class="env-left">
+      <text class="env-icon">🪴</text>
+      <view class="env-info">
+        <text class="env-name">{{item.name}}</text>
+        <text class="env-count">{{item.count}} 株植物</text>
+      </view>
+    </view>
+    <view class="env-right">
+      <view class="env-spec">☀️ {{item.lightIntensity || '—'}} lux</view>
+      <view class="env-spec">⏱ {{item.lightHours || '—'}} 小时/天</view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{envs.length===0}}">
+    <view class="empty-icon">🌤️</view>
+    <view>暂无环境分类，点击下方添加</view>
+  </view>
+
+  <button class="btn-primary" bindtap="goAdd">＋ 添加环境</button>
+</view>

@@ -1,0 +1,138 @@
+/* app.wxss 全局样式 */
+page {
+  background-color: #f4f7f5;
+  color: #26352c;
+  font-size: 28rpx;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+view, text, input, textarea, button, image, scroll-view {
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 24rpx;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(46, 125, 91, 0.06);
+}
+
+/* 通用按钮 */
+.btn-primary {
+  background: #2e7d5b;
+  color: #ffffff;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  padding: 0 40rpx;
+  line-height: 80rpx;
+  height: 80rpx;
+  text-align: center;
+  margin: 16rpx 0;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-ghost {
+  background: #eef4f0;
+  color: #2e7d5b;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  padding: 0 32rpx;
+  line-height: 72rpx;
+  height: 72rpx;
+  text-align: center;
+  margin: 12rpx 0;
+}
+
+.btn-ghost::after {
+  border: none;
+}
+
+.btn-danger {
+  background: #f7ecea;
+  color: #c0554f;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  padding: 0 32rpx;
+  line-height: 72rpx;
+  height: 72rpx;
+  text-align: center;
+}
+
+.btn-danger::after {
+  border: none;
+}
+
+/* 标签 / 徽标 */
+.tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  line-height: 36rpx;
+  margin-right: 12rpx;
+}
+
+.tag-green { background: #e2f2e9; color: #2e7d5b; }
+.tag-amber { background: #fdf3e0; color: #b07a20; }
+.tag-red   { background: #fbe9e7; color: #c0554f; }
+.tag-gray  { background: #eef1ef; color: #6b7a70; }
+.tag-blue  { background: #e6f0fa; color: #2a6fa8; }
+
+/* 表单 */
+.form-item {
+  display: flex;
+  align-items: center;
+  padding: 26rpx 4rpx;
+  border-bottom: 1rpx solid #eef1ef;
+}
+
+.form-label {
+  width: 180rpx;
+  color: #5b6a60;
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.form-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #26352c;
+}
+
+.form-placeholder {
+  color: #b6c0ba;
+}
+
+.form-unit {
+  color: #8a9b90;
+  font-size: 24rpx;
+  margin-left: 8rpx;
+}
+
+/* 页头 */
+.page-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  margin: 12rpx 0 20rpx;
+}
+
+.empty {
+  text-align: center;
+  color: #8a9b90;
+  padding: 120rpx 40rpx;
+  font-size: 28rpx;
+}
+
+.empty-icon {
+  font-size: 72rpx;
+  margin-bottom: 20rpx;
+}

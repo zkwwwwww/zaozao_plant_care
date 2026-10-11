@@ -1,0 +1,122 @@
+<view class="container">
+
+  <!-- 照片区 -->
+  <view class="card">
+    <view class="section-title">照片（{{photos.length}}）</view>
+    <view class="photo-grid">
+      <view class="photo-cell" wx:for="{{photos}}" wx:key="*this">
+        <image class="photo-img" src="{{item}}" mode="aspectFill" bindtap="previewPhoto" data-src="{{item}}"></image>
+        <view class="photo-del" bindtap="removePhoto" data-idx="{{index}}">×</view>
+      </view>
+      <view class="photo-cell add" bindtap="addPhoto" wx:if="{{photos.length<9}}">
+        <text class="add-plus">＋</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 基本字段 -->
+  <view class="card">
+    <view class="section-title">基本信息</view>
+
+    <view class="form-item">
+      <text class="form-label">名称 *</text>
+      <input class="form-input" placeholder="如：鹿角蕨" placeholder-class="form-placeholder" value="{{form.name}}" data-field="name" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">品种</text>
+      <input class="form-input" placeholder="如：皇后／深绿" placeholder-class="form-placeholder" value="{{form.variety}}" data-field="variety" bindinput="onInput" />
+    </view>
+
+    <picker range="{{statusOptions}}" value="{{statusOptions.indexOf(form.status)}}" bindchange="onStatus">
+      <view class="form-item">
+        <text class="form-label">状态</text>
+        <text class="form-input">{{form.status}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <view class="form-item">
+      <text class="form-label">价格（元）</text>
+      <input class="form-input" type="digit" placeholder="0.00" placeholder-class="form-placeholder" value="{{form.price}}" data-field="price" bindinput="onNumInput" />
+      <text class="form-unit">元</text>
+    </view>
+
+    <picker range="{{purchaseOptions}}" value="{{purchaseOptions.indexOf(form.purchaseWay)}}" bindchange="onPurchaseWay">
+      <view class="form-item">
+        <text class="form-label">购买途径</text>
+        <text class="form-input">{{form.purchaseWay}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <picker range="{{plantingOptions}}" value="{{plantingOptions.indexOf(form.planting)}}" bindchange="onPlanting">
+      <view class="form-item">
+        <text class="form-label">种植形式</text>
+        <text class="form-input">{{form.planting}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <picker range="{{envs}}" range-key="name" value="{{envIndex}}" bindchange="onEnv">
+      <view class="form-item">
+        <text class="form-label">生长环境</text>
+        <text class="form-input {{envName?'':'form-placeholder'}}">{{envName || '选择环境'}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <view class="form-item">
+      <text class="form-label">所在位置</text>
+      <input class="form-input" placeholder="如：客厅窗台 / 书房架" placeholder-class="form-placeholder" value="{{form.location}}" data-field="location" bindinput="onInput" />
+    </view>
+  </view>
+
+  <!-- 时间字段 -->
+  <view class="card">
+    <view class="section-title">时间</view>
+    <picker mode="date" value="{{form.purchaseDate}}" data-field="purchaseDate" bindchange="onDate">
+      <view class="form-item">
+        <text class="form-label">购买日期</text>
+        <text class="form-input {{form.purchaseDate?'':'form-placeholder'}}">{{form.purchaseDate || '选择日期'}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+    <picker mode="date" value="{{form.companionStart}}" data-field="companionStart" bindchange="onDate">
+      <view class="form-item">
+        <text class="form-label">陪伴起始</text>
+        <text class="form-input {{form.companionStart?'':'form-placeholder'}}">{{form.companionStart || '默认同购买日'}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 提醒设置 -->
+  <view class="card">
+    <view class="section-title">养护提醒间隔（天）</view>
+    <view class="reminder-hint">{{seasonText}}，留空则按季节自动。</view>
+    <view class="form-item">
+      <text class="form-label">浇水间隔</text>
+      <input class="form-input" type="number" placeholder="留空=按季节" placeholder-class="form-placeholder" value="{{form.customWaterInterval}}" data-field="customWaterInterval" bindinput="onNumInput" />
+      <text class="form-unit">天</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">施肥间隔</text>
+      <input class="form-input" type="number" placeholder="默认 30 天" placeholder-class="form-placeholder" value="{{form.customFertInterval}}" data-field="customFertInterval" bindinput="onNumInput" />
+      <text class="form-unit">天</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">换盆间隔</text>
+      <input class="form-input" type="number" placeholder="默认 365 天" placeholder-class="form-placeholder" value="{{form.customRepotInterval}}" data-field="customRepotInterval" bindinput="onNumInput" />
+      <text class="form-unit">天</text>
+    </view>
+  </view>
+
+  <!-- 备注 -->
+  <view class="card">
+    <view class="section-title">备注</view>
+    <textarea class="desc-textarea" placeholder="记录养护心得、特殊习性等…" placeholder-class="form-placeholder" value="{{form.description}}" data-field="description" bindinput="onInput" maxlength="500"></textarea>
+  </view>
+
+  <button class="btn-primary" bindtap="save">{{isEdit ? '保存修改' : '添加植物'}}</button>
+</view>

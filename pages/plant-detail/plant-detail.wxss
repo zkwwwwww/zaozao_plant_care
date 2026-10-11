@@ -1,0 +1,102 @@
+/* pages/plant-detail/plant-detail.wxss */
+.container { padding-bottom: 80rpx; }
+
+/* 头部照片 */
+.hero { padding: 0; overflow: hidden; }
+.hero-swiper { width: 100%; height: 460rpx; }
+.hero-img { width: 100%; height: 460rpx; display: block; }
+.hero-placeholder {
+  width: 100%; height: 460rpx;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #e8f0eb;
+}
+.hp-icon { font-size: 96rpx; }
+.hp-text { margin-top: 16rpx; color: #8a9b90; font-size: 26rpx; }
+.hero-info { padding: 24rpx; }
+.hero-title-row { display: flex; align-items: center; justify-content: space-between; }
+.hero-name { font-size: 40rpx; font-weight: 700; }
+.hero-variety { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 26rpx; }
+.hero-companion { display: block; margin-top: 10rpx; color: #2e7d5b; font-size: 26rpx; font-weight: 600; }
+
+/* 纪念碑 */
+.memorial-banner {
+  display: flex; align-items: center;
+  background: #f7f1f0;
+  border: 1rpx solid #eadcd8;
+}
+.mb-icon { font-size: 48rpx; margin-right: 20rpx; }
+.mb-body { flex: 1; display: flex; flex-direction: column; }
+.mb-title { font-size: 28rpx; font-weight: 700; color: #6b4a45; }
+.mb-note { font-size: 24rpx; color: #8a6f6a; margin-top: 6rpx; }
+.mb-sub { font-size: 22rpx; color: #b09690; margin-top: 6rpx; }
+.mb-btn { color: #2e7d5b; font-size: 26rpx; }
+
+/* 信息 */
+.info-grid {
+  display: flex; flex-wrap: wrap;
+}
+.info-item {
+  width: 50%;
+  padding: 16rpx 0;
+}
+.info-label { display: block; font-size: 22rpx; color: #8a9b90; }
+.info-value { display: block; font-size: 28rpx; margin-top: 6rpx; font-weight: 500; }
+.env-light {
+  display: flex; gap: 16rpx; margin-top: 20rpx; padding-top: 20rpx;
+  border-top: 1rpx solid #f0f3f1;
+}
+.el-item { font-size: 24rpx; color: #2a6fa8; background: #e6f0fa; padding: 6rpx 18rpx; border-radius: 18rpx; }
+.desc { margin-top: 20rpx; font-size: 26rpx; color: #5b6a60; line-height: 1.6; }
+
+/* 任务行 */
+.task-row { display: flex; align-items: center; padding: 16rpx 0; border-bottom: 1rpx solid #f2f5f3; }
+.task-row:last-child { border-bottom: none; }
+.task-emoji { font-size: 40rpx; margin-right: 18rpx; }
+.task-info { flex: 1; display: flex; flex-direction: column; }
+.task-name { font-size: 28rpx; font-weight: 600; }
+.task-date { font-size: 22rpx; color: #8a9b90; margin-top: 4rpx; }
+
+/* 操作 */
+.action-row { display: flex; gap: 20rpx; margin-bottom: 24rpx; }
+.action-btn { flex: 1; }
+.action-btn.ghost { background: #fff; border: 1rpx solid #e3cdca; color: #c0554f; }
+
+/* 记录时间线 */
+.record-list { padding-left: 12rpx; }
+.record-item { position: relative; padding-left: 34rpx; padding-bottom: 28rpx; }
+.record-item::before {
+  content: '';
+  position: absolute; left: 6rpx; top: 18rpx; bottom: 0;
+  width: 2rpx; background: #dfe8e2;
+}
+.record-item:last-child::before { display: none; }
+.record-dot {
+  position: absolute; left: 0; top: 12rpx;
+  width: 14rpx; height: 14rpx; border-radius: 50%;
+  background: #2e7d5b;
+}
+.record-head { display: flex; align-items: center; }
+.record-type { font-size: 28rpx; font-weight: 700; }
+.record-date { font-size: 22rpx; color: #8a9b90; margin-left: 16rpx; }
+.record-content { display: block; font-size: 26rpx; color: #5b6a60; margin-top: 8rpx; line-height: 1.5; }
+.record-photo { width: 200rpx; height: 200rpx; border-radius: 12rpx; margin-top: 12rpx; }
+
+/* 弹层 */
+.mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; }
+.dialog {
+  position: fixed; left: 8%; right: 8%; top: 32%;
+  background: #fff; border-radius: 24rpx; padding: 40rpx 32rpx; z-index: 101;
+}
+.dialog-title { font-size: 34rpx; font-weight: 700; margin-bottom: 28rpx; text-align: center; }
+.dialog-field {
+  background: #f4f7f5; border-radius: 16rpx; padding: 26rpx 24rpx;
+  font-size: 28rpx; margin-bottom: 20rpx; color: #26352c;
+}
+.dialog-textarea {
+  width: 100%; min-height: 160rpx; background: #f4f7f5; border-radius: 16rpx;
+  padding: 24rpx; font-size: 28rpx;
+}
+.dialog-actions { display: flex; gap: 20rpx; margin-top: 28rpx; }
+.dialog-actions button { flex: 1; margin: 0; }
+
+.empty.small { padding: 60rpx 20rpx; }

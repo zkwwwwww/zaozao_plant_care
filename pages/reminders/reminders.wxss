@@ -1,0 +1,41 @@
+/* pages/reminders/reminders.wxss */
+.container { padding-bottom: 60rpx; }
+
+.season-card { background: #eef4f0; }
+.season-title { font-size: 30rpx; font-weight: 700; color: #2e7d5b; }
+.season-legend { display: flex; gap: 24rpx; margin-top: 20rpx; }
+.lg-item { display: flex; align-items: center; font-size: 24rpx; color: #5b6a60; }
+.lg-dot { width: 20rpx; height: 20rpx; border-radius: 50%; margin-right: 10rpx; }
+.lg-dot.green { background: #2e7d5b; }
+.lg-dot.amber { background: #e0a93c; }
+.lg-dot.blue { background: #4a7fc2; }
+.season-note { font-size: 22rpx; color: #8a9b90; margin-top: 20rpx; line-height: 1.5; }
+
+.overdue-bar { background: #fbe9e7; border: 1rpx solid #f2d3cf; }
+.ob-text { font-size: 26rpx; color: #c0554f; font-weight: 600; }
+
+.task-row { display: flex; align-items: center; padding: 16rpx 0; border-bottom: 1rpx solid #f2f5f3; }
+.task-row:last-child { border-bottom: none; }
+.task-photo-wrap { width: 72rpx; height: 72rpx; margin-right: 18rpx; }
+.task-photo { width: 72rpx; height: 72rpx; border-radius: 14rpx; background: #eef4f0; }
+.task-photo.placeholder { display: flex; align-items: center; justify-content: center; }
+.ph-icon { font-size: 36rpx; }
+.task-info { flex: 1; display: flex; flex-direction: column; }
+.task-name { font-size: 28rpx; font-weight: 600; }
+.task-date { font-size: 22rpx; color: #8a9b90; margin-top: 4rpx; }
+
+/* 分组 */
+.group-card { padding: 24rpx; }
+.group-head { display: flex; align-items: center; }
+.g-photo { width: 72rpx; height: 72rpx; border-radius: 14rpx; background: #eef4f0; margin-right: 18rpx; }
+.g-photo.placeholder { display: flex; align-items: center; justify-content: center; }
+.g-name { font-size: 30rpx; font-weight: 700; flex: 1; }
+.g-int { font-size: 22rpx; color: #8a9b90; }
+.g-tasks { margin-top: 16rpx; border-top: 1rpx solid #f2f5f3; padding-top: 8rpx; }
+.g-task { display: flex; align-items: center; padding: 14rpx 0; }
+.g-emoji { font-size: 34rpx; margin-right: 16rpx; }
+.g-tinfo { flex: 1; display: flex; flex-direction: column; }
+.g-tname { font-size: 26rpx; font-weight: 600; }
+.g-tdate { font-size: 22rpx; color: #8a9b90; margin-top: 2rpx; }
+
+.empty.small { padding: 60rpx 20rpx; }

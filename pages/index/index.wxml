@@ -1,0 +1,85 @@
+<view class="container">
+
+  <!-- 统计卡片 -->
+  <view class="card stats">
+    <view class="stat-item" bindtap="goReminders">
+      <text class="stat-num">{{stats.count}}</text>
+      <text class="stat-label">植物</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-num">¥{{stats.totalPrice}}</text>
+      <text class="stat-label">总投入</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="goReminders">
+      <text class="stat-num {{stats.waterToday>0?'warn':''}}">{{stats.waterToday}}</text>
+      <text class="stat-label">今日需浇水</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="goReminders">
+      <text class="stat-num {{stats.overdue>0?'danger':''}}">{{stats.overdue}}</text>
+      <text class="stat-label">逾期待办</text>
+    </view>
+  </view>
+
+  <!-- 季节浇水提示 -->
+  <view class="card season-tip">
+    <text class="tip-text">💧 {{seasonText}}</text>
+  </view>
+
+  <!-- 待办任务（仅展示即将到期与逾期） -->
+  <view class="card" wx:if="{{tasks.length>0}}">
+    <view class="section-title">
+      <text>近期待办</text>
+      <text class="section-more" bindtap="goReminders">全部 ›</text>
+    </view>
+    <view class="task-row" wx:for="{{tasks}}" wx:key="key" bindtap="goDetail" data-id="{{item.plantId}}">
+      <image class="task-photo" src="{{item.photo}}" mode="aspectFill" wx:if="{{item.photo}}"></image>
+      <view class="task-photo placeholder-photo" wx:else>
+        <text class="ph-icon">🌿</text>
+      </view>
+      <view class="task-info">
+        <text class="task-name">{{item.plantName}} · {{item.label}}</text>
+        <text class="task-date">到期 {{item.due}}</text>
+      </view>
+      <text class="tag {{item.overdue?'tag-red':'tag-amber'}}">{{item.dueText}}</text>
+    </view>
+  </view>
+
+  <!-- 植物图片墙 -->
+  <view class="section-title between">
+    <text>我的植物</text>
+    <text class="section-more" bindtap="goMemorial" wx:if="{{true}}">纪念碑 ›</text>
+  </view>
+
+  <view class="grid" wx:if="{{plants.length>0}}">
+    <view class="plant-card" wx:for="{{plants}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <view class="photo-wrap">
+        <image class="plant-photo" src="{{item.photo}}" mode="aspectFill" wx:if="{{item.photo}}"></image>
+        <view class="plant-photo placeholder" wx:else>
+          <text class="ph-icon">🌿</text>
+        </view>
+        <text class="tag status-tag {{item.status==='健康'?'tag-green':(item.status==='生病中'||item.status==='需要关注')?'tag-red':'tag-amber'}}">{{item.status}}</text>
+      </view>
+      <view class="plant-body">
+        <view class="plant-name-row">
+          <text class="plant-name">{{item.name}}</text>
+          <text class="plant-price" wx:if="{{item.price}}">¥{{item.price}}</text>
+        </view>
+        <text class="plant-meta">{{item.variety || '未填品种'}} · {{item.planting || '土培'}}</text>
+        <text class="plant-env">{{item.envName}}</text>
+        <text class="water-tip {{item.waterCls}}" wx:if="{{item.waterText}}">{{item.waterText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <view class="empty-icon">🪴</view>
+    <view>还没有植物，点击下方按钮添加第一株吧</view>
+  </view>
+
+  <view class="add-bar" bindtap="goAdd">
+    <text class="add-btn">＋ 添加植物</text>
+  </view>
+</view>

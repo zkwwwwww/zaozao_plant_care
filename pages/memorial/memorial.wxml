@@ -1,0 +1,27 @@
+<view class="container">
+  <view class="mem-intro card" wx:if="{{list.length>0}}">
+    <text class="mi-text">送人或去世的植物在这里留下它们的纪念碑。🕯️</text>
+  </view>
+
+  <view class="mem-card" wx:for="{{list}}" wx:key="id" bindtap="goPlant" data-id="{{item.id}}">
+    <view class="mem-photo-wrap">
+      <image class="mem-photo" src="{{item.photos[0]}}" mode="aspectFill" bindtap="previewPhoto" data-id="{{item.id}}" wx:if="{{item.photos && item.photos.length}}"></image>
+      <view class="mem-photo placeholder" wx:else><text class="ph-icon">🪴</text></view>
+    </view>
+    <view class="mem-body">
+      <view class="mem-head">
+        <text class="mem-name">{{item.name}}</text>
+        <text class="tag {{item.typeCls}}">{{item.type}}</text>
+      </view>
+      <text class="mem-date">{{item.date}}</text>
+      <text class="mem-note" wx:if="{{item.note}}">「{{item.note}}」</text>
+      <text class="mem-companion" wx:if="{{item.companion}}">曾陪伴 {{item.companion}}</text>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{list.length===0}}">
+    <view class="empty-icon">🕯️</view>
+    <view>还没有纪念碑</view>
+    <view class="empty-sub">在植物详情中「送人 / 去世纪念」即可建立</view>
+  </view>
+</view>

@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">为「{{plantName}}」添加记录</view>
+
+    <picker range="{{careTypes}}" value="{{careTypes.indexOf(form.type)}}" bindchange="onType">
+      <view class="form-item">
+        <text class="form-label">养护类型</text>
+        <text class="form-input">{{form.type}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <picker mode="date" value="{{form.date}}" bindchange="onDate">
+      <view class="form-item">
+        <text class="form-label">日期</text>
+        <text class="form-input">{{form.date}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <view class="form-item" style="border-bottom:none;">
+      <text class="form-label">备注</text>
+      <text class="form-input form-placeholder">（可选）</text>
+    </view>
+    <textarea class="note-textarea" placeholder="记录本次养护的细节、用量、观察等…" placeholder-class="form-placeholder" value="{{form.content}}" bindinput="onContent" maxlength="500"></textarea>
+
+    <!-- 照片 -->
+    <view class="photo-row">
+      <view class="photo-preview" wx:if="{{photo}}">
+        <image class="p-img" src="{{photo}}" mode="aspectFill" bindtap="previewPhoto"></image>
+        <view class="p-del" bindtap="removePhoto">×</view>
+      </view>
+      <view class="photo-add" wx:else bindtap="addPhoto">
+        <text class="add-plus">＋</text>
+        <text class="add-text">配图</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="save">保存记录</button>
+</view>

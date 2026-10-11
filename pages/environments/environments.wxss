@@ -1,0 +1,20 @@
+/* pages/environments/environments.wxss */
+.container { padding-bottom: 60rpx; }
+
+.env-tip { padding: 20rpx 24rpx; }
+.tip-text { font-size: 25rpx; color: #5b6a60; line-height: 1.6; }
+
+.env-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border-radius: 20rpx; padding: 28rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(46, 125, 91, 0.06);
+}
+.env-left { display: flex; align-items: center; }
+.env-icon { font-size: 48rpx; margin-right: 20rpx; }
+.env-info { display: flex; flex-direction: column; }
+.env-name { font-size: 32rpx; font-weight: 700; }
+.env-count { font-size: 22rpx; color: #8a9b90; margin-top: 6rpx; }
+.env-right { display: flex; flex-direction: column; align-items: flex-end; }
+.env-spec { font-size: 24rpx; color: #2a6fa8; background: #e6f0fa; border-radius: 14rpx; padding: 4rpx 16rpx; margin-bottom: 10rpx; }
+.env-spec:last-child { margin-bottom: 0; }

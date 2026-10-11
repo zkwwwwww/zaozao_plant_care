@@ -1,0 +1,132 @@
+<view class="container" wx:if="{{plant}}">
+
+  <!-- 照片轮播 -->
+  <view class="card hero">
+    <swiper class="hero-swiper" indicator-dots="{{photos.length>1}}" indicator-color="rgba(255,255,255,.5)" indicator-active-color="#fff" circular="{{photos.length>1}}">
+      <swiper-item wx:for="{{photos}}" wx:key="*this">
+        <image class="hero-img" src="{{item}}" mode="aspectFill" bindtap="previewPhoto" data-src="{{item}}"></image>
+      </swiper-item>
+      <swiper-item wx:if="{{photos.length===0}}">
+        <view class="hero-placeholder">
+          <text class="hp-icon">🪴</text>
+          <text class="hp-text">暂无照片</text>
+        </view>
+      </swiper-item>
+    </swiper>
+    <view class="hero-info">
+      <view class="hero-title-row">
+        <text class="hero-name">{{plant.name}}</text>
+        <text class="tag {{plant.status==='健康'?'tag-green':(plant.status==='生病中'||plant.status==='需要关注')?'tag-red':'tag-amber'}}">{{plant.status}}</text>
+      </view>
+      <text class="hero-variety" wx:if="{{plant.variety}}">品种：{{plant.variety}}</text>
+      <text class="hero-companion">陪伴 {{companion}}</text>
+    </view>
+  </view>
+
+  <!-- 纪念碑提示 -->
+  <view class="card memorial-banner" wx:if="{{memorial}}">
+    <text class="mb-icon">🕯️</text>
+    <view class="mb-body">
+      <text class="mb-title">{{memorial.type}}纪念 · {{memorial.date}}</text>
+      <text class="mb-note" wx:if="{{memorial.note}}">{{memorial.note}}</text>
+      <text class="mb-sub">曾陪伴 {{memorial.companion}}</text>
+    </view>
+    <view class="mb-actions">
+      <text class="mb-btn" bindtap="undoMemorial">恢复</text>
+    </view>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="card">
+    <view class="section-title">基本信息</view>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="info-label">价格</text>
+        <text class="info-value">{{plant.price!=='' && plant.price!=null ? '¥'+plant.price : '未填'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">种植形式</text>
+        <text class="info-value">{{plant.planting || '未填'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">购买途径</text>
+        <text class="info-value">{{plant.purchaseWay || '未填'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">所在位置</text>
+        <text class="info-value">{{plant.location || '未填'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">购买日期</text>
+        <text class="info-value">{{plant.purchaseDate || '未填'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">生长环境</text>
+        <text class="info-value">{{env ? env.name : (plant.location || '未分类')}}</text>
+      </view>
+    </view>
+    <!-- 环境光照信息 -->
+    <view class="env-light" wx:if="{{env}}">
+      <text class="el-item">☀️ {{env.lightIntensity || '—'}} lux</text>
+      <text class="el-item">⏱ {{env.lightHours || '—'}} 小时/天</text>
+    </view>
+    <view class="desc" wx:if="{{plant.description}}">{{plant.description}}</view>
+  </view>
+
+  <!-- 待办提醒 -->
+  <view class="card" wx:if="{{tasks.length>0}}">
+    <view class="section-title">下次养护提醒</view>
+    <view class="task-row" wx:for="{{tasks}}" wx:key="type">
+      <text class="task-emoji">{{item.type==='water'?'💧':item.type==='fertilize'?'🌱':'🪴'}}</text>
+      <view class="task-info">
+        <text class="task-name">{{item.label}}</text>
+        <text class="task-date">上次后下次到期 {{item.due}}</text>
+      </view>
+      <text class="tag {{item.overdue?'tag-red':'tag-green'}}">{{item.dueText}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-row">
+    <button class="btn-ghost action-btn" bindtap="goNote">＋ 添加养护记录</button>
+    <button class="btn-ghost action-btn" bindtap="goEdit">编辑</button>
+  </view>
+  <view class="action-row" wx:if="{{!plant.memorialized}}">
+    <button class="btn-danger action-btn" bindtap="onMemorial">🕯️ 送人 / 去世纪念</button>
+    <button class="btn-danger action-btn ghost" bindtap="deletePlant">删除</button>
+  </view>
+
+  <!-- 养护记录时间线 -->
+  <view class="card">
+    <view class="section-title">养护记录（{{records.length}}）</view>
+    <view class="record-list" wx:if="{{records.length>0}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="id">
+        <view class="record-dot"></view>
+        <view class="record-body">
+          <view class="record-head">
+            <text class="record-type">{{item.type}}</text>
+            <text class="record-date">{{item.date}}</text>
+          </view>
+          <text class="record-content" wx:if="{{item.content}}">{{item.content}}</text>
+          <image class="record-photo" wx:if="{{item.photo}}" src="{{item.photo}}" mode="aspectFill" bindtap="previewNotePhoto" data-src="{{item.photo}}"></image>
+        </view>
+      </view>
+    </view>
+    <view class="empty small" wx:else>还没有记录，点击上方按钮添加</view>
+  </view>
+
+  <!-- 纪念弹层 -->
+  <view class="mask" wx:if="{{showMemorial}}" bindtap="cancelMemorial"></view>
+  <view class="dialog" wx:if="{{showMemorial}}">
+    <view class="dialog-title">建立纪念碑 · {{memorialType}}</view>
+    <picker mode="date" value="{{memorialDate}}" bindchange="onMemorialDate">
+      <view class="dialog-field">日期：{{memorialDate}} ▾</view>
+    </picker>
+    <textarea class="dialog-textarea" placeholder="写一句纪念语（可选）" value="{{memorialNote}}" bindinput="onMemorialNote" maxlength="200"></textarea>
+    <view class="dialog-actions">
+      <button class="btn-ghost" bindtap="cancelMemorial">取消</button>
+      <button class="btn-primary" bindtap="confirmMemorial">确认建立</button>
+    </view>
+  </view>
+
+</view>

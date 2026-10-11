@@ -1,0 +1,64 @@
+<view class="container">
+
+  <!-- 季节提示 -->
+  <view class="card season-card">
+    <view class="season-title">🌦 {{seasonText}}</view>
+    <view class="season-legend">
+      <view class="lg-item"><text class="lg-dot green"></text>春/秋 10天</view>
+      <view class="lg-item"><text class="lg-dot amber"></text>夏 5天</view>
+      <view class="lg-item"><text class="lg-dot blue"></text>冬 15天</view>
+    </view>
+    <view class="season-note">每株植物可在「编辑」中单独设置浇水/施肥/换盆间隔，留空则按季节自动。</view>
+  </view>
+
+  <!-- 逾期总览 -->
+  <view class="card overdue-bar" wx:if="{{overdueCount>0}}">
+    <text class="ob-text">⚠ 共 {{overdueCount}} 项已逾期</text>
+  </view>
+
+  <!-- 全部待办（今天及逾期优先） -->
+  <view class="card">
+    <view class="section-title">全部待办</view>
+    <view class="task-row" wx:for="{{flatTasks}}" wx:key="key" bindtap="goDetail" data-id="{{item.plantId}}">
+      <view class="task-photo-wrap">
+        <image class="task-photo" src="{{item.photo}}" mode="aspectFill" wx:if="{{item.photo}}"></image>
+        <view class="task-photo placeholder" wx:else><text class="ph-icon">🌿</text></view>
+      </view>
+      <view class="task-info">
+        <text class="task-name">{{item.plantName}} · {{item.label}}</text>
+        <text class="task-date">到期 {{item.due}}</text>
+      </view>
+      <text class="tag {{item.overdue?'tag-red':'tag-green'}}">{{item.dueText}}</text>
+    </view>
+    <view class="empty small" wx:if="{{flatTasks.length===0}}">
+      <view class="empty-icon">✅</view>
+      <view>太棒了，当前没有到期或逾期的养护任务</view>
+    </view>
+  </view>
+
+  <!-- 按植物分组 -->
+  <view class="section-title" style="margin-top:8rpx;">按植物查看</view>
+  <view class="card group-card" wx:for="{{groups}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+    <view class="group-head">
+      <image class="g-photo" src="{{item.photo}}" mode="aspectFill" wx:if="{{item.photo}}"></image>
+      <view class="g-photo placeholder" wx:else><text class="ph-icon">🌿</text></view>
+      <text class="g-name">{{item.name}}</text>
+      <text class="g-int">浇水间隔 {{item.waterInterval}} 天</text>
+    </view>
+    <view class="g-tasks">
+      <view class="g-task" wx:for="{{item.tasks}}" wx:for-item="t" wx:key="type">
+        <text class="g-emoji">{{t.type==='water'?'💧':t.type==='fertilize'?'🌱':'🪴'}}</text>
+        <view class="g-tinfo">
+          <text class="g-tname">{{t.label}}</text>
+          <text class="g-tdate">{{t.due}}</text>
+        </view>
+        <text class="tag {{t.overdue?'tag-red':'tag-green'}}">{{t.dueText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{groups.length===0}}">
+    <view class="empty-icon">📅</view>
+    <view>暂无养护待办</view>
+  </view>
+</view>

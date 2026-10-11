@@ -1,0 +1,27 @@
+/* pages/note-edit/note-edit.wxss */
+.container { padding-bottom: 60rpx; }
+
+.note-textarea {
+  width: 100%; min-height: 180rpx;
+  font-size: 28rpx; line-height: 1.6;
+  margin-top: 8rpx;
+}
+
+.photo-row { margin-top: 24rpx; }
+.photo-preview { position: relative; width: 240rpx; height: 240rpx; }
+.p-img { width: 100%; height: 100%; border-radius: 16rpx; }
+.p-del {
+  position: absolute; top: 0; right: 0;
+  width: 48rpx; height: 48rpx;
+  background: rgba(0,0,0,.5); color: #fff;
+  text-align: center; line-height: 44rpx; font-size: 34rpx;
+  border-bottom-left-radius: 12rpx;
+}
+.photo-add {
+  width: 240rpx; height: 240rpx;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 2rpx dashed #b9cdc1; border-radius: 16rpx;
+  background: #f4f8f5;
+}
+.add-plus { font-size: 56rpx; color: #2e7d5b; line-height: 1; }
+.add-text { font-size: 24rpx; color: #8a9b90; margin-top: 8rpx; }

@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/environments/environments",
+    "pages/reminders/reminders",
+    "pages/plant-detail/plant-detail",
+    "pages/plant-edit/plant-edit",
+    "pages/note-edit/note-edit",
+    "pages/environment-edit/environment-edit",
+    "pages/memorial/memorial"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#2e7d5b",
+    "navigationBarTitleText": "植物养护",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f4f7f5"
+  },
+  "tabBar": {
+    "color": "#8a9b90",
+    "selectedColor": "#2e7d5b",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "主页"
+      },
+      {
+        "pagePath": "pages/environments/environments",
+        "text": "环境"
+      },
+      {
+        "pagePath": "pages/reminders/reminders",
+        "text": "提醒"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

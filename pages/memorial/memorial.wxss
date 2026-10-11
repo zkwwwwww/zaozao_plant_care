@@ -1,0 +1,23 @@
+/* pages/memorial/memorial.wxss */
+.container { padding-bottom: 60rpx; }
+
+.mem-intro { padding: 20rpx 24rpx; }
+.mi-text { font-size: 25rpx; color: #6b4a45; }
+
+.mem-card {
+  display: flex; align-items: center;
+  background: #fff; border-radius: 20rpx; padding: 24rpx;
+  margin-bottom: 20rpx; box-shadow: 0 4rpx 16rpx rgba(46, 125, 91, 0.05);
+}
+.mem-photo-wrap { width: 140rpx; height: 140rpx; margin-right: 24rpx; flex-shrink: 0; }
+.mem-photo { width: 140rpx; height: 140rpx; border-radius: 16rpx; background: #eef4f0; }
+.mem-photo.placeholder { display: flex; align-items: center; justify-content: center; }
+.ph-icon { font-size: 56rpx; }
+.mem-body { flex: 1; display: flex; flex-direction: column; }
+.mem-head { display: flex; align-items: center; }
+.mem-name { font-size: 32rpx; font-weight: 700; margin-right: 16rpx; }
+.mem-date { font-size: 24rpx; color: #8a9b90; margin-top: 8rpx; }
+.mem-note { font-size: 26rpx; color: #6b4a45; margin-top: 10rpx; font-style: italic; }
+.mem-companion { font-size: 22rpx; color: #b09690; margin-top: 8rpx; }
+
+.empty-sub { font-size: 24rpx; color: #b6c0ba; margin-top: 12rpx; }

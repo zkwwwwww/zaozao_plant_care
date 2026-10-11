@@ -1,0 +1,201 @@
+/* pages/index/index.wxss */
+.container {
+  padding-bottom: 160rpx;
+}
+
+/* 统计 */
+.stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 30rpx 10rpx;
+}
+.stat-item {
+  flex: 1;
+  text-align: center;
+}
+.stat-num {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #2e7d5b;
+}
+.stat-num.warn { color: #b07a20; }
+.stat-num.danger { color: #c0554f; }
+.stat-label {
+  display: block;
+  font-size: 22rpx;
+  color: #8a9b90;
+  margin-top: 6rpx;
+}
+.stat-divider {
+  width: 1rpx;
+  height: 56rpx;
+  background: #eef1ef;
+}
+
+/* 季节提示 */
+.season-tip {
+  padding: 20rpx 24rpx;
+}
+.tip-text {
+  font-size: 26rpx;
+  color: #2e7d5b;
+}
+
+/* 区块标题 */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 20rpx;
+}
+.section-title.between {
+  margin-top: 8rpx;
+}
+.section-more {
+  font-size: 24rpx;
+  color: #2e7d5b;
+  font-weight: 400;
+}
+
+/* 待办行 */
+.task-row {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f2f5f3;
+}
+.task-row:last-child { border-bottom: none; }
+.task-photo {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 14rpx;
+  margin-right: 18rpx;
+  background: #eef4f0;
+}
+.placeholder-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ph-icon { font-size: 40rpx; }
+.task-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.task-name {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.task-date {
+  font-size: 22rpx;
+  color: #8a9b90;
+  margin-top: 4rpx;
+}
+
+/* 植物网格 */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.plant-card {
+  width: 47.8%;
+  background: #ffffff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(46, 125, 91, 0.06);
+}
+.photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 300rpx;
+  background: #eef4f0;
+}
+.plant-photo {
+  width: 100%;
+  height: 300rpx;
+  display: block;
+}
+.plant-photo.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.status-tag {
+  position: absolute;
+  top: 12rpx;
+  left: 12rpx;
+  background: rgba(255, 255, 255, 0.92);
+}
+.plant-body {
+  padding: 18rpx;
+}
+.plant-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.plant-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plant-price {
+  font-size: 24rpx;
+  color: #2e7d5b;
+  font-weight: 600;
+}
+.plant-meta {
+  display: block;
+  font-size: 22rpx;
+  color: #6b7a70;
+  margin-top: 8rpx;
+}
+.plant-env {
+  display: inline-block;
+  font-size: 20rpx;
+  color: #2a6fa8;
+  background: #e6f0fa;
+  border-radius: 16rpx;
+  padding: 2rpx 14rpx;
+  margin-top: 12rpx;
+}
+.water-tip {
+  display: block;
+  font-size: 22rpx;
+  margin-top: 12rpx;
+}
+.water-tip.tag-red { color: #c0554f; }
+.water-tip.tag-amber { color: #b07a20; }
+.water-tip.tag-green { color: #2e7d5b; }
+
+/* 添加按钮 */
+.add-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx 40rpx;
+  background: linear-gradient(180deg, rgba(244, 247, 245, 0), #f4f7f5 30%);
+  z-index: 10;
+}
+.add-btn {
+  display: block;
+  text-align: center;
+  background: #2e7d5b;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 96rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 8rpx 24rpx rgba(46, 125, 91, 0.3);
+}
