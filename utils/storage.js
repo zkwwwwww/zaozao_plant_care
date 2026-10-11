@@ -128,5 +128,6 @@ module.exports = {
   saveMemorial,
   getMemorial,
   removeMemorial,
-  genId
+  genId,
+  DEFAULT_ENVS
 };

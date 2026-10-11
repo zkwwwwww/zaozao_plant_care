@@ -138,6 +138,10 @@
 
 </view>
 
+<view class="container" wx:elif="{{loadError}}">
+  <view class="card load-error" bindtap="loadDetail">{{loadError}}，点此重试</view>
+</view>
+
 <view class="container" wx:elif="{{notFound}}">
   <view class="empty">
     <view>植物不存在或已被删除</view>

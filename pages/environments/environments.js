@@ -1,26 +1,38 @@
 // pages/environments/environments.js 生长环境分类列表
-const storage = require('../../utils/storage');
 const account = require('../../services/account');
+const dataApi = require('../../services/data');
 
 Page({
   data: {
-    envs: []
+    envs: [],
+    guest: false,
+    loading: false,
+    loadError: ''
   },
 
   onShow() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      this.setData({ envs: [], guest: account.isGuest(), loading: false });
+      return;
+    }
+    this.setData({ guest: false });
     this.load();
   },
 
-  load() {
-    const envs = storage.getEnvs();
-    // 计算每个环境下的植物数量
-    const plants = storage.getPlants().filter(p => !p.memorialized);
-    const withCount = envs.map(e => ({
-      ...e,
-      count: plants.filter(p => p.environmentId === e.id).length
-    }));
-    this.setData({ envs: withCount });
+  async load() {
+    this.setData({ loading: true, loadError: '' });
+    try {
+      const bundle = await dataApi.loadBundle();
+      const plants = bundle.plants.filter(p => !p.memorialized);
+      this.setData({
+        loading: false,
+        envs: bundle.envs.map(env => Object.assign({}, env, {
+          count: plants.filter(p => p.environmentId === env.id).length
+        }))
+      });
+    } catch (error) {
+      this.setData({ loading: false, loadError: error.message || '读取失败，请重试' });
+    }
   },
 
   goEdit(e) {

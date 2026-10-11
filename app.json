@@ -43,7 +43,7 @@
       },
       {
         "pagePath": "pages/account/account",
-        "text": "账户",
+        "text": "我的",
         "iconPath": "assets/icons/tab-account.png",
         "selectedIconPath": "assets/icons/tab-account-active.png"
       }
@@ -51,6 +51,7 @@
   },
   "usingComponents": {
     "empty-state": "/components/empty-state/empty-state",
+    "guest-gate": "/components/guest-gate/guest-gate",
     "plant-thumb": "/components/plant-thumb/plant-thumb",
     "section-header": "/components/section-header/section-header",
     "task-row": "/components/task-row/task-row"

@@ -1,4 +1,6 @@
 <view class="container {{plants.length ? 'has-add' : ''}}">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="loadData">{{loadError}}，点此重试</view>
+  <view class="card load-hint" wx:elif="{{loading}}">正在读取植物…</view>
 
   <!-- 小程序标识与功能 -->
   <view class="card brand">
@@ -95,7 +97,14 @@
   </view>
 
   <empty-state
-    wx:else
+    wx:elif="{{guest}}"
+    image="/assets/illustrations/empty-plants.png"
+    title="登录后查看你的植物"
+    description="在「我的」中授权登录后，植物、提醒和花费都会出现在这里"
+  ></empty-state>
+
+  <empty-state
+    wx:elif="{{!loading && !loadError}}"
     image="/assets/illustrations/empty-plants.png"
     title="还没有植物，从第一株开始记下吧"
     description="拍照建档，浇水、光照、花费和陪伴都会留在这里"
@@ -106,4 +115,59 @@
   <view class="add-bar" wx:if="{{plants.length>0}}" bindtap="goAdd">
     <text class="add-btn">＋ 添加植物</text>
   </view>
+</view>
+
+<guest-gate show="{{guest}}"></guest-gate>
+
+<view class="login-blur" wx:if="{{showLoginSheet}}" catchtouchmove="preventMove"></view>
+<view class="login-sheet" wx:if="{{showLoginSheet}}">
+    <view class="login-head">
+      <image class="login-logo" src="/assets/icons/logo.png" mode="aspectFill"></image>
+      <text class="login-apply">植早早 申请</text>
+    </view>
+    <text class="login-title">{{loginExpired ? '登录已过期，请重新授权' : '获取你的昵称、头像'}}</text>
+    <text class="login-desc">头像可使用微信头像或上传图片。昵称请点输入框，键盘上方会出现微信昵称。</text>
+
+    <button
+      wx:if="{{needPrivacy}}"
+      id="agree-privacy"
+      class="privacy-btn"
+      open-type="agreePrivacyAuthorization"
+      bindagreeprivacyauthorization="onAgreePrivacy"
+    >先同意隐私保护指引</button>
+
+    <view class="login-row">
+      <text class="login-label">头像</text>
+      <button class="login-avatar-btn" open-type="chooseAvatar" bindchooseavatar="onLoginAvatar">
+        <image class="login-avatar" src="{{loginAvatar || '/assets/icons/logo.png'}}" mode="aspectFill"></image>
+      </button>
+      <view class="login-album" bindtap="chooseLocalAvatar">上传</view>
+    </view>
+
+    <form bindsubmit="allowLogin">
+      <view class="login-row">
+        <text class="login-label">昵称</text>
+        <input
+          class="login-nick"
+          type="nickname"
+          name="nickName"
+          maxlength="32"
+          placeholder="点此使用微信昵称"
+          placeholder-class="login-nick-placeholder"
+          always-embed="{{true}}"
+          adjust-position="{{true}}"
+          cursor-spacing="80"
+          confirm-type="done"
+          bindblur="onLoginNickname"
+          bindnicknamereview="onNicknameReview"
+        />
+      </view>
+
+      <text class="login-error" wx:if="{{loginError}}">{{loginError}}</text>
+
+      <view class="login-actions">
+        <view class="login-refuse" catchtap="refuseLogin">拒绝</view>
+        <button class="login-allow {{loginSubmitting ? 'is-disabled' : ''}}" form-type="submit">允许</button>
+      </view>
+    </form>
 </view>

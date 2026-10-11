@@ -11,7 +11,7 @@
 - `icons/tab-home*.png`：主页轮廓图标，房屋与入口的抽象组合。
 - `icons/tab-environment*.png`：环境图标，叶片与日照的抽象组合。
 - `icons/tab-reminder*.png`：提醒图标，圆角铃铛轮廓。
-- `icons/tab-account*.png`：账户图标，圆头与肩部轮廓。
+- `icons/tab-account*.png`：「我的」图标，圆头与肩部轮廓。
 - `illustrations/plant-placeholder.png`：幼苗与暖米色花盆占位图。
 - `illustrations/empty-plants.png`：暂无植物空状态。
 - `illustrations/empty-records.png`：暂无养护记录空状态。

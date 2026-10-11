@@ -1,7 +1,6 @@
 // pages/environment-edit/environment-edit.js 新增/编辑环境
-const storage = require('../../utils/storage');
 const account = require('../../services/account');
-const format = require('../../utils/format');
+const dataApi = require('../../services/data');
 
 Page({
   data: {
@@ -10,10 +9,17 @@ Page({
     form: { name: '', lightIntensity: '', lightHours: '' }
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     if (!account.requireLogin()) return;
     if (options.id) {
-      const env = storage.getEnv(options.id);
+      let bundle;
+      try {
+        bundle = await dataApi.loadBundle();
+      } catch (error) {
+        wx.showToast({ title: error.message || '读取失败', icon: 'none' });
+        return;
+      }
+      const env = bundle.envs.find(item => item.id === options.id);
       if (env) {
         this.setData({
           id: env.id,
@@ -39,49 +45,51 @@ Page({
     this.setData({ ['form.' + field]: v });
   },
 
-  save() {
+  async save() {
     if (!account.requireLogin()) return;
     const form = this.data.form;
     if (!form.name.trim()) {
       wx.showToast({ title: '请填写环境名称', icon: 'none' });
       return;
     }
-    const env = {
-      id: this.data.id || storage.genId('env'),
-      name: form.name.trim(),
-      lightIntensity: form.lightIntensity.trim(),
-      lightHours: form.lightHours.trim(),
-      createdAt: this.data.isEdit ? (storage.getEnv(this.data.id) || {}).createdAt || format.today() : format.today()
-    };
-    storage.saveEnv(env);
-    wx.showToast({ title: '已保存', icon: 'success' });
-    wx.navigateBack();
+    wx.showLoading({ title: '保存中', mask: true });
+    try {
+      await dataApi.saveEnv({
+        id: this.data.isEdit ? this.data.id : '',
+        name: form.name.trim(),
+        lightIntensity: form.lightIntensity.trim(),
+        lightHours: form.lightHours.trim()
+      });
+      wx.showToast({ title: '已保存', icon: 'success' });
+      wx.navigateBack();
+    } catch (error) {
+      wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
   },
 
   deleteEnv() {
     if (!account.requireLogin()) return;
     if (!this.data.isEdit) return;
-    const env = storage.getEnv(this.data.id);
-    if (!env) return;
-    const used = storage.getPlants().filter(p => p.environmentId === env.id && !p.memorialized).length;
+    const name = this.data.form.name || '该环境';
     wx.showModal({
       title: '删除环境',
-      content: used > 0 ? '该环境下有 ' + used + ' 株植物，删除后这些植物会变为未分类。确定删除「' + env.name + '」吗？' : '确定删除「' + env.name + '」吗？',
+      content: '删除「' + name + '」后，使用该环境的植物会变为未分类。确定吗？',
       confirmText: '删除',
       confirmColor: '#c0554f',
-      success: (res) => {
+      success: async (res) => {
         if (!res.confirm) return;
-        // 将相关植物置为未分类
-        const plants = storage.getPlants();
-        plants.forEach(p => {
-          if (p.environmentId === env.id) {
-            p.environmentId = '';
-            storage.savePlant(p);
-          }
-        });
-        storage.deleteEnv(env.id);
-        wx.showToast({ title: '已删除', icon: 'success' });
-        wx.navigateBack();
+        wx.showLoading({ title: '删除中', mask: true });
+        try {
+          await dataApi.deleteEnv(this.data.id);
+          wx.showToast({ title: '已删除', icon: 'success' });
+          wx.navigateBack();
+        } catch (error) {
+          wx.showToast({ title: error.message || '删除失败，请重试', icon: 'none' });
+        } finally {
+          wx.hideLoading();
+        }
       }
     });
   }

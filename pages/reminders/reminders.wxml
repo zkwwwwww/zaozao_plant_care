@@ -1,4 +1,6 @@
 <view class="container">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+  <view class="card load-hint" wx:elif="{{loading}}">正在读取提醒…</view>
 
   <!-- 季节提示 -->
   <view class="card season-card">
@@ -37,8 +39,8 @@
       wx:if="{{flatTasks.length===0}}"
       compact="{{true}}"
       image="/assets/illustrations/empty-reminders.png"
-      title="当前没有近期或逾期的养护任务"
-      description="完成养护后及时记录，下次到期日会自动更新"
+      title="{{guest ? '登录后查看养护任务' : '当前没有近期或逾期的养护任务'}}"
+      description="{{guest ? '在「我的」中授权登录后，浇水、施肥和换盆提醒会出现在这里' : '完成养护后及时记录，下次到期日会自动更新'}}"
     ></empty-state>
   </view>
 
@@ -64,3 +66,5 @@
   </view>
 
 </view>
+
+<guest-gate show="{{guest}}"></guest-gate>

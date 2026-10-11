@@ -1,7 +1,6 @@
 // pages/plant-edit/plant-edit.js 新增 / 编辑植物
-const storage = require('../../utils/storage');
 const account = require('../../services/account');
-const format = require('../../utils/format');
+const dataApi = require('../../services/data');
 const reminder = require('../../utils/reminder');
 const constants = require('../../utils/constants');
 const media = require('../../utils/media');
@@ -41,10 +40,17 @@ Page({
     seasonText: reminder.seasonWaterText()
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     if (!account.requireLogin()) return;
+    let bundle;
+    try {
+      bundle = await dataApi.loadBundle();
+    } catch (error) {
+      wx.showToast({ title: error.message || '读取失败', icon: 'none' });
+      return;
+    }
     if (options.id) {
-      const plant = storage.getPlant(options.id);
+      const plant = bundle.plants.find(item => item.id === options.id);
       if (plant) {
         this.setData({
           id: plant.id,
@@ -53,7 +59,7 @@ Page({
             name: plant.name || '',
             variety: plant.variety || '',
             status: plant.status || '健康',
-            price: plant.price !== undefined ? String(plant.price) : '',
+            price: plant.price !== undefined && plant.price !== '' ? String(plant.price) : '',
             purchaseWay: plant.purchaseWay || '线上网店',
             planting: plant.planting || '土培',
             environmentId: plant.environmentId || '',
@@ -69,7 +75,7 @@ Page({
         });
       }
     }
-    const envs = storage.getEnvs();
+    const envs = bundle.envs;
     let envId = this.data.form.environmentId;
     if (!envId && envs.length) envId = envs[0].id;
     const envIndex = Math.max(0, envs.findIndex(e => e.id === envId));
@@ -123,6 +129,7 @@ Page({
   onEnv(e) {
     const envs = this.data.envs;
     const idx = Number(e.detail.value);
+    if (!envs[idx]) return;
     this.setData({
       'form.environmentId': envs[idx].id,
       envIndex: idx,
@@ -181,7 +188,7 @@ Page({
     wx.previewImage({ current, urls: this.data.photos });
   },
 
-  save() {
+  async save() {
     if (!account.requireLogin()) return;
     if (this.data.isSavingPhoto) {
       wx.showToast({ title: '照片仍在保存，请稍候', icon: 'none' });
@@ -194,42 +201,37 @@ Page({
       return;
     }
     this.setData({ isSubmitting: true });
-    const now = format.today();
-    const existing = this.data.isEdit ? storage.getPlant(this.data.id) : null;
-    const plant = {
-      id: this.data.id || storage.genId('plant'),
-      name: form.name.trim(),
-      variety: form.variety.trim(),
-      status: form.status,
-      price: form.price === '' ? '' : Number(form.price),
-      purchaseWay: form.purchaseWay,
-      planting: form.planting,
-      environmentId: form.environmentId,
-      location: form.location.trim(),
-      companionStart: form.companionStart || form.purchaseDate,
-      purchaseDate: form.purchaseDate,
-      description: form.description.trim(),
-      photos: this.data.photos,
-      customWaterInterval: form.customWaterInterval === '' ? 0 : Number(form.customWaterInterval),
-      customFertInterval: form.customFertInterval === '' ? 0 : Number(form.customFertInterval),
-      customRepotInterval: form.customRepotInterval === '' ? 0 : Number(form.customRepotInterval),
-      records: existing ? existing.records || [] : [],
-      memorialized: existing ? !!existing.memorialized : false,
-      updatedAt: now,
-      createdAt: existing ? existing.createdAt || now : now
-    };
-
+    wx.showLoading({ title: '保存中', mask: true });
     try {
-      storage.savePlant(plant);
+      const saved = await dataApi.savePlant({
+        id: this.data.isEdit ? this.data.id : '',
+        name: form.name.trim(),
+        variety: form.variety.trim(),
+        status: form.status,
+        price: form.price === '' ? '' : Number(form.price),
+        purchaseWay: form.purchaseWay,
+        planting: form.planting,
+        environmentId: form.environmentId,
+        location: form.location.trim(),
+        companionStart: form.companionStart || form.purchaseDate,
+        purchaseDate: form.purchaseDate,
+        description: form.description.trim(),
+        photos: this.data.photos,
+        customWaterInterval: form.customWaterInterval === '' ? 0 : Number(form.customWaterInterval),
+        customFertInterval: form.customFertInterval === '' ? 0 : Number(form.customFertInterval),
+        customRepotInterval: form.customRepotInterval === '' ? 0 : Number(form.customRepotInterval)
+      });
       wx.showToast({ title: this.data.isEdit ? '已保存' : '已添加', icon: 'success' });
       if (this.data.isEdit) {
         wx.navigateBack();
       } else {
-        wx.redirectTo({ url: '/pages/plant-detail/plant-detail?id=' + plant.id });
+        wx.redirectTo({ url: '/pages/plant-detail/plant-detail?id=' + saved.id });
       }
     } catch (error) {
       this.setData({ isSubmitting: false });
-      wx.showToast({ title: '保存失败，请重试', icon: 'none' });
+      wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
     }
   }
 });

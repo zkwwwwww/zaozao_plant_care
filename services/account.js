@@ -1,6 +1,5 @@
 const env = require('../config/env');
 const profile = require('../utils/profile');
-const storage = require('../utils/storage');
 
 const SESSION_KEY = 'accountSession';
 const SIGNED_OUT_KEY = 'accountSignedOut';
@@ -53,7 +52,14 @@ function saveSession(session, options) {
   wx.setStorageSync(SESSION_KEY, session);
 }
 
+function patchSession(partial) {
+  const current = getSession();
+  if (!current) return;
+  saveSession(Object.assign({}, current, partial));
+}
+
 function signOut() {
+  guestBrowsing = false;
   wx.setStorageSync(SIGNED_OUT_KEY, true);
   wx.removeStorageSync(SESSION_KEY);
 }
@@ -108,6 +114,7 @@ async function login(input, options) {
     nickName: (result.user && result.user.nickName) || '',
     avatarUrl: (result.user && result.user.avatarUrl) || '',
     authorized: !!(result.user && result.user.nickName),
+    migrationStatus: (result.user && result.user.migrationStatus) || 'pending',
     loggedInAt: loggedInAt,
     expiresAt: loggedInAt + profile.SESSION_TTL_MS
   };
@@ -124,21 +131,52 @@ function isAuthorized() {
   return displaySession().status === 'valid';
 }
 
+// 仅在本次启动内有效：拒绝授权后进入游客浏览，下次冷启动会重新弹出登录引导
+let guestBrowsing = false;
+
+function isGuest() {
+  return guestBrowsing && !isAuthorized();
+}
+
+function startGuestBrowsing() {
+  guestBrowsing = true;
+  syncTabBar();
+}
+
+function syncTabBar() {
+  if (typeof wx === 'undefined') return;
+  const action = isAuthorized() || guestBrowsing ? wx.showTabBar : wx.hideTabBar;
+  if (!action) return;
+  action({ animation: false, fail() {} });
+}
+
 function openLoginGuide() {
   if (isAuthorized()) return;
+  syncTabBar();
   const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
   const current = pages.length ? pages[pages.length - 1] : null;
-  if (current && current.route === 'pages/account/account') return;
-  wx.switchTab({ url: '/pages/account/account' });
+  const target = guestBrowsing ? 'pages/account/account' : 'pages/index/index';
+  if (current && current.route === target) return;
+  wx.switchTab({ url: '/' + target });
 }
 
 function requireLogin() {
-  if (isAuthorized()) {
-    storage.ensureDefaultEnvs();
-    return true;
-  }
-  openLoginGuide();
+  syncTabBar();
+  if (isAuthorized()) return true;
+  if (!guestBrowsing) openLoginGuide();
   return false;
+}
+
+function promptLogin() {
+  wx.showModal({
+    title: '请先登录',
+    content: '登录后才能查看和记录植物，请在「我的」中授权登录。',
+    confirmText: '去登录',
+    confirmColor: '#2e7d5b',
+    success: (res) => {
+      if (res.confirm) wx.switchTab({ url: '/pages/account/account' });
+    }
+  });
 }
 
 function restore() {
@@ -153,10 +191,15 @@ module.exports = {
   isSignedOut,
   displaySession,
   login,
+  patchSession,
   refresh,
   restore,
   isAuthorized,
+  isGuest,
+  startGuestBrowsing,
+  syncTabBar,
   openLoginGuide,
   requireLogin,
+  promptLogin,
   signOut
 };

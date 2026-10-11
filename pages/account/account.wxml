@@ -1,5 +1,11 @@
 <view class="container">
   <view class="card account-card">
+    <button
+      wx:if="{{needPrivacy}}"
+      class="privacy-btn"
+      open-type="agreePrivacyAuthorization"
+      bindagreeprivacyauthorization="onAgreePrivacy"
+    >先同意隐私保护指引</button>
     <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
       <image class="avatar" src="{{avatarUrl || '/assets/icons/logo.png'}}" mode="aspectFill"></image>
     </button>
@@ -25,7 +31,9 @@
     <text class="account-note" wx:else>账号身份由当前微信自动绑定，登录状态保留 7 天。</text>
 
     <view class="btn-primary {{submitting || loading ? 'is-disabled' : ''}}" bindtap="submit">{{authorized ? '更新资料' : (expired ? '重新登录' : '授权登录')}}</view>
-    <view class="btn-ghost" wx:if="{{authorized}}" bindtap="signOut">退出登录</view>
+    <view class="btn-ghost" wx:if="{{authorized}}" bindtap="exportData">导出云端数据</view>
+    <view class="btn-ghost" wx:if="{{authorized && canMigrate}}" bindtap="migrateLocal">迁移本机数据</view>
+    <view class="btn-ghost is-danger" wx:if="{{authorized}}" bindtap="signOut">退出登录</view>
   </view>
 
   <view class="card status-card" wx:if="{{loading}}">正在读取微信账号…</view>

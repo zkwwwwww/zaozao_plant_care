@@ -1,6 +1,6 @@
 // pages/reminders/reminders.js 提醒总览
-const storage = require('../../utils/storage');
 const account = require('../../services/account');
+const dataApi = require('../../services/data');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
 
@@ -10,17 +10,40 @@ Page({
     seasonText: '',
     groups: [],          // 按植物分组
     flatTasks: [],       // 扁平化待办（含逾期）
-    overdueCount: 0
+    overdueCount: 0,
+    guest: false,
+    loading: false,
+    loadError: ''
   },
 
   onShow() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      const s = reminder.currentSeason();
+      this.setData({
+        seasonText: '当前' + s.name + '季 · 默认每 ' + s.waterInterval + ' 天浇水',
+        groups: [],
+        flatTasks: [],
+        overdueCount: 0,
+        guest: account.isGuest(),
+        loading: false
+      });
+      return;
+    }
+    this.setData({ guest: false });
     this.load();
   },
 
-  load() {
+  async load() {
+    this.setData({ loading: true, loadError: '' });
+    let bundle;
+    try {
+      bundle = await dataApi.loadBundle();
+    } catch (error) {
+      this.setData({ loading: false, loadError: error.message || '读取失败，请重试' });
+      return;
+    }
     const s = reminder.currentSeason();
-    const plants = storage.getPlants().filter(p => !p.memorialized);
+    const plants = bundle.plants.filter(p => !p.memorialized);
 
     const groups = plants.map(p => {
       const tasks = reminder.plantTasks(p);
@@ -41,6 +64,8 @@ Page({
     const overdueCount = flatTasks.filter(t => t.overdue).length;
 
     this.setData({
+      loading: false,
+      loadError: '',
       season: s.name,
       seasonText: '当前' + s.name + '季 · 默认每 ' + s.waterInterval + ' 天浇水',
       groups,

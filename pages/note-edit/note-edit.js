@@ -1,6 +1,6 @@
 // pages/note-edit/note-edit.js 添加养护记录
-const storage = require('../../utils/storage');
 const account = require('../../services/account');
+const dataApi = require('../../services/data');
 const format = require('../../utils/format');
 const constants = require('../../utils/constants');
 const media = require('../../utils/media');
@@ -22,9 +22,16 @@ Page({
     photo: ''
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     if (!account.requireLogin()) return;
-    const plant = storage.getPlant(options.plantId);
+    let bundle;
+    try {
+      bundle = await dataApi.loadBundle();
+    } catch (error) {
+      this.setData({ loadError: error.message || '读取失败，请返回重试' });
+      return;
+    }
+    const plant = bundle.plants.find(item => item.id === options.plantId);
     if (plant) {
       const requestedType = options.type ? decodeURIComponent(options.type) : '';
       const careTypeIndex = constants.CARE_TYPES.indexOf(requestedType);
@@ -87,7 +94,7 @@ Page({
     if (this.data.photo) wx.previewImage({ current: this.data.photo, urls: [this.data.photo] });
   },
 
-  save() {
+  async save() {
     if (!account.requireLogin()) return;
     if (this.data.loadError) return;
     if (this.data.isSavingPhoto) {
@@ -100,25 +107,23 @@ Page({
       wx.showToast({ title: '请选择日期', icon: 'none' });
       return;
     }
-    if (!storage.getPlant(plantId)) {
-      this.setData({ loadError: '植物不存在或已被删除' });
-      return;
-    }
     this.setData({ isSubmitting: true });
-    const record = {
-      id: storage.genId('rec'),
-      type: form.type,
-      date: form.date,
-      content: form.content.trim(),
-      photo: photo || ''
-    };
+    wx.showLoading({ title: '保存中', mask: true });
     try {
-      storage.addRecord(plantId, record);
+      await dataApi.saveRecord({
+        plantId,
+        type: form.type,
+        date: form.date,
+        content: form.content.trim(),
+        photo: photo || ''
+      });
       wx.showToast({ title: '已记录', icon: 'success' });
       wx.navigateBack();
     } catch (error) {
       this.setData({ isSubmitting: false });
-      wx.showToast({ title: '保存失败，请重试', icon: 'none' });
+      wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
     }
   }
 });

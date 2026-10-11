@@ -1,4 +1,6 @@
 const account = require('../../services/account');
+const dataApi = require('../../services/data');
+const migrate = require('../../services/migrate');
 const profile = require('../../utils/profile');
 
 Page({
@@ -11,11 +13,24 @@ Page({
     nickName: '',
     avatarUrl: '',
     openidMask: '',
-    error: ''
+    error: '',
+    needPrivacy: false,
+    canMigrate: false
   },
 
   onLoad() {
     this._alive = true;
+    if (wx.getPrivacySetting) {
+      wx.getPrivacySetting({
+        success: (res) => {
+          if (this._alive && res.needAuthorization) this.setData({ needPrivacy: true });
+        }
+      });
+    }
+  },
+
+  onAgreePrivacy() {
+    this.setData({ needPrivacy: false });
   },
 
   onUnload() {
@@ -24,6 +39,7 @@ Page({
 
   onShow() {
     this._alive = true;
+    account.syncTabBar();
     const session = account.getSession();
     const view = account.displaySession();
     const signedOut = account.isSignedOut();
@@ -33,7 +49,8 @@ Page({
       expired: view.status === 'expired',
       openidMask: !signedOut && session ? profile.maskOpenId(session.openid) : '',
       loading: account.cloudReady() && view.status === 'valid',
-      error: account.cloudReady() ? '' : '云开发未配置，暂时无法登录'
+      error: account.cloudReady() ? '' : '云开发未配置，暂时无法登录',
+      canMigrate: migrate.needsMigration()
     };
     if (signedOut) {
       next.nickName = '';
@@ -130,6 +147,37 @@ Page({
     }
   },
 
+  async exportData() {
+    if (!this.data.authorized) return;
+    wx.showLoading({ title: '导出中', mask: true });
+    try {
+      const payload = await dataApi.exportData();
+      const text = JSON.stringify(payload);
+      wx.setClipboardData({
+        data: text.length > 100000 ? text.slice(0, 100000) : text,
+        success: () => wx.showToast({ title: text.length > 100000 ? '数据较大，已复制前一部分' : '已复制到剪贴板', icon: 'none' })
+      });
+    } catch (error) {
+      wx.showToast({ title: error.message || '导出失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
+  async migrateLocal() {
+    wx.showLoading({ title: '正在迁移', mask: true });
+    try {
+      await migrate.run();
+      if (!this._alive) return;
+      this.setData({ canMigrate: migrate.needsMigration() });
+      wx.showToast({ title: '迁移完成', icon: 'success' });
+    } catch (error) {
+      wx.showToast({ title: error.message || '迁移失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
   signOut() {
     wx.showModal({
       title: '退出登录',
@@ -139,15 +187,8 @@ Page({
       success: (res) => {
         if (!res.confirm || !this._alive) return;
         account.signOut();
-        this.setData({
-          authorized: false,
-          expired: false,
-          nickName: '',
-          avatarUrl: '',
-          openidMask: '',
-          error: ''
-        });
-        wx.showToast({ title: '已退出', icon: 'success' });
+        account.syncTabBar();
+        wx.switchTab({ url: '/pages/index/index' });
       }
     });
   }
