@@ -1,0 +1,107 @@
+.account-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48rpx 32rpx 32rpx;
+}
+
+.avatar-btn {
+  width: 160rpx;
+  height: 160rpx;
+  padding: 0;
+  margin: 0;
+  border-radius: 80rpx;
+  overflow: hidden;
+  background: #eef4f0;
+  line-height: 0;
+}
+
+.avatar-btn::after {
+  border: none;
+}
+
+.avatar {
+  width: 160rpx;
+  height: 160rpx;
+  display: block;
+}
+
+.avatar-hint {
+  margin-top: 16rpx;
+  font-size: 22rpx;
+  color: #8a9b90;
+}
+
+.field {
+  width: 100%;
+  margin-top: 36rpx;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 12rpx;
+  font-size: 24rpx;
+  color: #6b7a70;
+}
+
+.nick-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  border-radius: 16rpx;
+  background: #f4f7f5;
+  font-size: 30rpx;
+  color: #26352c;
+}
+
+.nick-placeholder {
+  color: #8a9b90;
+}
+
+.account-id {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #2e7d5b;
+}
+
+.account-note {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #6b7a70;
+}
+
+.account-note.is-expired {
+  color: #9b6819;
+}
+
+.account-card .btn-primary,
+.account-card .btn-ghost {
+  width: 100%;
+  margin-top: 28rpx;
+}
+
+.btn-ghost {
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 44rpx;
+  color: #b34e48;
+  font-size: 28rpx;
+}
+
+.status-card {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #6b7a70;
+}
+
+.status-card.error {
+  color: #b34e48;
+}
+
+.retry {
+  margin-top: 16rpx;
+  color: #2e7d5b;
+  font-weight: 600;
+}

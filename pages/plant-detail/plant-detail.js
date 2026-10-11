@@ -1,5 +1,6 @@
 // pages/plant-detail/plant-detail.js 植物详情：信息 + 照片 + 养护时间线 + 纪念
 const storage = require('../../utils/storage');
+const account = require('../../services/account');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
 const constants = require('../../utils/constants');
@@ -14,7 +15,8 @@ Page({
     records: [],
     careTypes: constants.CARE_TYPES,
     photos: [],
-    memorial: null
+    memorial: null,
+    notFound: false
   },
 
   onLoad(options) {
@@ -22,6 +24,7 @@ Page({
   },
 
   onShow() {
+    if (!account.requireLogin()) return;
     this.loadDetail();
   },
 
@@ -29,16 +32,17 @@ Page({
     const id = this.data.id;
     const plant = storage.getPlant(id);
     if (!plant) {
-      wx.showToast({ title: '植物不存在', icon: 'none' });
+      this.setData({ plant: null, notFound: true });
       return;
     }
     const env = plant.environmentId ? storage.getEnv(plant.environmentId) : null;
     const memorial = storage.getMemorial(id);
     const records = (plant.records || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-    const tasks = reminder.plantTasks(plant);
+    const tasks = plant.memorialized ? [] : reminder.plantTasks(plant);
 
     this.setData({
       plant,
+      notFound: false,
       env,
       memorial,
       photos: plant.photos || [],
@@ -52,11 +56,17 @@ Page({
     wx.navigateTo({ url: '/pages/plant-edit/plant-edit?id=' + this.data.id });
   },
 
-  goNote() {
-    wx.navigateTo({ url: '/pages/note-edit/note-edit?plantId=' + this.data.id });
+  goBack() {
+    wx.navigateBack();
   },
 
-  goNoteDetail() {},
+  goNote() {
+    if (this.data.plant && this.data.plant.memorialized) {
+      wx.showToast({ title: '请先恢复植物再添加记录', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: '/pages/note-edit/note-edit?plantId=' + this.data.id });
+  },
 
   // 展示图片
   previewPhoto(e) {
@@ -97,6 +107,7 @@ Page({
   },
 
   confirmMemorial() {
+    if (!account.requireLogin()) return;
     const { id, memorialType, memorialDate, memorialNote, plant } = this.data;
     if (!memorialDate) {
       wx.showToast({ title: '请选择日期', icon: 'none' });
@@ -131,6 +142,7 @@ Page({
 
   // 撤销纪念（恢复为活跃植物）
   undoMemorial() {
+    if (!account.requireLogin()) return;
     const plant = this.data.plant;
     if (!plant) return;
     wx.showModal({
@@ -152,6 +164,7 @@ Page({
   },
 
   deletePlant() {
+    if (!account.requireLogin()) return;
     const plant = this.data.plant;
     if (!plant) return;
     wx.showModal({
@@ -164,14 +177,8 @@ Page({
         storage.deletePlant(plant.id);
         storage.removeMemorial(plant.id);
         wx.showToast({ title: '已删除', icon: 'success' });
-        setTimeout(() => wx.navigateBack(), 400);
+        wx.navigateBack();
       }
     });
-  },
-
-  // 记录类型中文图标
-  careIcon(type) {
-    const map = { '浇水': '💧', '施肥': '🌱', '修剪': '✂️', '换盆': '🪴', '防治病虫害': '🐞', '测量': '📏' };
-    return map[type] || '📝';
   }
 });

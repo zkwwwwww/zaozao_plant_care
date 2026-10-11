@@ -23,19 +23,37 @@
 .task-info { flex: 1; display: flex; flex-direction: column; }
 .task-name { font-size: 28rpx; font-weight: 600; }
 .task-date { font-size: 22rpx; color: #8a9b90; margin-top: 4rpx; }
+.task-actions { display: flex; align-items: center; margin-left: 12rpx; }
+.task-complete {
+  flex: 0 0 auto;
+  height: 32rpx;
+  padding: 0 12rpx;
+  border-radius: 16rpx;
+  background: #eef4f0;
+  color: #2e7d5b;
+  font-size: 20rpx;
+  line-height: 32rpx;
+  text-align: center;
+}
 
 /* 分组 */
 .group-card { padding: 24rpx; }
 .group-head { display: flex; align-items: center; }
+.group-head plant-thumb {
+  flex: 0 0 72rpx;
+  width: 72rpx;
+  height: 72rpx;
+  margin-right: 18rpx;
+}
 .g-photo { width: 72rpx; height: 72rpx; border-radius: 14rpx; background: #eef4f0; margin-right: 18rpx; }
 .g-photo.placeholder { display: flex; align-items: center; justify-content: center; }
 .g-name { font-size: 30rpx; font-weight: 700; flex: 1; }
 .g-int { font-size: 22rpx; color: #8a9b90; }
 .g-tasks { margin-top: 16rpx; border-top: 1rpx solid #f2f5f3; padding-top: 8rpx; }
-.g-task { display: flex; align-items: center; padding: 14rpx 0; }
-.g-emoji { font-size: 34rpx; margin-right: 16rpx; }
-.g-tinfo { flex: 1; display: flex; flex-direction: column; }
+.g-task { display: flex; align-items: center; gap: 20rpx; padding: 18rpx 0; }
+.g-emoji { flex: 0 0 auto; font-size: 34rpx; margin-right: 4rpx; }
+.g-tinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .g-tname { font-size: 26rpx; font-weight: 600; }
-.g-tdate { font-size: 22rpx; color: #8a9b90; margin-top: 2rpx; }
+.g-tdate { font-size: 22rpx; color: #8a9b90; margin-top: 2rpx; white-space: nowrap; }
 
 .empty.small { padding: 60rpx 20rpx; }

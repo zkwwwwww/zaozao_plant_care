@@ -1,1 +1,3 @@
 .DS_Store
+cloudfunctions/**/node_modules
+project.private.config.json

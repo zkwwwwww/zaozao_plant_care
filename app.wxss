@@ -1,5 +1,20 @@
 /* app.wxss 全局样式 */
 page {
+  --color-primary: #2e7d5b;
+  --color-primary-soft: #eef4f0;
+  --color-sprout: #79b86a;
+  --color-warm: #f4eadb;
+  --color-danger: #b34e48;
+  --color-warning: #9b6819;
+  --color-text: #26352c;
+  --color-text-secondary: #6b7a70;
+  --color-text-muted: #8a9b90;
+  --color-surface: #ffffff;
+  --color-page: #f4f7f5;
+  --radius-card: 20rpx;
+  --radius-button: 44rpx;
+  --space-page: 24rpx;
+  --shadow-card: 0 4rpx 16rpx rgba(46, 125, 91, 0.06);
   background-color: #f4f7f5;
   color: #26352c;
   font-size: 28rpx;
@@ -23,6 +38,31 @@ view, text, input, textarea, button, image, scroll-view {
   box-shadow: 0 4rpx 16rpx rgba(46, 125, 91, 0.06);
 }
 
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64rpx;
+  margin-bottom: 16rpx;
+  color: #26352c;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.section-more {
+  min-height: 64rpx;
+  line-height: 64rpx;
+  padding-left: 24rpx;
+  color: #2e7d5b;
+  font-size: 24rpx;
+  font-weight: 400;
+}
+
+.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 /* 通用按钮 */
 .btn-primary {
   background: #2e7d5b;
@@ -38,6 +78,13 @@ view, text, input, textarea, button, image, scroll-view {
 
 .btn-primary::after {
   border: none;
+}
+
+.btn-primary[disabled],
+.btn-ghost[disabled],
+.btn-danger[disabled] {
+  opacity: 0.55;
+  color: inherit;
 }
 
 .btn-ghost {
@@ -135,4 +182,12 @@ view, text, input, textarea, button, image, scroll-view {
 .empty-icon {
   font-size: 72rpx;
   margin-bottom: 20rpx;
+}
+
+.empty.small {
+  padding: 48rpx 20rpx;
+}
+
+.safe-bottom {
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
 }

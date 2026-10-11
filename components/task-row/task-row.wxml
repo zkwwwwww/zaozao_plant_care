@@ -1,0 +1,11 @@
+<view class="task-row" bindtap="onTap">
+  <image class="thumb" src="{{photo || '/assets/illustrations/plant-placeholder.png'}}" mode="{{photo ? 'aspectFill' : 'aspectFit'}}"></image>
+  <view class="task-info">
+    <text class="task-name">{{title}}</text>
+    <text class="task-date">{{subtitle}}</text>
+  </view>
+  <view class="task-actions">
+    <text class="tag {{statusClass}}">{{statusText}}</text>
+    <view class="complete" wx:if="{{showComplete}}" catchtap="onComplete">完成</view>
+  </view>
+</view>

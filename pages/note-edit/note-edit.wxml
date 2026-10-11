@@ -1,8 +1,13 @@
 <view class="container">
+  <view class="empty" wx:if="{{loadError}}">
+    <view>{{loadError}}</view>
+  </view>
+
+  <block wx:else>
   <view class="card">
     <view class="section-title">为「{{plantName}}」添加记录</view>
 
-    <picker range="{{careTypes}}" value="{{careTypes.indexOf(form.type)}}" bindchange="onType">
+    <picker range="{{careTypes}}" value="{{careTypeIndex}}" bindchange="onType">
       <view class="form-item">
         <text class="form-label">养护类型</text>
         <text class="form-input">{{form.type}}</text>
@@ -30,12 +35,15 @@
         <image class="p-img" src="{{photo}}" mode="aspectFill" bindtap="previewPhoto"></image>
         <view class="p-del" bindtap="removePhoto">×</view>
       </view>
-      <view class="photo-add" wx:else bindtap="addPhoto">
-        <text class="add-plus">＋</text>
-        <text class="add-text">配图</text>
+      <view class="photo-add {{isSavingPhoto?'is-disabled':''}}" wx:else bindtap="addPhoto">
+        <text class="add-plus">{{isSavingPhoto ? '…' : '＋'}}</text>
+        <text class="add-text">{{isSavingPhoto ? '保存中' : '配图'}}</text>
       </view>
     </view>
   </view>
 
-  <button class="btn-primary" bindtap="save">保存记录</button>
+  <button class="btn-primary" bindtap="save" disabled="{{isSavingPhoto || isSubmitting}}" loading="{{isSubmitting}}">
+    {{isSavingPhoto ? '正在保存照片' : '保存记录'}}
+  </button>
+  </block>
 </view>

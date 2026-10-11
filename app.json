@@ -7,12 +7,13 @@
     "pages/plant-edit/plant-edit",
     "pages/note-edit/note-edit",
     "pages/environment-edit/environment-edit",
-    "pages/memorial/memorial"
+    "pages/memorial/memorial",
+    "pages/account/account"
   ],
   "window": {
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#2e7d5b",
-    "navigationBarTitleText": "植物养护",
+    "navigationBarTitleText": "植早早",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#f4f7f5"
   },
@@ -24,19 +25,38 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "主页"
+        "text": "主页",
+        "iconPath": "assets/icons/tab-home.png",
+        "selectedIconPath": "assets/icons/tab-home-active.png"
       },
       {
         "pagePath": "pages/environments/environments",
-        "text": "环境"
+        "text": "环境",
+        "iconPath": "assets/icons/tab-environment.png",
+        "selectedIconPath": "assets/icons/tab-environment-active.png"
       },
       {
         "pagePath": "pages/reminders/reminders",
-        "text": "提醒"
+        "text": "提醒",
+        "iconPath": "assets/icons/tab-reminder.png",
+        "selectedIconPath": "assets/icons/tab-reminder-active.png"
+      },
+      {
+        "pagePath": "pages/account/account",
+        "text": "账户",
+        "iconPath": "assets/icons/tab-account.png",
+        "selectedIconPath": "assets/icons/tab-account-active.png"
       }
     ]
   },
+  "usingComponents": {
+    "empty-state": "/components/empty-state/empty-state",
+    "plant-thumb": "/components/plant-thumb/plant-thumb",
+    "section-header": "/components/section-header/section-header",
+    "task-row": "/components/task-row/task-row"
+  },
   "style": "v2",
+  "__usePrivacyCheck__": true,
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents"
 }

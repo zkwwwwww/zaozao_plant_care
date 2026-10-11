@@ -1,5 +1,6 @@
 // pages/reminders/reminders.js 提醒总览
 const storage = require('../../utils/storage');
+const account = require('../../services/account');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
 
@@ -13,6 +14,7 @@ Page({
   },
 
   onShow() {
+    if (!account.requireLogin()) return;
     this.load();
   },
 
@@ -48,18 +50,17 @@ Page({
   },
 
   goDetail(e) {
-    const id = e.currentTarget.dataset.id;
+    const id = (e.detail && e.detail.id) || e.currentTarget.dataset.id;
     wx.navigateTo({ url: '/pages/plant-detail/plant-detail?id=' + id });
   },
 
   // 完成提醒：跳转到该植物快速记一笔
   completeTask(e) {
-    const id = e.currentTarget.dataset.id;
-    const type = e.currentTarget.dataset.type;
+    const id = (e.detail && e.detail.id) || e.currentTarget.dataset.id;
+    const type = (e.detail && e.detail.type) || e.currentTarget.dataset.type;
     const typeName = { water: '浇水', fertilize: '施肥', repot: '换盆' }[type] || '浇水';
-    wx.navigateTo({ url: '/pages/note-edit/note-edit?plantId=' + id });
-    setTimeout(() => {
-      wx.showToast({ title: '请选择「' + typeName + '」类型记录', icon: 'none' });
-    }, 300);
+    wx.navigateTo({
+      url: '/pages/note-edit/note-edit?plantId=' + encodeURIComponent(id) + '&type=' + encodeURIComponent(typeName)
+    });
   }
 });

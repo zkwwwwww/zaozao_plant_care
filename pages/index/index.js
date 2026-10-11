@@ -2,6 +2,7 @@
 const storage = require('../../utils/storage');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
+const account = require('../../services/account');
 
 Page({
   data: {
@@ -9,15 +10,22 @@ Page({
     envMap: {},
     stats: { count: 0, totalPrice: 0, waterToday: 0, overdue: 0 },
     tasks: [],           // 全局待办（含逾期），用于顶部展示
-    seasonText: ''
+    seasonText: '',
+    pricesVisible: false,
+    account: { nickName: '', avatarUrl: '', status: 'anonymous', summary: '未登录' }
   },
 
   onShow() {
+    this.setData({
+      pricesVisible: false,
+      account: account.displaySession()
+    });
+    if (!account.requireLogin()) return;
     this.loadData();
   },
 
   onPullDownRefresh() {
-    this.loadData();
+    if (account.requireLogin()) this.loadData();
     wx.stopPullDownRefresh();
   },
 
@@ -68,14 +76,18 @@ Page({
     this.setData({
       plants: cardPlants,
       envMap,
-      stats: { count: plants.length, totalPrice: totalPrice, waterToday, overdue },
+      stats: { count: plants.length, totalPrice: format.money(totalPrice), waterToday, overdue },
       tasks: tasks.slice(0, 5),
       seasonText: reminder.seasonWaterText()
     });
   },
 
+  togglePrices() {
+    this.setData({ pricesVisible: !this.data.pricesVisible });
+  },
+
   goDetail(e) {
-    const id = e.currentTarget.dataset.id;
+    const id = (e.detail && e.detail.id) || e.currentTarget.dataset.id;
     wx.navigateTo({ url: '/pages/plant-detail/plant-detail?id=' + id });
   },
 
@@ -87,7 +99,15 @@ Page({
     wx.navigateTo({ url: '/pages/memorial/memorial' });
   },
 
+  goAccount() {
+    wx.switchTab({ url: '/pages/account/account' });
+  },
+
   goReminders() {
     wx.switchTab({ url: '/pages/reminders/reminders' });
+  },
+
+  goEnvironments() {
+    wx.switchTab({ url: '/pages/environments/environments' });
   }
 });

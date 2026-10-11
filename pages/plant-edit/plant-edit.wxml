@@ -8,8 +8,8 @@
         <image class="photo-img" src="{{item}}" mode="aspectFill" bindtap="previewPhoto" data-src="{{item}}"></image>
         <view class="photo-del" bindtap="removePhoto" data-idx="{{index}}">×</view>
       </view>
-      <view class="photo-cell add" bindtap="addPhoto" wx:if="{{photos.length<9}}">
-        <text class="add-plus">＋</text>
+      <view class="photo-cell add {{isSavingPhoto?'is-disabled':''}}" bindtap="addPhoto" wx:if="{{photos.length<9}}">
+        <text class="add-plus">{{isSavingPhoto ? '…' : '＋'}}</text>
       </view>
     </view>
   </view>
@@ -28,7 +28,7 @@
       <input class="form-input" placeholder="如：皇后／深绿" placeholder-class="form-placeholder" value="{{form.variety}}" data-field="variety" bindinput="onInput" />
     </view>
 
-    <picker range="{{statusOptions}}" value="{{statusOptions.indexOf(form.status)}}" bindchange="onStatus">
+    <picker range="{{statusOptions}}" value="{{statusIndex}}" bindchange="onStatus">
       <view class="form-item">
         <text class="form-label">状态</text>
         <text class="form-input">{{form.status}}</text>
@@ -42,7 +42,7 @@
       <text class="form-unit">元</text>
     </view>
 
-    <picker range="{{purchaseOptions}}" value="{{purchaseOptions.indexOf(form.purchaseWay)}}" bindchange="onPurchaseWay">
+    <picker range="{{purchaseOptions}}" value="{{purchaseIndex}}" bindchange="onPurchaseWay">
       <view class="form-item">
         <text class="form-label">购买途径</text>
         <text class="form-input">{{form.purchaseWay}}</text>
@@ -50,7 +50,7 @@
       </view>
     </picker>
 
-    <picker range="{{plantingOptions}}" value="{{plantingOptions.indexOf(form.planting)}}" bindchange="onPlanting">
+    <picker range="{{plantingOptions}}" value="{{plantingIndex}}" bindchange="onPlanting">
       <view class="form-item">
         <text class="form-label">种植形式</text>
         <text class="form-input">{{form.planting}}</text>
@@ -118,5 +118,7 @@
     <textarea class="desc-textarea" placeholder="记录养护心得、特殊习性等…" placeholder-class="form-placeholder" value="{{form.description}}" data-field="description" bindinput="onInput" maxlength="500"></textarea>
   </view>
 
-  <button class="btn-primary" bindtap="save">{{isEdit ? '保存修改' : '添加植物'}}</button>
+  <button class="btn-primary" bindtap="save" disabled="{{isSavingPhoto || isSubmitting}}" loading="{{isSubmitting}}">
+    {{isSavingPhoto ? '正在保存照片' : (isEdit ? '保存修改' : '添加植物')}}
+  </button>
 </view>

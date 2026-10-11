@@ -1,0 +1,15 @@
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64rpx;
+  margin-bottom: 16rpx;
+}
+.title { font-size: 32rpx; font-weight: 700; color: #26352c; }
+.more {
+  min-height: 64rpx;
+  line-height: 64rpx;
+  padding-left: 24rpx;
+  color: #2e7d5b;
+  font-size: 24rpx;
+}

@@ -1,0 +1,1 @@
+<image class="thumb {{size}}" src="{{src || '/assets/illustrations/plant-placeholder.png'}}" mode="{{src ? mode : 'aspectFit'}}"></image>

@@ -1,5 +1,6 @@
 // pages/environment-edit/environment-edit.js 新增/编辑环境
 const storage = require('../../utils/storage');
+const account = require('../../services/account');
 const format = require('../../utils/format');
 
 Page({
@@ -10,6 +11,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!account.requireLogin()) return;
     if (options.id) {
       const env = storage.getEnv(options.id);
       if (env) {
@@ -38,6 +40,7 @@ Page({
   },
 
   save() {
+    if (!account.requireLogin()) return;
     const form = this.data.form;
     if (!form.name.trim()) {
       wx.showToast({ title: '请填写环境名称', icon: 'none' });
@@ -52,10 +55,11 @@ Page({
     };
     storage.saveEnv(env);
     wx.showToast({ title: '已保存', icon: 'success' });
-    setTimeout(() => wx.navigateBack(), 400);
+    wx.navigateBack();
   },
 
   deleteEnv() {
+    if (!account.requireLogin()) return;
     if (!this.data.isEdit) return;
     const env = storage.getEnv(this.data.id);
     if (!env) return;
@@ -77,7 +81,7 @@ Page({
         });
         storage.deleteEnv(env.id);
         wx.showToast({ title: '已删除', icon: 'success' });
-        setTimeout(() => wx.navigateBack(), 400);
+        wx.navigateBack();
       }
     });
   }

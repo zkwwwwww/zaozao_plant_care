@@ -17,10 +17,14 @@
     </view>
   </view>
 
-  <view class="empty" wx:if="{{envs.length===0}}">
-    <view class="empty-icon">🌤️</view>
-    <view>暂无环境分类，点击下方添加</view>
-  </view>
+  <empty-state
+    wx:if="{{envs.length===0}}"
+    image="/assets/illustrations/empty-environments.png"
+    title="暂无环境分类"
+    description="按光照强度和每日时长，为植物整理生长空间"
+    button-text="添加环境"
+    bind:action="goAdd"
+  ></empty-state>
 
-  <button class="btn-primary" bindtap="goAdd">＋ 添加环境</button>
+  <button class="btn-primary" bindtap="goAdd" wx:if="{{envs.length>0}}">＋ 添加环境</button>
 </view>
