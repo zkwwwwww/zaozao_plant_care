@@ -1,4 +1,6 @@
 <view class="container">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+  <view class="card load-hint" wx:elif="{{loading}}">正在读取环境…</view>
   <view class="env-tip card">
     <text class="tip-text">为不同的生长环境分别设置光照强度（lux 勒克斯）与每日光照时长，分类管理各环境下的植物。</text>
   </view>
@@ -18,7 +20,14 @@
   </view>
 
   <empty-state
-    wx:if="{{envs.length===0}}"
+    wx:if="{{guest}}"
+    image="/assets/illustrations/empty-environments.png"
+    title="登录后管理生长环境"
+    description="在「我的」中授权登录后，可以按光照整理植物的生长空间"
+  ></empty-state>
+
+  <empty-state
+    wx:elif="{{!loading && envs.length===0}}"
     image="/assets/illustrations/empty-environments.png"
     title="暂无环境分类"
     description="按光照强度和每日时长，为植物整理生长空间"
@@ -28,3 +37,5 @@
 
   <button class="btn-primary" bindtap="goAdd" wx:if="{{envs.length>0}}">＋ 添加环境</button>
 </view>
+
+<guest-gate show="{{guest}}"></guest-gate>

@@ -41,6 +41,7 @@ exports.main = async (event) => {
     if (!existing.data.length) {
       await users.add({
         data: {
+          _openid: openid,
           nickName,
           avatarUrl: avatarFileId,
           migrationStatus: 'pending',

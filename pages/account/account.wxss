@@ -5,8 +5,24 @@
   padding: 48rpx 32rpx 32rpx;
 }
 
+.privacy-btn {
+  width: 100% !important;
+  margin: 0 0 32rpx;
+  padding: 0;
+  height: 76rpx;
+  line-height: 76rpx;
+  border-radius: 38rpx;
+  background: #eef7f1;
+  color: #2e7d5b;
+  font-size: 26rpx;
+}
+
+.privacy-btn::after {
+  border: none;
+}
+
 .avatar-btn {
-  width: 160rpx;
+  width: 160rpx !important;
   height: 160rpx;
   padding: 0;
   margin: 0;
@@ -81,12 +97,16 @@
   margin-top: 28rpx;
 }
 
+.btn-ghost.is-danger {
+  color: #b34e48;
+}
+
 .btn-ghost {
   height: 80rpx;
+  color: #2e7d5b;
   line-height: 80rpx;
   text-align: center;
   border-radius: 44rpx;
-  color: #b34e48;
   font-size: 28rpx;
 }
 

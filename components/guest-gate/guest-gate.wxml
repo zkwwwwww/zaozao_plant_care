@@ -1,0 +1,6 @@
+<view wx:if="{{show}}" class="guest-gate" catchtap="onTap">
+  <view class="guest-bar" catchtap="goLogin">
+    <text class="guest-text">未登录，仅可浏览</text>
+    <text class="guest-link">去「我的」登录</text>
+  </view>
+</view>

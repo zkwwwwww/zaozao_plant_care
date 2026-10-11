@@ -1,4 +1,6 @@
 <view class="container">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+  <view class="card load-hint" wx:elif="{{loading}}">正在读取纪念碑…</view>
   <view class="mem-intro card" wx:if="{{list.length>0}}">
     <text class="mi-text">送人或去世的植物在这里留下它们的纪念碑。🕯️</text>
   </view>

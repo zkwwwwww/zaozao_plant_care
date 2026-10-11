@@ -4,7 +4,12 @@ const account = require('./services/account');
 
 App({
   onLaunch() {
+    account.syncTabBar();
     this.initCloud();
+  },
+
+  onShow() {
+    account.syncTabBar();
   },
 
   initCloud() {

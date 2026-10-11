@@ -1,6 +1,6 @@
 // pages/plant-detail/plant-detail.js 植物详情：信息 + 照片 + 养护时间线 + 纪念
-const storage = require('../../utils/storage');
 const account = require('../../services/account');
+const dataApi = require('../../services/data');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
 const constants = require('../../utils/constants');
@@ -16,7 +16,9 @@ Page({
     careTypes: constants.CARE_TYPES,
     photos: [],
     memorial: null,
-    notFound: false
+    notFound: false,
+    loading: false,
+    loadError: ''
   },
 
   onLoad(options) {
@@ -24,23 +26,39 @@ Page({
   },
 
   onShow() {
+    this._alive = true;
     if (!account.requireLogin()) return;
     this.loadDetail();
   },
 
-  loadDetail() {
+  onUnload() {
+    this._alive = false;
+  },
+
+  async loadDetail() {
     const id = this.data.id;
-    const plant = storage.getPlant(id);
-    if (!plant) {
-      this.setData({ plant: null, notFound: true });
+    this.setData({ loading: true, loadError: '' });
+    let bundle;
+    try {
+      bundle = await dataApi.loadBundle();
+    } catch (error) {
+      if (!this._alive) return;
+      this.setData({ loading: false, loadError: error.message || '读取失败，请重试' });
       return;
     }
-    const env = plant.environmentId ? storage.getEnv(plant.environmentId) : null;
-    const memorial = storage.getMemorial(id);
+    if (!this._alive) return;
+    const plant = bundle.plants.find(item => item.id === id);
+    if (!plant) {
+      this.setData({ plant: null, notFound: true, loading: false });
+      return;
+    }
+    const env = plant.environmentId ? bundle.envs.find(item => item.id === plant.environmentId) : null;
+    const memorial = bundle.memorials.find(item => item.id === id) || null;
     const records = (plant.records || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     const tasks = plant.memorialized ? [] : reminder.plantTasks(plant);
 
     this.setData({
+      loading: false,
       plant,
       notFound: false,
       env,
@@ -106,34 +124,30 @@ Page({
     this.setData({ memorialNote: e.detail.value });
   },
 
-  confirmMemorial() {
+  async confirmMemorial() {
     if (!account.requireLogin()) return;
     const { id, memorialType, memorialDate, memorialNote, plant } = this.data;
     if (!memorialDate) {
       wx.showToast({ title: '请选择日期', icon: 'none' });
       return;
     }
-    const mem = {
-      id: plant.id,
-      name: plant.name,
-      photos: plant.photos || [],
-      type: memorialType,        // 送人 / 去世
-      date: memorialDate,
-      note: memorialNote || '',
-      companion: format.companionText(plant.companionStart || plant.purchaseDate),
-      createdAt: format.today()
-    };
-    storage.saveMemorial(mem);
-
-    // 标记植物为已纪念，移出活跃列表
-    plant.memorialized = true;
-    plant.memorialType = memorialType;
-    plant.memorialDate = memorialDate;
-    storage.savePlant(plant);
-
-    this.setData({ showMemorial: false });
-    wx.showToast({ title: '已建立纪念碑', icon: 'success' });
-    this.loadDetail();
+    wx.showLoading({ title: '保存中', mask: true });
+    try {
+      await dataApi.memorialize({
+        plantId: id,
+        type: memorialType,
+        date: memorialDate,
+        note: memorialNote || '',
+        companion: format.companionText(plant.companionStart || plant.purchaseDate)
+      });
+      this.setData({ showMemorial: false });
+      wx.showToast({ title: '已建立纪念碑', icon: 'success' });
+      this.loadDetail();
+    } catch (error) {
+      wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
   },
 
   cancelMemorial() {
@@ -150,15 +164,18 @@ Page({
       content: '将把该植物恢复到主页活跃列表，并删除纪念碑。确定吗？',
       confirmText: '撤销',
       confirmColor: '#2e7d5b',
-      success: (res) => {
+      success: async (res) => {
         if (!res.confirm) return;
-        storage.removeMemorial(plant.id);
-        plant.memorialized = false;
-        delete plant.memorialType;
-        delete plant.memorialDate;
-        storage.savePlant(plant);
-        wx.showToast({ title: '已恢复', icon: 'success' });
-        this.loadDetail();
+        wx.showLoading({ title: '恢复中', mask: true });
+        try {
+          await dataApi.restorePlant(plant.id);
+          wx.showToast({ title: '已恢复', icon: 'success' });
+          this.loadDetail();
+        } catch (error) {
+          wx.showToast({ title: error.message || '恢复失败，请重试', icon: 'none' });
+        } finally {
+          wx.hideLoading();
+        }
       }
     });
   },
@@ -169,15 +186,21 @@ Page({
     if (!plant) return;
     wx.showModal({
       title: '删除植物',
-      content: '将永久删除「' + plant.name + '」及其全部记录，且无法恢复。确定吗？',
+      content: '将删除「' + plant.name + '」及其全部记录，且无法在小程序里恢复。确定吗？',
       confirmText: '删除',
       confirmColor: '#c0554f',
-      success: (res) => {
+      success: async (res) => {
         if (!res.confirm) return;
-        storage.deletePlant(plant.id);
-        storage.removeMemorial(plant.id);
-        wx.showToast({ title: '已删除', icon: 'success' });
-        wx.navigateBack();
+        wx.showLoading({ title: '删除中', mask: true });
+        try {
+          await dataApi.deletePlant(plant.id);
+          wx.hideLoading();
+          wx.showToast({ title: '已删除', icon: 'success' });
+          wx.navigateBack();
+        } catch (error) {
+          wx.hideLoading();
+          wx.showToast({ title: error.message || '删除失败，请重试', icon: 'none' });
+        }
       }
     });
   }

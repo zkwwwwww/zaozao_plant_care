@@ -1,0 +1,24 @@
+.guest-gate {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 900;
+  background: transparent;
+}
+.guest-bar {
+  position: absolute;
+  right: 24rpx;
+  bottom: 24rpx;
+  left: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 28rpx;
+  border-radius: 20rpx;
+  background: rgba(38, 53, 44, 0.88);
+  box-shadow: 0 8rpx 24rpx rgba(38, 53, 44, 0.18);
+}
+.guest-text { color: #fff; font-size: 26rpx; }
+.guest-link { color: #8fe0b4; font-size: 26rpx; font-weight: 600; }

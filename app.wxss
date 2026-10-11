@@ -30,6 +30,9 @@ view, text, input, textarea, button, image, scroll-view {
   padding: 24rpx;
 }
 
+.load-hint { color: #6b7a70; font-size: 26rpx; }
+.load-error { color: #b34e48; font-size: 26rpx; }
+
 .card {
   background: #ffffff;
   border-radius: 20rpx;
