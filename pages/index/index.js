@@ -46,29 +46,16 @@ Page({
   onShow() {
     this._alive = true;
     const view = account.displaySession();
-    if (!account.requireLogin()) {
-      if (account.isGuest()) {
-        this.setData({
-          pricesVisible: false,
-          account: view,
-          showLoginSheet: false,
-          guest: true,
-          plants: [],
-          tasks: [],
-          stats: { count: 0, totalPrice: 0, waterToday: 0, overdue: 0 },
-          seasonText: reminder.seasonWaterText()
-        });
-        return;
-      }
+    if (!account.isAuthorized()) {
       this.setData({
         pricesVisible: false,
         account: view,
-        guest: false,
-        showLoginSheet: true,
-        loginExpired: view.status === 'expired',
-        loginNickName: this.data.loginNickName || view.nickName || '',
-        loginAvatar: this.data.loginAvatar || view.avatarUrl || '',
-        loginError: account.cloudReady() ? '' : '云开发未配置，暂时无法登录'
+        showLoginSheet: false,
+        guest: true,
+        plants: [],
+        tasks: [],
+        stats: { count: 0, totalPrice: 0, waterToday: 0, overdue: 0 },
+        seasonText: reminder.seasonWaterText()
       });
       return;
     }

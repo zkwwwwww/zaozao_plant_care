@@ -95,7 +95,10 @@ Page({
   },
 
   async save() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
     if (this.data.loadError) return;
     if (this.data.isSavingPhoto) {
       wx.showToast({ title: '照片仍在保存，请稍候', icon: 'none' });

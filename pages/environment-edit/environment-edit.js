@@ -46,7 +46,10 @@ Page({
   },
 
   async save() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
     const form = this.data.form;
     if (!form.name.trim()) {
       wx.showToast({ title: '请填写环境名称', icon: 'none' });
@@ -70,7 +73,10 @@ Page({
   },
 
   deleteEnv() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
     if (!this.data.isEdit) return;
     const name = this.data.form.name || '该环境';
     wx.showModal({
