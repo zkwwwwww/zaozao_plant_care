@@ -59,7 +59,6 @@ function patchSession(partial) {
 }
 
 function signOut() {
-  guestBrowsing = false;
   wx.setStorageSync(SIGNED_OUT_KEY, true);
   wx.removeStorageSync(SESSION_KEY);
 }
@@ -131,50 +130,40 @@ function isAuthorized() {
   return displaySession().status === 'valid';
 }
 
-// 仅在本次启动内有效：拒绝授权后进入游客浏览，下次冷启动会重新弹出登录引导
-let guestBrowsing = false;
-
 function isGuest() {
-  return guestBrowsing && !isAuthorized();
+  return !isAuthorized();
 }
 
 function startGuestBrowsing() {
-  guestBrowsing = true;
   syncTabBar();
 }
 
 function syncTabBar() {
-  if (typeof wx === 'undefined') return;
-  const action = isAuthorized() || guestBrowsing ? wx.showTabBar : wx.hideTabBar;
-  if (!action) return;
-  action({ animation: false, fail() {} });
+  if (typeof wx === 'undefined' || !wx.showTabBar) return;
+  wx.showTabBar({ animation: false, fail() {} });
 }
 
 function openLoginGuide() {
   if (isAuthorized()) return;
-  syncTabBar();
   const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
   const current = pages.length ? pages[pages.length - 1] : null;
-  const target = guestBrowsing ? 'pages/account/account' : 'pages/index/index';
-  if (current && current.route === target) return;
-  wx.switchTab({ url: '/' + target });
+  if (current && current.route === 'pages/account/account') return;
+  wx.switchTab({ url: '/pages/account/account' });
 }
 
 function requireLogin() {
-  syncTabBar();
-  if (isAuthorized()) return true;
-  if (!guestBrowsing) openLoginGuide();
-  return false;
+  return isAuthorized();
 }
 
 function promptLogin() {
   wx.showModal({
-    title: '请先登录',
-    content: '登录后才能查看和记录植物，请在「我的」中授权登录。',
+    title: '登录后可保存记录',
+    content: '可以先继续浏览。需要把植物记到当前微信时，再在「我的」中授权头像和昵称。不会获取手机号。',
     confirmText: '去登录',
+    cancelText: '继续浏览',
     confirmColor: '#2e7d5b',
     success: (res) => {
-      if (res.confirm) wx.switchTab({ url: '/pages/account/account' });
+      if (res.confirm) openLoginGuide();
     }
   });
 }

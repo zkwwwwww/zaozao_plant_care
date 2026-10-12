@@ -125,7 +125,10 @@ Page({
   },
 
   async confirmMemorial() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
     const { id, memorialType, memorialDate, memorialNote, plant } = this.data;
     if (!memorialDate) {
       wx.showToast({ title: '请选择日期', icon: 'none' });
@@ -156,7 +159,10 @@ Page({
 
   // 撤销纪念（恢复为活跃植物）
   undoMemorial() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
     const plant = this.data.plant;
     if (!plant) return;
     wx.showModal({
@@ -181,7 +187,10 @@ Page({
   },
 
   deletePlant() {
-    if (!account.requireLogin()) return;
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
     const plant = this.data.plant;
     if (!plant) return;
     wx.showModal({

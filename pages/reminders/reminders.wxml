@@ -39,8 +39,8 @@
       wx:if="{{flatTasks.length===0}}"
       compact="{{true}}"
       image="/assets/illustrations/empty-reminders.png"
-      title="{{guest ? '登录后查看养护任务' : '当前没有近期或逾期的养护任务'}}"
-      description="{{guest ? '在「我的」中授权登录后，浇水、施肥和换盆提醒会出现在这里' : '完成养护后及时记录，下次到期日会自动更新'}}"
+      title="{{guest ? '浇水、施肥和换盆会汇总在这里' : '当前没有近期或逾期的养护任务'}}"
+      description="{{guest ? '上方是当前季节的默认间隔。登录后会按你的植物计算到期任务' : '完成养护后及时记录，下次到期日会自动更新'}}"
     ></empty-state>
   </view>
 

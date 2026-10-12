@@ -27,7 +27,7 @@
 
     <text class="account-id" wx:if="{{openidMask}}">{{openidMask}}</text>
     <text class="account-note is-expired" wx:if="{{expired}}">本地登录已过期，请重新确认头像和昵称。</text>
-    <text class="account-note" wx:elif="{{!authorized}}">登录后才能查看和记录植物。请确认头像和昵称，账号会绑定当前微信，登录状态保留 7 天。</text>
+    <text class="account-note" wx:elif="{{!authorized}}">可以先浏览首页、环境和提醒。需要把植物记到当前微信时，再授权头像和昵称。不会获取手机号，登录状态保留 7 天。</text>
     <text class="account-note" wx:else>账号身份由当前微信自动绑定，登录状态保留 7 天。</text>
 
     <view class="btn-primary {{submitting || loading ? 'is-disabled' : ''}}" bindtap="submit">{{authorized ? '更新资料' : (expired ? '重新登录' : '授权登录')}}</view>

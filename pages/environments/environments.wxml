@@ -22,8 +22,8 @@
   <empty-state
     wx:if="{{guest}}"
     image="/assets/illustrations/empty-environments.png"
-    title="登录后管理生长环境"
-    description="在「我的」中授权登录后，可以按光照整理植物的生长空间"
+    title="按光照整理植物的生长空间"
+    description="上方说明了如何记录光照强度和每日时长。登录后可以添加自己的环境"
   ></empty-state>
 
   <empty-state

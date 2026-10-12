@@ -99,8 +99,8 @@
   <empty-state
     wx:elif="{{guest}}"
     image="/assets/illustrations/empty-plants.png"
-    title="登录后查看你的植物"
-    description="在「我的」中授权登录后，植物、提醒和花费都会出现在这里"
+    title="从这里记下每一株植物"
+    description="可以先查看季节提醒、光照环境和纪念碑。准备保存自己的记录时，再在「我的」中登录"
   ></empty-state>
 
   <empty-state
@@ -116,8 +116,6 @@
     <text class="add-btn">＋ 添加植物</text>
   </view>
 </view>
-
-<guest-gate show="{{guest}}"></guest-gate>
 
 <view class="login-blur" wx:if="{{showLoginSheet}}" catchtouchmove="preventMove"></view>
 <view class="login-sheet" wx:if="{{showLoginSheet}}">
