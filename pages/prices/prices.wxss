@@ -1,0 +1,7 @@
+/* pages/prices/prices.wxss */
+.summary { display: flex; gap: 24rpx; }
+.summary-item { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.summary-label { color: #8a9b90; font-size: 24rpx; }
+.summary-num { margin-top: 8rpx; color: #26352c; font-size: 40rpx; font-weight: 700; }
+.summary-num.small { font-size: 30rpx; line-height: 56rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.summary-sub { margin-top: 4rpx; color: #8a9b90; font-size: 22rpx; }

@@ -8,7 +8,16 @@
     "pages/note-edit/note-edit",
     "pages/environment-edit/environment-edit",
     "pages/memorial/memorial",
-    "pages/account/account"
+    "pages/account/account",
+    "pages/seedlings/seedlings",
+    "pages/seedling-edit/seedling-edit",
+    "pages/seedling-detail/seedling-detail",
+    "pages/lineage/lineage",
+    "pages/expenses/expenses",
+    "pages/expense-edit/expense-edit",
+    "pages/tags/tags",
+    "pages/todo/todo",
+    "pages/prices/prices"
   ],
   "window": {
     "backgroundTextStyle": "dark",

@@ -43,7 +43,12 @@ function dueTasks(plant, records, today) {
   specs.forEach(spec => {
     const last = lastDate(records, spec[1], plant);
     const due = last ? addDays(last, spec[2]) : '';
-    if (due === today) tasks.push({ type: spec[0], label: spec[1], due });
+    const advance = plant.reminderAdvanceDays == null
+      ? 1
+      : Math.min(30, Math.max(0, Math.round(Number(plant.reminderAdvanceDays) || 0)));
+    if (due && addDays(due, -advance) === today) {
+      tasks.push({ type: spec[0], label: spec[1], due });
+    }
   });
   return tasks;
 }
@@ -101,6 +106,7 @@ exports.main = async (event) => {
       const records = await listAll(db, 'care_records', { _openid: openid, deleted: false });
       for (let p = 0; p < plants.length; p += 1) {
         const plant = plants[p];
+        if (plant.status === '死亡') continue;
         const mine = records.filter(record => record.plantId === plant._id);
         const tasks = dueTasks(plant, mine, today);
         for (let t = 0; t < tasks.length; t += 1) {

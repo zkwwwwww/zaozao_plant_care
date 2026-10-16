@@ -17,6 +17,7 @@
 .hero-name { font-size: 40rpx; font-weight: 700; }
 .hero-variety { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 26rpx; }
 .hero-companion { display: block; margin-top: 10rpx; color: #2e7d5b; font-size: 26rpx; font-weight: 600; }
+.hero-tags { margin-top: 12rpx; }
 
 /* 纪念碑 */
 .memorial-banner {

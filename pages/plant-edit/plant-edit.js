@@ -23,9 +23,13 @@ Page({
       description: '',
       customWaterInterval: '',
       customFertInterval: '',
-      customRepotInterval: ''
+      customRepotInterval: '',
+      reminderAdvanceDays: '1'
     },
     photos: [],
+    tags: [],
+    tagIds: [],
+    wasDead: false,
     envs: [],
     envIndex: 0,
     envName: '',
@@ -69,12 +73,21 @@ Page({
             description: plant.description || '',
             customWaterInterval: plant.customWaterInterval ? String(plant.customWaterInterval) : '',
             customFertInterval: plant.customFertInterval ? String(plant.customFertInterval) : '',
-            customRepotInterval: plant.customRepotInterval ? String(plant.customRepotInterval) : ''
+            customRepotInterval: plant.customRepotInterval ? String(plant.customRepotInterval) : '',
+            reminderAdvanceDays: String(reminder.reminderAdvanceDaysFor(plant))
           },
-          photos: plant.photos || []
+          photos: plant.photos || [],
+          tagIds: plant.tags || [],
+          wasDead: plant.status === '死亡' || plant.memorialized
         });
       }
     }
+    if (!options.id && options.tag && options.tag !== constants.UNTAGGED.id) {
+      this.setData({ tagIds: [options.tag] });
+    }
+    const known = bundle.tags.map(tag => tag.id);
+    this.setData({ tagIds: this.data.tagIds.filter(id => known.indexOf(id) >= 0) });
+    this.renderTags(bundle.tags);
     const envs = bundle.envs;
     let envId = this.data.form.environmentId;
     if (!envId && envs.length) envId = envs[0].id;
@@ -134,6 +147,46 @@ Page({
       'form.environmentId': envs[idx].id,
       envIndex: idx,
       envName: envs[idx].name
+    });
+  },
+
+  renderTags(tags) {
+    const selected = this.data.tagIds;
+    this.setData({
+      tags: (tags || this.data.tags).map(tag => ({ id: tag.id, name: tag.name, selected: selected.indexOf(tag.id) >= 0 }))
+    });
+  },
+
+  toggleTag(e) {
+    const id = e.currentTarget.dataset.id;
+    const tagIds = this.data.tagIds.slice();
+    const index = tagIds.indexOf(id);
+    if (index >= 0) tagIds.splice(index, 1);
+    else tagIds.push(id);
+    this.setData({ tagIds });
+    this.renderTags();
+  },
+
+  addTag() {
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
+    wx.showModal({
+      title: '新建标签',
+      editable: true,
+      placeholderText: '最多 12 个字',
+      success: async (res) => {
+        const name = (res.content || '').trim();
+        if (!res.confirm || !name) return;
+        try {
+          const tag = await dataApi.saveTag({ name });
+          this.setData({ tagIds: this.data.tagIds.concat(tag.id) });
+          this.renderTags(this.data.tags.concat(tag));
+        } catch (error) {
+          wx.showToast({ title: error.message || '新建失败', icon: 'none' });
+        }
+      }
     });
   },
 
@@ -203,6 +256,11 @@ Page({
       wx.showToast({ title: '请填写植物名称', icon: 'none' });
       return;
     }
+    const advanceDays = form.reminderAdvanceDays === '' ? 1 : Number(form.reminderAdvanceDays);
+    if (!Number.isInteger(advanceDays) || advanceDays < 0 || advanceDays > 30) {
+      wx.showToast({ title: '提前提醒请填写 0–30 的整数', icon: 'none' });
+      return;
+    }
     this.setData({ isSubmitting: true });
     wx.showLoading({ title: '保存中', mask: true });
     try {
@@ -220,10 +278,17 @@ Page({
         purchaseDate: form.purchaseDate,
         description: form.description.trim(),
         photos: this.data.photos,
+        tags: this.data.tagIds,
         customWaterInterval: form.customWaterInterval === '' ? 0 : Number(form.customWaterInterval),
         customFertInterval: form.customFertInterval === '' ? 0 : Number(form.customFertInterval),
-        customRepotInterval: form.customRepotInterval === '' ? 0 : Number(form.customRepotInterval)
+        customRepotInterval: form.customRepotInterval === '' ? 0 : Number(form.customRepotInterval),
+        reminderAdvanceDays: advanceDays
       });
+      wx.hideLoading();
+      if (form.status === '死亡' && !this.data.wasDead) {
+        this.askMemorial(saved.id);
+        return;
+      }
       wx.showToast({ title: this.data.isEdit ? '已保存' : '已添加', icon: 'success' });
       if (this.data.isEdit) {
         wx.navigateBack();
@@ -236,5 +301,19 @@ Page({
     } finally {
       wx.hideLoading();
     }
+  },
+
+  // 标记为死亡时只询问，不自动建纪念碑
+  askMemorial(id) {
+    wx.showModal({
+      title: '已标记为死亡',
+      content: '要为它建立纪念碑吗？建立后会移出在养列表，之后也可以恢复。',
+      confirmText: '建纪念碑',
+      cancelText: '暂不',
+      success: (res) => {
+        const url = '/pages/plant-detail/plant-detail?id=' + id + (res.confirm ? '&memorial=去世' : '');
+        wx.redirectTo({ url });
+      }
+    });
   }
 });

@@ -87,6 +87,7 @@ function plantView(doc) {
     purchaseDate: doc.purchaseDate || '',
     description: doc.description || '',
     photos: doc.photos || [],
+    tags: doc.tags || [],
     customWaterInterval: doc.customWaterInterval || 0,
     customFertInterval: doc.customFertInterval || 0,
     customRepotInterval: doc.customRepotInterval || 0,

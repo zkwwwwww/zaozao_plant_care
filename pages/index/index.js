@@ -1,21 +1,29 @@
-// pages/index/index.js 主页：植物图片墙 + 总价统计 + 待办提醒
+// pages/index/index.js 主页：植物图片墙 + 标签筛选 + 待办聚合
+const constants = require('../../utils/constants');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
+const pagination = require('../../utils/pagination');
 const account = require('../../services/account');
 const dataApi = require('../../services/data');
 const migrate = require('../../services/migrate');
 const profile = require('../../utils/profile');
 
+const DENSITY_KEY = 'homeDensity';
+
 Page({
   data: {
     plants: [],
     envMap: {},
-    stats: { count: 0, totalPrice: 0, waterToday: 0, overdue: 0 },
-    tasks: [],           // 全局待办（含逾期），用于顶部展示
+    totalPlants: 0,
+    stats: { count: 0, seedlings: 0, waterToday: 0, overdue: 0 },
+    todo: { total: 0, text: '' },
+    tagBar: [],
+    tagFilter: '',
+    density: 2,
+    hasMore: false,
     seasonText: '',
     loading: false,
     loadError: '',
-    pricesVisible: false,
     account: { nickName: '', avatarUrl: '', status: 'anonymous', summary: '未登录' },
     showLoginSheet: false,
     guest: false,
@@ -30,6 +38,8 @@ Page({
 
   onLoad() {
     this._alive = true;
+    const density = Number(wx.getStorageSync(DENSITY_KEY));
+    if (constants.DENSITY_OPTIONS.indexOf(density) >= 0) this.setData({ density });
     if (wx.getPrivacySetting) {
       wx.getPrivacySetting({
         success: (res) => {
@@ -47,20 +57,23 @@ Page({
     this._alive = true;
     const view = account.displaySession();
     if (!account.isAuthorized()) {
+      this._bundle = null;
       this.setData({
-        pricesVisible: false,
         account: view,
         showLoginSheet: false,
         guest: true,
         plants: [],
-        tasks: [],
-        stats: { count: 0, totalPrice: 0, waterToday: 0, overdue: 0 },
+        hasMore: false,
+        totalPlants: 0,
+        tagBar: [],
+        tagFilter: '',
+        todo: { total: 0, text: '' },
+        stats: { count: 0, seedlings: 0, waterToday: 0, overdue: 0 },
         seasonText: reminder.seasonWaterText()
       });
       return;
     }
     this.setData({
-      pricesVisible: false,
       account: view,
       showLoginSheet: false,
       guest: false
@@ -69,16 +82,16 @@ Page({
   },
 
   onPullDownRefresh() {
-    if (account.requireLogin()) this.loadData();
+    if (account.requireLogin()) this.loadData(true);
     else wx.stopPullDownRefresh();
   },
 
-  async loadData() {
+  async loadData(force) {
     this.setData({ loading: true, loadError: '' });
     try {
       await migrate.promptOnce();
       if (!this._alive) return;
-      const bundle = await dataApi.loadBundle();
+      const bundle = await dataApi.loadBundle({ force: !!force });
       if (!this._alive) return;
       this.renderBundle(bundle);
     } catch (error) {
@@ -90,62 +103,145 @@ Page({
   },
 
   renderBundle(bundle) {
+    this._bundle = bundle;
     const plants = bundle.plants.filter(p => !p.memorialized);
-    const envs = bundle.envs;
     const envMap = {};
-    envs.forEach(e => { envMap[e.id] = e; });
+    bundle.envs.forEach(e => { envMap[e.id] = e; });
+    const tagIds = bundle.tags.map(tag => tag.id);
+    const groups = reminder.dueTodayGroups(plants);
+    const today = format.today();
+    const waterToday = groups[0].items.filter(t => t.due === today).length;
+    const overdue = groups.reduce((sum, group) => sum + group.items.filter(t => t.overdue).length, 0);
 
-    // 计算总价
-    let totalPrice = 0;
-    plants.forEach(p => {
-      totalPrice += Number(p.price) || 0;
+    const filter = this.data.tagFilter;
+    const validFilter = !filter || filter === constants.UNTAGGED.id || tagIds.indexOf(filter) >= 0 ? filter : '';
+    const visible = plants.filter(p => {
+      const own = (p.tags || []).filter(id => tagIds.indexOf(id) >= 0);
+      if (!validFilter) return true;
+      if (validFilter === constants.UNTAGGED.id) return !own.length;
+      return own.indexOf(validFilter) >= 0;
     });
 
-    // 汇总待办任务
-    let tasks = [];
-    plants.forEach(p => {
-      reminder.plantTasks(p).forEach(t => {
-        tasks.push({ key: p.id + '_' + t.type, plantId: p.id, plantName: p.name, photo: p.photos && p.photos[0] || '', ...t });
-      });
-    });
-    // 排序：逾期在前，再按到期日
-    tasks.sort((a, b) => (a.overdue === b.overdue ? a.due.localeCompare(b.due) : a.overdue ? -1 : 1));
-
-    const waterToday = tasks.filter(t => t.type === 'water' && !t.overdue && t.due === format.today()).length;
-    const overdue = tasks.filter(t => t.overdue).length;
-
-    // 主页植物卡片：附加展示字段
-    const cardPlants = plants.map(p => {
+    const cardPlants = visible.map(p => {
       const env = p.environmentId ? envMap[p.environmentId] : null;
-      const waterDue = reminder.nextDueDate(p, 'water');
+      const waterDue = p.status === '死亡' ? '' : reminder.nextDueDate(p, 'water');
       const waterInfo = waterDue ? format.dueInfo(waterDue) : null;
       return {
         id: p.id,
         name: p.name,
         variety: p.variety || '',
-        status: p.status || '健康',
-        price: p.price ? format.money(p.price) : '',
+        status: p.status,
+        statusCls: constants.statusClass(p.status),
         planting: p.planting || '',
-        envName: env ? env.name : (p.location || '未分类'),
+        envName: env ? env.name : (p.location || '未设置环境'),
         photo: p.photos && p.photos.length ? p.photos[0] : '',
         waterText: waterInfo ? (waterInfo.overdue ? '待浇水·' + waterInfo.text : '下次浇水·' + waterInfo.text) : '',
         waterCls: waterInfo ? waterInfo.cls : ''
       };
     });
+    this._visiblePlants = cardPlants;
+    const page = pagination.slice(cardPlants, 1);
 
     this.setData({
       loading: false,
       loadError: '',
-      plants: cardPlants,
+      plants: page.items,
+      hasMore: page.hasMore,
+      totalPlants: plants.length,
+      tagFilter: validFilter,
+      tagBar: [{ id: '', name: '全部' }].concat(bundle.tags, [constants.UNTAGGED]),
       envMap,
-      stats: { count: plants.length, totalPrice: format.money(totalPrice), waterToday, overdue },
-      tasks: tasks.slice(0, 5),
+      stats: { count: plants.length, seedlings: bundle.seedlings.length, waterToday, overdue },
+      todo: {
+        total: groups.reduce((sum, group) => sum + group.items.length, 0),
+        text: groups.filter(group => group.items.length).map(group => group.label + ' ' + group.items.length).join(' · ')
+      },
       seasonText: reminder.seasonWaterText()
     });
   },
 
-  togglePrices() {
-    this.setData({ pricesVisible: !this.data.pricesVisible });
+  pickTag(e) {
+    this.setData({ tagFilter: e.currentTarget.dataset.id });
+    if (this._bundle) this.renderBundle(this._bundle);
+  },
+
+  onReachBottom() {
+    if (!this.data.hasMore || !this._visiblePlants) return;
+    const nextPage = Math.floor(this.data.plants.length / pagination.PAGE_SIZE) + 1;
+    const page = pagination.slice(this._visiblePlants, nextPage);
+    this.setData({ plants: page.items, hasMore: page.hasMore });
+  },
+
+  pickDensity() {
+    const options = constants.DENSITY_OPTIONS;
+    wx.showActionSheet({
+      itemList: options.map(n => '每行 ' + n + ' 个'),
+      success: (res) => {
+        const density = options[res.tapIndex];
+        this.setData({ density });
+        wx.setStorageSync(DENSITY_KEY, density);
+      }
+    });
+  },
+
+  // 对当前筛选下的植物各记一条今天的养护
+  batchCare() {
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
+    const targets = (this._visiblePlants || []).filter(p => p.status !== '死亡');
+    if (!targets.length) {
+      wx.showToast({ title: '当前没有可养护的植物', icon: 'none' });
+      return;
+    }
+    const types = constants.CARE_TYPES;
+    const scope = (this.data.tagBar.find(tag => tag.id === this.data.tagFilter) || { name: '全部' }).name;
+    wx.showActionSheet({
+      itemList: types,
+      success: (res) => {
+        const type = types[res.tapIndex];
+        wx.showModal({
+          title: '批量' + type,
+          content: '为「' + scope + '」下的 ' + targets.length + ' 株植物各记一条今天的' + type + '记录？',
+          confirmText: '确定',
+          confirmColor: '#2e7d5b',
+          success: async (modal) => {
+            if (!modal.confirm) return;
+            wx.showLoading({ title: '记录中', mask: true });
+            try {
+              const result = await dataApi.batchCare(targets.map(p => p.id), type);
+              wx.hideLoading();
+              wx.showToast({ title: '已记录 ' + result.saved + ' 株', icon: 'success' });
+              this.loadData();
+            } catch (error) {
+              wx.hideLoading();
+              wx.showToast({ title: error.message || '记录失败，请重试', icon: 'none' });
+            }
+          }
+        });
+      }
+    });
+  },
+
+  goTodo() {
+    wx.navigateTo({ url: '/pages/todo/todo' });
+  },
+
+  goTags() {
+    wx.navigateTo({ url: '/pages/tags/tags' });
+  },
+
+  goSeedlings() {
+    wx.navigateTo({ url: '/pages/seedlings/seedlings' });
+  },
+
+  goExpenses() {
+    wx.navigateTo({ url: '/pages/expenses/expenses' });
+  },
+
+  goPrices() {
+    wx.navigateTo({ url: '/pages/prices/prices' });
   },
 
   goDetail(e) {
@@ -154,7 +250,8 @@ Page({
   },
 
   goAdd() {
-    wx.navigateTo({ url: '/pages/plant-edit/plant-edit' });
+    const tag = this.data.tagFilter;
+    wx.navigateTo({ url: '/pages/plant-edit/plant-edit' + (tag ? '?tag=' + tag : '') });
   },
 
   goMemorial() {
@@ -257,6 +354,7 @@ Page({
     try {
       await account.login({ nickName: loginNickName, avatarUrl: this.data.loginAvatar });
       if (!this._alive) return;
+      dataApi.invalidateBundle();
       account.syncTabBar();
       this.setData({
         showLoginSheet: false,

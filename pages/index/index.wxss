@@ -318,29 +318,43 @@
 
 /* 植物网格 */
 .grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20rpx;
+  margin-bottom: 24rpx;
 }
+.grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16rpx; }
+.grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12rpx; }
+.grid.cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8rpx; }
 .photo-wrap plant-thumb {
   display: block;
   width: 100%;
-  height: 300rpx;
+  height: 100%;
 }
 .plant-card {
-  width: 47.8%;
+  min-width: 0;
   background: #ffffff;
   border-radius: 20rpx;
   overflow: hidden;
-  margin-bottom: 24rpx;
   box-shadow: 0 4rpx 16rpx rgba(46, 125, 91, 0.06);
 }
+.cols-4 .plant-card, .cols-6 .plant-card { border-radius: 12rpx; }
 .photo-wrap {
   position: relative;
   width: 100%;
   height: 300rpx;
   background: #eef4f0;
 }
+.cols-3 .photo-wrap { height: 200rpx; }
+.cols-4 .photo-wrap { height: 150rpx; }
+.cols-6 .photo-wrap { height: 100rpx; }
+.cols-4 .status-tag, .cols-6 .status-tag { display: none; }
+.cols-3 .status-tag { top: 8rpx; left: 8rpx; font-size: 18rpx; padding: 0 10rpx; line-height: 30rpx; }
+.cols-3 .plant-body, .cols-4 .plant-body { padding: 10rpx 12rpx; }
+.cols-6 .plant-body { padding: 6rpx; }
+.cols-3 .plant-name { font-size: 24rpx; }
+.cols-4 .plant-name { font-size: 22rpx; }
+.cols-6 .plant-name { font-size: 18rpx; }
 .plant-photo {
   width: 100%;
   height: 300rpx;
@@ -360,28 +374,13 @@
 .plant-body {
   padding: 18rpx;
 }
-.plant-name-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 .plant-name {
+  display: block;
   font-size: 30rpx;
   font-weight: 700;
-  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.plant-price {
-  font-size: 24rpx;
-  color: #2e7d5b;
-  font-weight: 600;
-  padding: 4rpx 0 4rpx 12rpx;
-}
-.is-masked {
-  letter-spacing: 2rpx;
-  color: #8a9b90;
 }
 .plant-meta {
   display: block;
@@ -428,3 +427,32 @@
   border-radius: 48rpx;
   box-shadow: 0 8rpx 24rpx rgba(46, 125, 91, 0.3);
 }
+
+/* 今日待办聚合 */
+.todo-row { display: flex; align-items: center; padding: 24rpx; }
+.todo-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.todo-title { font-size: 28rpx; font-weight: 700; color: #26352c; }
+.todo-desc { margin-top: 6rpx; font-size: 24rpx; color: #6b7a70; }
+.todo-count { font-size: 26rpx; color: #8a9b90; }
+.todo-count.is-on { color: #b07a20; font-weight: 600; }
+
+/* 标签筛选 */
+.tag-bar { margin: 0 -24rpx 12rpx; }
+.tag-scroll { width: 100%; white-space: nowrap; padding: 0 24rpx; box-sizing: border-box; }
+.tag-chip {
+  display: inline-block;
+  flex-shrink: 0;
+  margin-right: 12rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  color: #5b6a60;
+  font-size: 24rpx;
+  line-height: 40rpx;
+}
+.tag-chip.is-on { background: #2e7d5b; color: #ffffff; }
+.tag-chip.is-manage { color: #2e7d5b; border: 1rpx dashed #9cc4b0; background: transparent; }
+.batch-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.batch-count { color: #8a9b90; font-size: 24rpx; }
+.batch-btn { color: #2e7d5b; font-size: 26rpx; padding: 8rpx 0 8rpx 24rpx; }
+.filter-empty { color: #8a9b90; font-size: 26rpx; text-align: center; }

@@ -1,0 +1,121 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">基本信息</view>
+    <view class="form-item">
+      <text class="form-label">名称 *</text>
+      <input class="form-input" maxlength="40" placeholder="如：龟背竹扦插第 1 批" placeholder-class="form-placeholder" value="{{form.name}}" data-field="name" bindinput="onInput" />
+    </view>
+    <view class="form-item tag-field">
+      <text class="form-label">繁殖方式 *</text>
+      <view class="tag-choices">
+        <text class="tag-choice {{form.method === item ? 'is-on' : ''}}" wx:for="{{methods}}" wx:key="*this" data-value="{{item}}" bindtap="pickMethod">{{item}}</text>
+      </view>
+    </view>
+    <picker mode="date" value="{{form.startDate}}" bindchange="onDate">
+      <view class="form-item">
+        <text class="form-label">育苗日期 *</text>
+        <text class="form-input">{{form.startDate}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="card">
+    <view class="section-title">母株</view>
+    <view class="segmented">
+      <text class="segmented-item {{form.motherType === item.key ? 'is-on' : ''}}" wx:for="{{motherModes}}" wx:key="key" data-key="{{item.key}}" bindtap="pickMotherMode">{{item.label}}</text>
+    </view>
+
+    <picker wx:if="{{form.motherType === 'plant'}}" range="{{plantOptions}}" range-key="name" bindchange="onMotherPick">
+      <view class="form-item">
+        <text class="form-label">选择植物</text>
+        <text class="form-input {{motherName ? '' : 'form-placeholder'}}">{{motherName || (plantOptions.length ? '点此选择' : '还没有在养植物')}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <picker wx:if="{{form.motherType === 'seedling'}}" range="{{seedlingOptions}}" range-key="name" bindchange="onMotherPick">
+      <view class="form-item">
+        <text class="form-label">选择育苗</text>
+        <text class="form-input {{motherName ? '' : 'form-placeholder'}}">{{motherName || (seedlingOptions.length ? '点此选择' : '还没有可选的育苗')}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+
+    <block wx:if="{{form.motherType === 'text'}}">
+      <view class="form-item">
+        <text class="form-label">来源</text>
+        <input class="form-input" maxlength="60" placeholder="如：朋友家的老桩" placeholder-class="form-placeholder" value="{{form.motherText}}" data-field="motherText" bindinput="onInput" />
+      </view>
+      <view class="photo-grid">
+        <view class="photo-cell" wx:for="{{motherPhotos}}" wx:key="*this">
+          <image class="photo-img" src="{{item}}" mode="aspectFill" data-field="motherPhotos" data-src="{{item}}" bindtap="previewPhoto"></image>
+          <view class="photo-del" data-field="motherPhotos" data-idx="{{index}}" bindtap="removePhoto">×</view>
+        </view>
+        <view class="photo-cell add {{isSavingPhoto ? 'is-disabled' : ''}}" wx:if="{{motherPhotos.length < 3}}" bindtap="addMotherPhoto">
+          <text class="add-plus">＋</text>
+        </view>
+      </view>
+      <text class="field-hint">手写来源不会出现在族谱里</text>
+    </block>
+  </view>
+
+  <view class="card">
+    <view class="section-title">育苗照片（{{photos.length}}）</view>
+    <view class="photo-grid">
+      <view class="photo-cell" wx:for="{{photos}}" wx:key="*this">
+        <image class="photo-img" src="{{item}}" mode="aspectFill" data-field="photos" data-src="{{item}}" bindtap="previewPhoto"></image>
+        <view class="photo-del" data-field="photos" data-idx="{{index}}" bindtap="removePhoto">×</view>
+      </view>
+      <view class="photo-cell add {{isSavingPhoto ? 'is-disabled' : ''}}" wx:if="{{photos.length < 9}}" bindtap="addPhoto">
+        <text class="add-plus">{{isSavingPhoto ? '…' : '＋'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">规模与容器</view>
+    <view class="form-item">
+      <text class="form-label">计划数量</text>
+      <input class="form-input" type="number" placeholder="选填" placeholder-class="form-placeholder" value="{{form.plannedCount}}" data-field="plannedCount" bindinput="onCountInput" />
+      <text class="form-unit">株</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">格位</text>
+      <input class="form-input grid-input" type="number" placeholder="行" placeholder-class="form-placeholder" value="{{form.gridRows}}" data-field="gridRows" bindinput="onCountInput" />
+      <text class="form-unit">行 ×</text>
+      <input class="form-input grid-input" type="number" placeholder="列" placeholder-class="form-placeholder" value="{{form.gridCols}}" data-field="gridCols" bindinput="onCountInput" />
+      <text class="form-unit">列</text>
+    </view>
+    <text class="field-hint" wx:if="{{gridPreview}}">{{gridPreview}}</text>
+
+    <view class="form-item tag-field">
+      <text class="form-label">基质</text>
+      <view class="tag-choices">
+        <text class="tag-choice {{(!substrateCustom && form.substrate === item) || (substrateCustom && item === '其他') ? 'is-on' : ''}}" wx:for="{{substrates}}" wx:key="*this" data-value="{{item}}" bindtap="pickSubstrate">{{item}}</text>
+        <input wx:if="{{substrateCustom}}" class="inline-input" maxlength="20" placeholder="填写基质" value="{{form.substrate}}" data-field="substrate" bindinput="onInput" />
+      </view>
+    </view>
+    <view class="form-item tag-field">
+      <text class="form-label">容器</text>
+      <view class="tag-choices">
+        <text class="tag-choice {{(!containerCustom && form.container === item) || (containerCustom && item === '其他') ? 'is-on' : ''}}" wx:for="{{containers}}" wx:key="*this" data-value="{{item}}" bindtap="pickContainer">{{item}}</text>
+        <input wx:if="{{containerCustom}}" class="inline-input" maxlength="20" placeholder="填写容器" value="{{form.container}}" data-field="container" bindinput="onInput" />
+      </view>
+    </view>
+    <view class="form-item tag-field">
+      <text class="form-label">育苗场所</text>
+      <view class="tag-choices">
+        <input class="inline-input is-wide" maxlength="30" placeholder="如：阳台育苗架" value="{{form.place}}" data-field="place" bindinput="onInput" />
+        <text class="tag-choice {{form.place === item ? 'is-on' : ''}}" wx:for="{{places}}" wx:key="*this" data-value="{{item}}" bindtap="pickPlace">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">备注</view>
+    <textarea class="desc-textarea" maxlength="500" placeholder="温度、湿度、生根情况…" placeholder-class="form-placeholder" value="{{form.note}}" data-field="note" bindinput="onInput"></textarea>
+  </view>
+
+  <button class="btn-primary" bindtap="save" disabled="{{isSavingPhoto || isSubmitting}}" loading="{{isSubmitting}}">{{isEdit ? '保存修改' : '保存育苗'}}</button>
+</view>

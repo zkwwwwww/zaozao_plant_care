@@ -4,6 +4,14 @@ const dataApi = require('../../services/data');
 const format = require('../../utils/format');
 const reminder = require('../../utils/reminder');
 const constants = require('../../utils/constants');
+const pagination = require('../../utils/pagination');
+
+function tagNames(plant, tags) {
+  const names = (plant.tags || [])
+    .map(id => (tags.find(tag => tag.id === id) || {}).name)
+    .filter(Boolean);
+  return names.length ? names : [constants.UNTAGGED.name];
+}
 
 Page({
   data: {
@@ -16,13 +24,19 @@ Page({
     careTypes: constants.CARE_TYPES,
     photos: [],
     memorial: null,
+    statusCls: 'tag-green',
+    tagNames: [],
+    priceText: '未填',
+    childCount: 0,
     notFound: false,
     loading: false,
-    loadError: ''
+    loadError: '',
+    hasMoreRecords: false
   },
 
   onLoad(options) {
     this.setData({ id: options.id });
+    this._pendingMemorial = options.memorial ? decodeURIComponent(options.memorial) : '';
   },
 
   onShow() {
@@ -55,6 +69,8 @@ Page({
     const env = plant.environmentId ? bundle.envs.find(item => item.id === plant.environmentId) : null;
     const memorial = bundle.memorials.find(item => item.id === id) || null;
     const records = (plant.records || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    this._allRecords = records;
+    const recordPage = pagination.slice(records, 1);
     const tasks = plant.memorialized ? [] : reminder.plantTasks(plant);
 
     this.setData({
@@ -66,8 +82,32 @@ Page({
       photos: plant.photos || [],
       companion: format.companionText(plant.companionStart || plant.purchaseDate),
       tasks,
-      records
+      records: recordPage.items,
+      hasMoreRecords: recordPage.hasMore,
+      statusCls: constants.statusClass(plant.status),
+      tagNames: tagNames(plant, bundle.tags),
+      priceText: plant.price !== '' && plant.price != null ? '¥' + format.money(plant.price) : '未填',
+      childCount: bundle.seedlings.filter(item => item.motherType === 'plant' && item.motherId === id).length
     });
+    if (this._pendingMemorial && !plant.memorialized) {
+      this.openMemorialDialog(this._pendingMemorial);
+    }
+    this._pendingMemorial = '';
+  },
+
+  onReachBottom() {
+    if (!this.data.hasMoreRecords) return;
+    const next = Math.floor(this.data.records.length / pagination.PAGE_SIZE) + 1;
+    const page = pagination.slice(this._allRecords, next);
+    this.setData({ records: page.items, hasMoreRecords: page.hasMore });
+  },
+
+  goLineage() {
+    wx.navigateTo({ url: '/pages/lineage/lineage?type=plant&id=' + this.data.id });
+  },
+
+  goPropagate() {
+    wx.navigateTo({ url: '/pages/seedling-edit/seedling-edit?motherType=plant&motherId=' + this.data.id });
   },
 
   goEdit() {

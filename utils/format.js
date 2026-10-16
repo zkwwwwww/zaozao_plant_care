@@ -81,11 +81,12 @@ function dueInfo(dueDate) {
   }
 }
 
-// 金额格式化（保留两位小数，去掉多余的 0）
+// 金额统一四舍五入到两位小数
 function money(n) {
-  const v = Number(n) || 0;
-  const s = v.toFixed(2);
-  return s.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+  const v = Number(n);
+  if (!Number.isFinite(v)) return '0.00';
+  const rounded = Math.round(Math.abs(v) * 100 + 1e-7) / 100;
+  return (v < 0 ? '-' : '') + rounded.toFixed(2);
 }
 
 module.exports = {

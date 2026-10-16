@@ -16,10 +16,13 @@
     <view class="hero-info">
       <view class="hero-title-row">
         <text class="hero-name">{{plant.name}}</text>
-        <text class="tag {{plant.status==='健康'?'tag-green':(plant.status==='生病中'||plant.status==='需要关注')?'tag-red':'tag-amber'}}">{{plant.status}}</text>
+        <text class="tag {{statusCls}}">{{plant.status}}</text>
       </view>
       <text class="hero-variety" wx:if="{{plant.variety}}">品种：{{plant.variety}}</text>
       <text class="hero-companion">陪伴 {{companion}}</text>
+      <view class="hero-tags">
+        <text class="tag tag-gray" wx:for="{{tagNames}}" wx:key="*this">#{{item}}</text>
+      </view>
     </view>
   </view>
 
@@ -42,7 +45,7 @@
     <view class="info-grid">
       <view class="info-item">
         <text class="info-label">价格</text>
-        <text class="info-value">{{plant.price!=='' && plant.price!=null ? '¥'+plant.price : '未填'}}</text>
+        <text class="info-value">{{priceText}}</text>
       </view>
       <view class="info-item">
         <text class="info-label">种植形式</text>
@@ -91,6 +94,10 @@
   <view class="action-row">
     <button class="btn-ghost action-btn" bindtap="goNote">＋ 添加养护记录</button>
     <button class="btn-ghost action-btn" bindtap="goEdit">编辑</button>
+  </view>
+  <view class="action-row">
+    <button class="btn-ghost action-btn" bindtap="goLineage">族谱{{childCount ? '（' + childCount + ' 个子代）' : ''}}</button>
+    <button class="btn-ghost action-btn" bindtap="goPropagate">用它育苗</button>
   </view>
   <view class="action-row" wx:if="{{!plant.memorialized}}">
     <button class="btn-danger action-btn" bindtap="onMemorial">🕯️ 送人 / 去世纪念</button>

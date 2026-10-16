@@ -1,0 +1,36 @@
+<view class="container has-fixed-bar">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+  <view class="card load-hint" wx:elif="{{loading && !list.length}}">正在读取育苗…</view>
+
+  <view class="card" wx:if="{{list.length}}">
+    <view class="list-row" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <plant-thumb src="{{item.photo}}"></plant-thumb>
+      <view class="list-main">
+        <text class="list-title">{{item.name}}</text>
+        <text class="list-sub">{{item.method}} · {{item.startDate}}{{item.plannedCount ? ' · 计划 ' + item.plannedCount + ' 株' : ''}}</text>
+        <text class="list-sub" wx:if="{{item.mother}}">{{item.mother}}</text>
+      </view>
+      <text class="list-action">›</text>
+    </view>
+  </view>
+
+  <empty-state
+    wx:elif="{{guest}}"
+    image="/assets/illustrations/empty-plants.png"
+    title="记下每一次扦插、分株和播种"
+    description="育苗可以关联母株，自动长成族谱。在「我的」中登录后即可开始记录"
+  ></empty-state>
+
+  <empty-state
+    wx:elif="{{!loading && !loadError}}"
+    image="/assets/illustrations/empty-plants.png"
+    title="还没有育苗记录"
+    description="从一次扦插或播种开始，选好母株就能看到族谱"
+    button-text="新建育苗"
+    bind:action="goAdd"
+  ></empty-state>
+</view>
+
+<view class="fixed-bar" wx:if="{{list.length || guest}}">
+  <button class="btn-primary" bindtap="goAdd">＋ 新建育苗</button>
+</view>

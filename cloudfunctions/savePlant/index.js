@@ -1,6 +1,29 @@
 const { fail, ok, text, day, fileIds, amount, interval, openContext, ensure, owned, plantView } = require('./runtime');
 
-const STATUSES = ['健康', '生长中', '休眠', '状态一般', '需要关注', '生病中'];
+const STATUSES = ['健康', '病害', '虫害', '待观察', '休眠', '死亡'];
+const LEGACY_STATUS = { 生长中: '健康', 状态一般: '健康', 需要关注: '待观察', 生病中: '病害' };
+
+function status(value) {
+  if (STATUSES.indexOf(value) >= 0) return value;
+  return LEGACY_STATUS[value] || '健康';
+}
+
+function tagIds(list) {
+  const source = Array.isArray(list) ? list : [];
+  const result = [];
+  source.forEach(item => {
+    const id = text(item, 64);
+    if (id && result.indexOf(id) < 0 && result.length < 20) result.push(id);
+  });
+  return result;
+}
+
+function advanceDays(value) {
+  if (value === '' || value == null) return 1;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 1;
+  return Math.min(30, Math.max(0, Math.round(number)));
+}
 
 exports.main = async (event) => {
   const ctx = await openContext();
@@ -16,7 +39,7 @@ exports.main = async (event) => {
     const data = {
       name,
       variety: text(input.variety, 40),
-      status: STATUSES.indexOf(input.status) >= 0 ? input.status : '健康',
+      status: status(input.status),
       price: amount(input.price),
       purchaseWay: text(input.purchaseWay, 20),
       planting: text(input.planting, 20),
@@ -29,8 +52,10 @@ exports.main = async (event) => {
       customWaterInterval: interval(input.customWaterInterval),
       customFertInterval: interval(input.customFertInterval),
       customRepotInterval: interval(input.customRepotInterval),
+      reminderAdvanceDays: advanceDays(input.reminderAdvanceDays),
       updatedAt: now
     };
+    if (Array.isArray(input.tags)) data.tags = tagIds(input.tags);
     if (input.clientId) data.clientId = text(input.clientId, 64);
 
     let id = text(input.id, 64);

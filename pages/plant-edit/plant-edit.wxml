@@ -42,6 +42,15 @@
       <text class="form-unit">元</text>
     </view>
 
+    <view class="form-item tag-field">
+      <text class="form-label">标签</text>
+      <view class="tag-choices">
+        <text class="tag-choice {{item.selected ? 'is-on' : ''}}" wx:for="{{tags}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleTag">{{item.name}}</text>
+        <text class="tag-choice is-add" bindtap="addTag">＋ 新标签</text>
+        <text class="tag-hint" wx:if="{{!tagIds.length}}">不选则归入「未分类」</text>
+      </view>
+    </view>
+
     <picker range="{{purchaseOptions}}" value="{{purchaseIndex}}" bindchange="onPurchaseWay">
       <view class="form-item">
         <text class="form-label">购买途径</text>
@@ -94,7 +103,12 @@
   <!-- 提醒设置 -->
   <view class="card">
     <view class="section-title">养护提醒间隔（天）</view>
-    <view class="reminder-hint">{{seasonText}}，留空则按季节自动。</view>
+    <view class="reminder-hint">{{seasonText}}，留空则按季节自动。提前提醒默认 1 天，设为 0 表示到期当天提醒。</view>
+    <view class="form-item">
+      <text class="form-label">提前提醒</text>
+      <input class="form-input" type="number" placeholder="默认 1 天" placeholder-class="form-placeholder" value="{{form.reminderAdvanceDays}}" data-field="reminderAdvanceDays" bindinput="onNumInput" />
+      <text class="form-unit">天</text>
+    </view>
     <view class="form-item">
       <text class="form-label">浇水间隔</text>
       <input class="form-input" type="number" placeholder="留空=按季节" placeholder-class="form-placeholder" value="{{form.customWaterInterval}}" data-field="customWaterInterval" bindinput="onNumInput" />

@@ -194,3 +194,64 @@ view, text, input, textarea, button, image, scroll-view {
 .safe-bottom {
   padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
 }
+
+/* 可选标签 / 选项卡片 */
+.tag-field { align-items: flex-start; }
+.tag-choices { flex: 1; display: flex; flex-wrap: wrap; gap: 12rpx; }
+.tag-choice {
+  padding: 8rpx 22rpx;
+  border-radius: 28rpx;
+  background: #f2f5f3;
+  color: #5b6a60;
+  font-size: 24rpx;
+  line-height: 40rpx;
+}
+.tag-choice.is-on { background: #2e7d5b; color: #ffffff; }
+.tag-choice.is-add { background: #ffffff; color: #2e7d5b; border: 1rpx dashed #9cc4b0; }
+.tag-hint { width: 100%; color: #8a9b90; font-size: 22rpx; }
+
+/* 分段切换 */
+.segmented {
+  display: flex;
+  background: #eef4f0;
+  border-radius: 36rpx;
+  padding: 6rpx;
+}
+.segmented-item {
+  flex: 1;
+  text-align: center;
+  line-height: 60rpx;
+  border-radius: 30rpx;
+  color: #5b6a60;
+  font-size: 26rpx;
+}
+.segmented-item.is-on { background: #ffffff; color: #2e7d5b; font-weight: 600; }
+
+/* 通用列表行 */
+.list-row {
+  display: flex;
+  align-items: center;
+  min-height: 96rpx;
+  padding: 16rpx 4rpx;
+  border-bottom: 1rpx solid #eef1ef;
+}
+.list-row:last-child { border-bottom: none; }
+.list-main { flex: 1; min-width: 0; display: flex; flex-direction: column; margin-left: 20rpx; }
+.list-title { color: #26352c; font-size: 28rpx; font-weight: 600; }
+.list-sub { color: #8a9b90; font-size: 24rpx; margin-top: 4rpx; }
+.list-side { color: #26352c; font-size: 28rpx; font-weight: 600; margin-left: 16rpx; }
+.list-action { color: #2e7d5b; font-size: 26rpx; padding: 12rpx 0 12rpx 20rpx; }
+.list-action.is-danger { color: #c0554f; }
+
+.fixed-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16rpx 32rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: rgba(247, 250, 248, 0.96);
+  box-shadow: 0 -4rpx 16rpx rgba(46, 125, 91, 0.06);
+  z-index: 20;
+}
+.fixed-bar .btn-primary { width: 100%; margin: 0; }
+.has-fixed-bar { padding-bottom: calc(160rpx + env(safe-area-inset-bottom)); }

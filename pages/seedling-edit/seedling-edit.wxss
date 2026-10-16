@@ -1,0 +1,16 @@
+/* pages/seedling-edit/seedling-edit.wxss */
+@import "../plant-edit/plant-edit.wxss";
+
+.segmented { margin-bottom: 8rpx; }
+.photo-grid { margin-top: 20rpx; }
+.grid-input { flex: 0 0 96rpx; text-align: center; }
+.field-hint { display: block; padding: 12rpx 4rpx; color: #8a9b90; font-size: 22rpx; }
+.inline-input {
+  height: 56rpx;
+  padding: 0 20rpx;
+  border-radius: 28rpx;
+  background: #f2f5f3;
+  font-size: 24rpx;
+  min-width: 200rpx;
+}
+.inline-input.is-wide { width: 100%; }

@@ -1,0 +1,34 @@
+<view class="container">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+  <view class="card load-hint" wx:elif="{{loading && !rows.length}}">正在整理族谱…</view>
+
+  <view class="card" wx:if="{{rows.length}}">
+    <view class="section-title">共 {{generations}} 代 · {{rows.length}} 个节点</view>
+    <view
+      class="node {{item.key === currentKey ? 'is-current' : ''}}"
+      wx:for="{{rows}}"
+      wx:key="key"
+      style="margin-left: {{item.indent}}rpx;"
+      data-type="{{item.type}}"
+      data-id="{{item.id}}"
+      bindtap="goNode"
+    >
+      <text class="node-branch" wx:if="{{item.depth}}">└</text>
+      <plant-thumb src="{{item.photo}}"></plant-thumb>
+      <view class="list-main">
+        <text class="list-title">{{item.name}}</text>
+        <text class="list-sub">第 {{item.depth + 1}} 代 · {{item.sub}}{{item.childCount ? ' · ' + item.childCount + ' 个子代' : ''}}</text>
+      </view>
+      <text class="tag {{item.type === 'plant' ? 'tag-green' : 'tag-blue'}}">{{item.kind}}</text>
+    </view>
+  </view>
+
+  <empty-state
+    wx:elif="{{!loading && !loadError}}"
+    image="/assets/illustrations/empty-records.png"
+    title="暂无族谱"
+    description="新建育苗时选择母株，这里就会长出族谱"
+    button-text="用它育苗"
+    bind:action="goPropagate"
+  ></empty-state>
+</view>

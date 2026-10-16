@@ -48,7 +48,7 @@ Page({
       authorized: view.status === 'valid',
       expired: view.status === 'expired',
       openidMask: !signedOut && session ? profile.maskOpenId(session.openid) : '',
-      loading: account.cloudReady() && view.status === 'valid',
+      loading: false,
       error: account.cloudReady() ? '' : '云开发未配置，暂时无法登录',
       canMigrate: migrate.needsMigration()
     };
@@ -60,34 +60,10 @@ Page({
       if (!this.data.avatarUrl) next.avatarUrl = view.avatarUrl;
     }
     this.setData(next);
-    if (next.loading) this.refresh();
   },
 
   onHide() {
     this._alive = false;
-  },
-
-  async refresh() {
-    try {
-      const session = await account.refresh();
-      if (!this._alive || !session) return;
-      const avatarDirty = this.data.avatarUrl && !profile.isCloudFileId(this.data.avatarUrl);
-      this.setData({
-        loading: false,
-        error: '',
-        authorized: profile.sessionStatus(session) === 'valid',
-        expired: profile.sessionStatus(session) === 'expired',
-        nickName: this.data.nickName || session.nickName,
-        avatarUrl: avatarDirty ? this.data.avatarUrl : (session.avatarUrl || this.data.avatarUrl),
-        openidMask: profile.maskOpenId(session.openid)
-      });
-    } catch (error) {
-      if (!this._alive) return;
-      this.setData({
-        loading: false,
-        error: error.message || '登录失败，请重试'
-      });
-    }
   },
 
   onChooseAvatar(e) {
@@ -123,6 +99,7 @@ Page({
         avatarUrl: this.data.avatarUrl
       });
       if (!this._alive) return;
+      dataApi.invalidateBundle();
       this.setData({
         authorized: true,
         expired: false,
@@ -187,6 +164,7 @@ Page({
       success: (res) => {
         if (!res.confirm || !this._alive) return;
         account.signOut();
+        dataApi.invalidateBundle();
         account.syncTabBar();
         wx.switchTab({ url: '/pages/index/index' });
       }

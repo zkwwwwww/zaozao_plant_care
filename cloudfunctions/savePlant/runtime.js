@@ -87,9 +87,11 @@ function plantView(doc) {
     purchaseDate: doc.purchaseDate || '',
     description: doc.description || '',
     photos: doc.photos || [],
+    tags: doc.tags || [],
     customWaterInterval: doc.customWaterInterval || 0,
     customFertInterval: doc.customFertInterval || 0,
     customRepotInterval: doc.customRepotInterval || 0,
+    reminderAdvanceDays: doc.reminderAdvanceDays == null ? 1 : Number(doc.reminderAdvanceDays),
     memorialized: !!doc.memorialized,
     memorialType: doc.memorialType || '',
     memorialDate: doc.memorialDate || ''

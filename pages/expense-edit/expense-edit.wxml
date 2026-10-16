@@ -1,0 +1,29 @@
+<view class="container">
+  <view class="card">
+    <picker mode="date" value="{{form.date}}" bindchange="onDate">
+      <view class="form-item">
+        <text class="form-label">日期 *</text>
+        <text class="form-input">{{form.date}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+    <view class="form-item tag-field">
+      <text class="form-label">类别 *</text>
+      <view class="tag-choices">
+        <text class="tag-choice {{form.category === item ? 'is-on' : ''}}" wx:for="{{categories}}" wx:key="*this" data-value="{{item}}" bindtap="pickCategory">{{item}}</text>
+      </view>
+    </view>
+    <view class="form-item">
+      <text class="form-label">金额 *</text>
+      <input class="form-input" type="digit" placeholder="0.00" placeholder-class="form-placeholder" value="{{form.amount}}" bindinput="onAmount" />
+      <text class="form-unit">元</text>
+    </view>
+    <view class="form-item" style="border-bottom: none;">
+      <text class="form-label">备注</text>
+      <input class="form-input" maxlength="100" placeholder="选填，如：缓释肥 500g" placeholder-class="form-placeholder" value="{{form.note}}" bindinput="onNote" />
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="save" disabled="{{isSubmitting}}" loading="{{isSubmitting}}">保存</button>
+  <button class="btn-danger" wx:if="{{isEdit}}" bindtap="remove">删除这笔花费</button>
+</view>

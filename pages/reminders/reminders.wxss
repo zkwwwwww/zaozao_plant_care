@@ -14,6 +14,47 @@
 .overdue-bar { background: #fbe9e7; border: 1rpx solid #f2d3cf; }
 .ob-text { font-size: 26rpx; color: #c0554f; font-weight: 600; }
 
+.reminder-tabs {
+  width: 100%;
+  margin-bottom: 24rpx;
+  white-space: nowrap;
+}
+.reminder-tabs-inner {
+  display: inline-flex;
+  min-width: 100%;
+  padding: 6rpx;
+  border-radius: 18rpx;
+  background: #e9efeb;
+}
+.reminder-tab {
+  flex: 1;
+  min-width: 148rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 14rpx;
+  color: #6b7a70;
+  font-size: 25rpx;
+  line-height: 1;
+  text-align: center;
+}
+.reminder-tab.is-active {
+  background: #ffffff;
+  color: #2e7d5b;
+  font-weight: 700;
+}
+
+.grouped-card { padding-top: 18rpx; }
+.group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14rpx;
+  border-bottom: 1rpx solid #f2f5f3;
+  color: #26352c;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.group-count { color: #8a9b90; font-size: 23rpx; font-weight: 400; }
+
 .task-row { display: flex; align-items: center; padding: 16rpx 0; border-bottom: 1rpx solid #f2f5f3; }
 .task-row:last-child { border-bottom: none; }
 .task-photo-wrap { width: 72rpx; height: 72rpx; margin-right: 18rpx; }
@@ -51,7 +92,7 @@
 .g-int { font-size: 22rpx; color: #8a9b90; }
 .g-tasks { margin-top: 16rpx; border-top: 1rpx solid #f2f5f3; padding-top: 8rpx; }
 .g-task { display: flex; align-items: center; gap: 20rpx; padding: 18rpx 0; }
-.g-emoji { flex: 0 0 auto; font-size: 34rpx; margin-right: 4rpx; }
+.g-type { flex: 0 0 72rpx; color: #2e7d5b; font-size: 25rpx; font-weight: 600; }
 .g-tinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .g-tname { font-size: 26rpx; font-weight: 600; }
 .g-tdate { font-size: 22rpx; color: #8a9b90; margin-top: 2rpx; white-space: nowrap; }

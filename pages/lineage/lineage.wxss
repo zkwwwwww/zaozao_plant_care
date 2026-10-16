@@ -1,0 +1,10 @@
+/* pages/lineage/lineage.wxss */
+.node {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 12rpx;
+  margin-bottom: 8rpx;
+  border-radius: 16rpx;
+}
+.node.is-current { background: #eef4f0; }
+.node-branch { color: #b6c0ba; font-size: 28rpx; margin-right: 8rpx; }

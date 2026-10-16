@@ -1,0 +1,79 @@
+<view class="container has-fixed-bar">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+
+  <empty-state
+    wx:if="{{guest}}"
+    image="/assets/illustrations/empty-plants.png"
+    title="把肥料、药剂、补光灯都记下来"
+    description="按日、周、月、年看花了多少。在「我的」中登录后即可开始记账"
+  ></empty-state>
+
+  <block wx:else>
+    <view class="card summary">
+      <view class="summary-item">
+        <text class="summary-label">累计花费</text>
+        <text class="summary-num">¥{{allTotal}}</text>
+      </view>
+      <view class="summary-item" bindtap="goPlant">
+        <text class="summary-label">最贵的植物</text>
+        <text class="summary-num small">{{topPlant ? topPlant.name + ' ¥' + topPlant.price : '还没有填价格'}}</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="segmented">
+        <text class="segmented-item {{mode === item.key ? 'is-on' : ''}}" wx:for="{{modes}}" wx:key="key" data-key="{{item.key}}" bindtap="switchMode">{{item.label}}</text>
+      </view>
+      <view class="range-row" wx:if="{{mode === 'custom'}}">
+        <picker mode="date" value="{{rangeStart}}" end="{{today}}" bindchange="onRangeStart">
+          <view class="range-field">{{rangeStart}} ▾</view>
+        </picker>
+        <text class="range-sep">至</text>
+        <picker mode="date" value="{{rangeEnd}}" end="{{today}}" bindchange="onRangeEnd">
+          <view class="range-field">{{rangeEnd}} ▾</view>
+        </picker>
+      </view>
+      <view class="chart {{series.length > 12 ? 'is-dense' : ''}}">
+        <view class="bar-col {{item.selected ? 'is-on' : ''}}" wx:for="{{series}}" wx:key="key" data-key="{{item.key}}" bindtap="pickBar">
+          <view class="bar-track">
+            <view class="bar" style="height: {{item.percent}}%;"></view>
+          </view>
+          <text class="bar-label">{{item.label}}</text>
+        </view>
+      </view>
+      <view class="period-head">
+        <text class="period-title">{{periodTitle}}</text>
+        <text class="period-total">¥{{periodTotal}}</text>
+      </view>
+      <view class="cat-row" wx:for="{{categories}}" wx:key="name">
+        <text class="cat-name">{{item.name}}</text>
+        <view class="cat-track"><view class="cat-bar" style="width: {{item.percent}}%;"></view></view>
+        <text class="cat-total">¥{{item.total}}</text>
+      </view>
+      <text class="muted" wx:if="{{!categories.length && !loading}}">这段时间没有花费</text>
+    </view>
+
+    <view class="card" wx:if="{{items.length}}">
+      <view class="section-title">明细（{{items.length}}）</view>
+      <view class="list-row" wx:for="{{items}}" wx:key="id" data-id="{{item.id}}" bindtap="goEdit">
+        <view class="list-main no-thumb">
+          <text class="list-title">{{item.category}}</text>
+          <text class="list-sub">{{item.date}}{{item.note ? ' · ' + item.note : ''}}</text>
+        </view>
+        <text class="list-side">¥{{item.amountText}}</text>
+      </view>
+    </view>
+
+    <empty-state
+      wx:if="{{!hasData && !loading && !loadError}}"
+      compact="{{true}}"
+      image="/assets/illustrations/empty-records.png"
+      title="还没有花费记录"
+      description="买了肥料或补光灯，就记一笔"
+    ></empty-state>
+  </block>
+</view>
+
+<view class="fixed-bar">
+  <button class="btn-primary" bindtap="goAdd">＋ 记一笔</button>
+</view>

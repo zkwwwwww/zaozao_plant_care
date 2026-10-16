@@ -1,13 +1,15 @@
 // pages/memorial/memorial.js 植物纪念碑
 const account = require('../../services/account');
 const dataApi = require('../../services/data');
+const pagination = require('../../utils/pagination');
 
 Page({
   data: {
     list: [],
     plants: [],
     loading: false,
-    loadError: ''
+    loadError: '',
+    hasMore: false
   },
 
   onShow() {
@@ -29,7 +31,22 @@ Page({
       ...m,
       typeCls: m.type === '送人' ? 'tag-blue' : 'tag-gray'
     }));
-    this.setData({ loading: false, loadError: '', list: withText, plants: bundle.plants });
+    this._allList = withText;
+    const page = pagination.slice(withText, 1);
+    this.setData({
+      loading: false,
+      loadError: '',
+      list: page.items,
+      plants: bundle.plants,
+      hasMore: page.hasMore
+    });
+  },
+
+  onReachBottom() {
+    if (!this.data.hasMore) return;
+    const next = Math.floor(this.data.list.length / pagination.PAGE_SIZE) + 1;
+    const page = pagination.slice(this._allList, next);
+    this.setData({ list: page.items, hasMore: page.hasMore });
   },
 
   // 查看对应植物（可能已删除）

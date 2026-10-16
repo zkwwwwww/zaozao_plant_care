@@ -10,7 +10,7 @@
       <view class="lg-item"><text class="lg-dot amber"></text>夏 5天</view>
       <view class="lg-item"><text class="lg-dot blue"></text>冬 15天</view>
     </view>
-    <view class="season-note">每株植物可在「编辑」中单独设置浇水/施肥/换盆间隔，留空则按季节自动。</view>
+    <view class="season-note">每株植物可单独设置养护间隔和提前提醒天数；未设置时提前 1 天提醒。</view>
   </view>
 
   <!-- 逾期总览 -->
@@ -18,8 +18,20 @@
     <text class="ob-text">⚠ 共 {{overdueCount}} 项已逾期</text>
   </view>
 
-  <!-- 全部待办（近期及逾期优先） -->
-  <view class="card">
+  <scroll-view class="reminder-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="reminder-tabs-inner">
+      <view
+        class="reminder-tab {{activeView===item.key ? 'is-active' : ''}}"
+        wx:for="{{tabs}}"
+        wx:key="key"
+        data-key="{{item.key}}"
+        bindtap="switchView"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 全部：按到期时间排序 -->
+  <view class="card" wx:if="{{activeView==='all'}}">
     <section-header title="全部待办"></section-header>
     <task-row
       wx:for="{{flatTasks}}"
@@ -44,26 +56,74 @@
     ></empty-state>
   </view>
 
-  <!-- 按植物分组 -->
-  <section-header title="按植物查看"></section-header>
-  <view class="card group-card" wx:for="{{groups}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
-    <view class="group-head">
-      <plant-thumb src="{{item.photo}}" size="small"></plant-thumb>
-      <text class="g-name">{{item.name}}</text>
-      <text class="g-int">浇水间隔 {{item.waterInterval}} 天</text>
+  <!-- 按时间：突出逾期时长 -->
+  <block wx:if="{{activeView==='time'}}">
+    <view class="card grouped-card" wx:for="{{timeGroups}}" wx:for-item="group" wx:key="key">
+      <view class="group-title">
+        <text>{{group.label}}</text>
+        <text class="group-count">{{group.items.length}} 项</text>
+      </view>
+      <task-row
+        wx:for="{{group.items}}"
+        wx:key="key"
+        item-id="{{item.plantId}}"
+        task-type="{{item.type}}"
+        photo="{{item.photo}}"
+        title="{{item.plantName}} · {{item.label}}"
+        subtitle="到期 {{item.due}}"
+        status-text="{{item.dueText}}"
+        status-class="{{item.cls}}"
+        show-complete="{{true}}"
+        bind:select="goDetail"
+        bind:complete="completeTask"
+      ></task-row>
     </view>
-    <view class="g-tasks">
-      <view class="g-task" wx:for="{{item.tasks}}" wx:for-item="t" wx:key="type">
-        <text class="g-emoji">{{t.type==='water'?'💧':t.type==='fertilize'?'🌱':'🪴'}}</text>
-        <view class="g-tinfo">
-          <text class="g-tname">{{t.label}}</text>
-          <text class="g-tdate">{{t.due}}</text>
+  </block>
+
+  <!-- 按植物分组 -->
+  <block wx:if="{{activeView==='plant'}}">
+    <view class="card group-card" wx:for="{{groups}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <view class="group-head">
+        <plant-thumb src="{{item.photo}}" size="small"></plant-thumb>
+        <text class="g-name">{{item.name}}</text>
+        <text class="g-int">提前 {{item.advanceDays}} 天</text>
+      </view>
+      <view class="g-tasks">
+        <view class="g-task" wx:for="{{item.tasks}}" wx:for-item="t" wx:key="type">
+          <text class="g-type">{{t.label}}</text>
+          <view class="g-tinfo">
+            <text class="g-tdate">到期 {{t.due}}</text>
+          </view>
+          <text class="tag {{t.cls}}">{{t.dueText}}</text>
+          <view class="task-complete" catchtap="completeTask" data-id="{{item.id}}" data-type="{{t.type}}">完成</view>
         </view>
-        <text class="tag {{t.cls}}">{{t.dueText}}</text>
-        <view class="task-complete" catchtap="completeTask" data-id="{{item.id}}" data-type="{{t.type}}">完成</view>
       </view>
     </view>
-  </view>
+  </block>
+
+  <!-- 按养护类型分组 -->
+  <block wx:if="{{activeView==='type'}}">
+    <view class="card grouped-card" wx:for="{{typeGroups}}" wx:for-item="group" wx:key="type">
+      <view class="group-title">
+        <text>{{group.label}}</text>
+        <text class="group-count">{{group.items.length}} 项</text>
+      </view>
+      <task-row
+        wx:for="{{group.items}}"
+        wx:key="key"
+        item-id="{{item.plantId}}"
+        task-type="{{item.type}}"
+        photo="{{item.photo}}"
+        title="{{item.plantName}}"
+        subtitle="到期 {{item.due}}"
+        status-text="{{item.dueText}}"
+        status-class="{{item.cls}}"
+        show-complete="{{true}}"
+        bind:select="goDetail"
+        bind:complete="completeTask"
+      ></task-row>
+    </view>
+  </block>
 
 </view>
 

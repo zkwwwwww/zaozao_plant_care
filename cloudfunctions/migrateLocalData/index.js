@@ -1,7 +1,8 @@
 const { fail, ok, text, day, fileIds, amount, interval, openContext, ensure } = require('./runtime');
 
 const MAX = { environments: 50, plants: 80, records: 400, memorials: 80 };
-const STATUSES = ['健康', '生长中', '休眠', '状态一般', '需要关注', '生病中'];
+const STATUSES = ['健康', '病害', '虫害', '待观察', '休眠', '死亡'];
+const LEGACY_STATUS = { 生长中: '健康', 状态一般: '健康', 需要关注: '待观察', 生病中: '病害' };
 const RECORD_TYPES = ['浇水', '施肥', '修剪', '换盆', '防治病虫害', '测量'];
 
 async function findByClient(db, collection, openid, clientId) {
@@ -97,7 +98,7 @@ exports.main = async (event) => {
               clientId,
               name,
               variety: text(item.variety, 40),
-              status: STATUSES.indexOf(item.status) >= 0 ? item.status : '健康',
+              status: STATUSES.indexOf(item.status) >= 0 ? item.status : (LEGACY_STATUS[item.status] || '健康'),
               price: amount(item.price),
               purchaseWay: text(item.purchaseWay, 20),
               planting: text(item.planting, 20),
@@ -110,6 +111,9 @@ exports.main = async (event) => {
               customWaterInterval: interval(item.customWaterInterval),
               customFertInterval: interval(item.customFertInterval),
               customRepotInterval: interval(item.customRepotInterval),
+              reminderAdvanceDays: item.reminderAdvanceDays == null
+                ? 1
+                : Math.min(30, Math.max(0, Math.round(Number(item.reminderAdvanceDays) || 0))),
               memorialized: false,
               deleted: false,
               createdAt: now,

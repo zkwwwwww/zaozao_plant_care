@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+
+  <empty-state
+    wx:if="{{guest}}"
+    image="/assets/illustrations/empty-plants.png"
+    title="用标签给植物分组"
+    description="比如「阳台」「多肉」「待出售」，主页可以按标签筛选和批量养护。登录后即可使用"
+  ></empty-state>
+
+  <block wx:else>
+    <view class="card">
+      <view class="section-title">
+        <text>我的标签</text>
+        <text class="section-more" bindtap="addTag">＋ 新建</text>
+      </view>
+      <view class="list-row">
+        <view class="list-main no-thumb">
+          <text class="list-title">{{untaggedName}}</text>
+          <text class="list-sub">默认标签 · {{untaggedCount}} 株</text>
+        </view>
+      </view>
+      <view class="list-row" wx:for="{{tags}}" wx:key="id">
+        <view class="list-main no-thumb">
+          <text class="list-title">{{item.name}}</text>
+          <text class="list-sub">{{item.count}} 株</text>
+        </view>
+        <text class="list-action" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="renameTag">重命名</text>
+        <text class="list-action is-danger" data-id="{{item.id}}" data-name="{{item.name}}" data-count="{{item.count}}" bindtap="deleteTag">删除</text>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{envs.length}}">
+      <view class="section-title">把环境归并为标签</view>
+      <text class="hint">用环境名生成同名标签，环境下的植物会自动打上。</text>
+      <view class="list-row" wx:for="{{envs}}" wx:key="id">
+        <view class="list-main no-thumb">
+          <text class="list-title">{{item.name}}</text>
+          <text class="list-sub">{{item.count}} 株</text>
+        </view>
+        <text class="list-action" data-id="{{item.id}}" data-name="{{item.name}}" data-count="{{item.count}}" bindtap="mergeEnv">归并</text>
+      </view>
+    </view>
+  </block>
+</view>

@@ -1,4 +1,4 @@
-<view class="container {{plants.length ? 'has-add' : ''}}">
+<view class="container {{totalPlants ? 'has-add' : ''}}">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="loadData">{{loadError}}，点此重试</view>
   <view class="card load-hint" wx:elif="{{loading}}">正在读取植物…</view>
 
@@ -11,17 +11,17 @@
       <text class="brand-login {{account.status === 'expired' ? 'is-expired' : ''}}" bindtap="goAccount">{{account.summary}}</text>
     </view>
     <view class="feature-row">
-      <view class="feature-item" bindtap="goReminders">
-        <text class="feature-title">季节提醒</text>
-        <text class="feature-desc">浇水·施肥·换盆</text>
+      <view class="feature-item" bindtap="goSeedlings">
+        <text class="feature-title">育苗</text>
+        <text class="feature-desc">扦插·播种·族谱</text>
       </view>
-      <view class="feature-item" bindtap="goEnvironments">
-        <text class="feature-title">光照环境</text>
-        <text class="feature-desc">强度与每日时长</text>
+      <view class="feature-item" bindtap="goExpenses">
+        <text class="feature-title">花费</text>
+        <text class="feature-desc">日周月年统计</text>
       </view>
-      <view class="feature-item">
-        <text class="feature-title">花费陪伴</text>
-        <text class="feature-desc">投入与相处天数</text>
+      <view class="feature-item" bindtap="goPrices">
+        <text class="feature-title">价格</text>
+        <text class="feature-desc">总价与最贵</text>
       </view>
       <view class="feature-item" bindtap="goMemorial">
         <text class="feature-title">纪念碑</text>
@@ -32,25 +32,35 @@
 
   <!-- 统计卡片 -->
   <view class="card stats">
-    <view class="stat-item" bindtap="goReminders">
+    <view class="stat-item">
       <text class="stat-num">{{stats.count}}</text>
       <text class="stat-label">植物</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="togglePrices">
-      <text class="stat-num {{pricesVisible ? '' : 'is-masked'}}">{{pricesVisible ? '¥' + stats.totalPrice : '****'}}</text>
-      <text class="stat-label">总投入</text>
+    <view class="stat-item" bindtap="goSeedlings">
+      <text class="stat-num">{{stats.seedlings}}</text>
+      <text class="stat-label">育苗</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="goReminders">
+    <view class="stat-item" bindtap="goTodo">
       <text class="stat-num {{stats.waterToday>0?'warn':''}}">{{stats.waterToday}}</text>
       <text class="stat-label">今日需浇水</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="goReminders">
+    <view class="stat-item" bindtap="goTodo">
       <text class="stat-num {{stats.overdue>0?'danger':''}}">{{stats.overdue}}</text>
       <text class="stat-label">逾期待办</text>
     </view>
+  </view>
+
+  <!-- 今日待办聚合 -->
+  <view class="card todo-row" wx:if="{{totalPlants>0}}" bindtap="goTodo">
+    <view class="todo-main">
+      <text class="todo-title">今日待办</text>
+      <text class="todo-desc" wx:if="{{todo.total}}">{{todo.text}}</text>
+      <text class="todo-desc" wx:else>今天没有到期的养护</text>
+    </view>
+    <text class="todo-count {{todo.total ? 'is-on' : ''}}">{{todo.total ? todo.total + ' 项 ›' : '›'}}</text>
   </view>
 
   <!-- 季节浇水提示 -->
@@ -58,61 +68,56 @@
     <text class="tip-text">💧 {{seasonText}}</text>
   </view>
 
-  <!-- 待办任务（仅展示即将到期与逾期） -->
-  <view class="card" wx:if="{{tasks.length>0}}">
-    <section-header title="近期待办" more-text="全部" bind:more="goReminders"></section-header>
-    <task-row
-      wx:for="{{tasks}}"
-      wx:key="key"
-      item-id="{{item.plantId}}"
-      task-type="{{item.type}}"
-      photo="{{item.photo}}"
-      title="{{item.plantName}} · {{item.label}}"
-      subtitle="到期 {{item.due}}"
-      status-text="{{item.dueText}}"
-      status-class="{{item.cls}}"
-      bind:select="goDetail"
-    ></task-row>
+  <!-- 植物图片墙 -->
+  <section-header title="我的植物" more-text="每行 {{density}} 个" bind:more="pickDensity"></section-header>
+
+  <view class="tag-bar" wx:if="{{totalPlants>0}}">
+    <scroll-view class="tag-scroll" scroll-x>
+      <text class="tag-chip {{tagFilter === item.id ? 'is-on' : ''}}" wx:for="{{tagBar}}" wx:key="id" data-id="{{item.id}}" bindtap="pickTag">{{item.name}}</text>
+      <text class="tag-chip is-manage" bindtap="goTags">管理</text>
+    </scroll-view>
+  </view>
+  <view class="batch-row" wx:if="{{totalPlants>0}}">
+    <text class="batch-count">{{plants.length}} 株</text>
+    <text class="batch-btn" bindtap="batchCare">批量养护</text>
   </view>
 
-  <!-- 植物图片墙 -->
-  <section-header title="我的植物" more-text="纪念碑" bind:more="goMemorial"></section-header>
-
-  <view class="grid" wx:if="{{plants.length>0}}">
+  <view class="grid cols-{{density}}" wx:if="{{plants.length>0}}">
     <view class="plant-card" wx:for="{{plants}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
       <view class="photo-wrap">
         <plant-thumb src="{{item.photo}}" size="large"></plant-thumb>
-        <text class="tag status-tag {{item.status==='健康'?'tag-green':(item.status==='生病中'||item.status==='需要关注')?'tag-red':'tag-amber'}}">{{item.status}}</text>
+        <text class="tag status-tag {{item.statusCls}}">{{item.status}}</text>
       </view>
       <view class="plant-body">
-        <view class="plant-name-row">
-          <text class="plant-name">{{item.name}}</text>
-          <text class="plant-price {{pricesVisible ? '' : 'is-masked'}}" wx:if="{{item.price}}" catchtap="togglePrices">{{pricesVisible ? '¥' + item.price : '****'}}</text>
-        </view>
-        <text class="plant-meta">{{item.variety || '未填品种'}} · {{item.planting || '土培'}}</text>
-        <text class="plant-env">{{item.envName}}</text>
-        <text class="water-tip {{item.waterCls}}" wx:if="{{item.waterText}}">{{item.waterText}}</text>
+        <text class="plant-name">{{item.name}}</text>
+        <block wx:if="{{density <= 2}}">
+          <text class="plant-meta">{{item.variety || '未填品种'}} · {{item.planting || '土培'}}</text>
+          <text class="plant-env">{{item.envName}}</text>
+          <text class="water-tip {{item.waterCls}}" wx:if="{{item.waterText}}">{{item.waterText}}</text>
+        </block>
       </view>
     </view>
   </view>
+
+  <view class="card filter-empty" wx:elif="{{totalPlants>0}}">这个标签下还没有植物</view>
 
   <empty-state
     wx:elif="{{guest}}"
     image="/assets/illustrations/empty-plants.png"
     title="从这里记下每一株植物"
-    description="可以先查看季节提醒、光照环境和纪念碑。准备保存自己的记录时，再在「我的」中登录"
+    description="可以先看看育苗、花费和季节提醒都能记什么。准备保存自己的记录时，再在「我的」中登录"
   ></empty-state>
 
   <empty-state
     wx:elif="{{!loading && !loadError}}"
     image="/assets/illustrations/empty-plants.png"
     title="还没有植物，从第一株开始记下吧"
-    description="拍照建档，浇水、光照、花费和陪伴都会留在这里"
+    description="拍照建档，浇水、光照、育苗和陪伴都会留在这里"
     button-text="添加第一株植物"
     bind:action="goAdd"
   ></empty-state>
 
-  <view class="add-bar" wx:if="{{plants.length>0}}" bindtap="goAdd">
+  <view class="add-bar" wx:if="{{totalPlants>0}}" bindtap="goAdd">
     <text class="add-btn">＋ 添加植物</text>
   </view>
 </view>

@@ -1,0 +1,20 @@
+/* pages/seedling-detail/seedling-detail.wxss */
+.hero { padding: 0; overflow: hidden; }
+.hero-swiper { width: 100%; height: 480rpx; background: #eef4f0; }
+.hero-img { width: 100%; height: 480rpx; display: block; background: #eef4f0; }
+.hero-info { padding: 24rpx; }
+.hero-name { display: block; font-size: 40rpx; font-weight: 700; }
+.hero-sub { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 26rpx; }
+
+.info-row { display: flex; justify-content: space-between; padding: 16rpx 4rpx; border-bottom: 1rpx solid #eef1ef; }
+.info-row:last-of-type { border-bottom: none; }
+.info-label { color: #8a9b90; font-size: 26rpx; }
+.info-value { color: #26352c; font-size: 26rpx; }
+.note { margin-top: 16rpx; padding: 16rpx 20rpx; background: #f7faf8; border-radius: 12rpx; color: #5b6a60; font-size: 26rpx; line-height: 1.6; }
+.muted { color: #8a9b90; font-size: 26rpx; }
+
+.mother-photos { display: flex; gap: 12rpx; margin-top: 12rpx; }
+.mother-photo { width: 140rpx; height: 140rpx; border-radius: 12rpx; background: #eef4f0; }
+
+.action-row { display: flex; gap: 20rpx; margin-bottom: 24rpx; }
+.action-btn { flex: 1; }

@@ -32,6 +32,16 @@ test('plantTasks includes upcoming tasks in the configured window', () => {
   assert.ok(tasks.some(task => task.type === 'water' && task.dueText === '还有 5 天'));
 });
 
+test('plant reminder defaults to one day early and supports per-plant override', () => {
+  const tomorrow = plant({ purchaseDate: format.today(), customWaterInterval: 1 });
+  assert.ok(reminder.plantTasks(tomorrow).some(task => task.type === 'water'));
+
+  const inThreeDays = plant({ purchaseDate: format.today(), customWaterInterval: 3 });
+  assert.equal(reminder.plantTasks(inThreeDays).some(task => task.type === 'water'), false);
+  assert.ok(reminder.plantTasks({ ...inThreeDays, reminderAdvanceDays: 3 }).some(task => task.type === 'water'));
+  assert.equal(reminder.reminderAdvanceDaysFor({ reminderAdvanceDays: 99 }), 30);
+});
+
 test('plantTasks excludes distant future tasks but always keeps overdue tasks', () => {
   const distant = plant({ purchaseDate: format.today(), customWaterInterval: 20 });
   assert.equal(reminder.plantTasks(distant, { upcomingDays: 7 }).some(t => t.type === 'water'), false);

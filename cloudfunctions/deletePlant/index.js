@@ -41,6 +41,15 @@ exports.main = async (event) => {
       throw error;
     }
 
+    try {
+      await ensure(db, 'seedlings');
+      await db.collection('seedlings').where({ _openid: openid, motherType: 'plant', motherId: plantId }).update({
+        data: { motherType: 'text', motherId: '', motherText: plant.name || '', updatedAt: now }
+      });
+    } catch (error) {
+      console.error('deletePlant detach seedlings failed');
+    }
+
     const referenced = {};
     (plant.photos || []).forEach(id => { referenced[id] = true; });
     records.forEach(record => { if (record.photo) referenced[record.photo] = true; });

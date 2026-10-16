@@ -1,0 +1,67 @@
+<view class="container" wx:if="{{seedling}}">
+  <view class="card hero">
+    <swiper class="hero-swiper" wx:if="{{seedling.photos.length}}" indicator-dots="{{seedling.photos.length > 1}}" circular="{{seedling.photos.length > 1}}">
+      <swiper-item wx:for="{{seedling.photos}}" wx:key="*this">
+        <image class="hero-img" src="{{item}}" mode="aspectFit" data-src="{{item}}" bindtap="previewPhoto"></image>
+      </swiper-item>
+    </swiper>
+    <view class="hero-info">
+      <text class="hero-name">{{seedling.name}}</text>
+      <text class="hero-sub">{{seedling.method}} · 始于 {{seedling.startDate}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">母株</view>
+    <view class="list-row" wx:if="{{mother}}" bindtap="goMother">
+      <text class="tag tag-green">{{mother.kind}}</text>
+      <view class="list-main"><text class="list-title">{{mother.name}}</text></view>
+      <text class="list-action" wx:if="{{mother.type !== 'text'}}">›</text>
+    </view>
+    <view class="mother-photos" wx:if="{{mother.photos && mother.photos.length}}">
+      <image class="mother-photo" wx:for="{{mother.photos}}" wx:key="*this" src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewMotherPhoto"></image>
+    </view>
+    <text class="muted" wx:if="{{!mother}}">未填写母株</text>
+  </view>
+
+  <view class="card">
+    <view class="section-title">育苗信息</view>
+    <view class="info-row" wx:for="{{infoRows}}" wx:key="label">
+      <text class="info-label">{{item.label}}</text>
+      <text class="info-value">{{item.value}}</text>
+    </view>
+    <view class="note" wx:if="{{seedling.note}}">{{seedling.note}}</view>
+  </view>
+
+  <view class="card" wx:if="{{children.length}}">
+    <view class="section-title">子代（{{children.length}}）</view>
+    <view class="list-row" wx:for="{{children}}" wx:key="id" data-id="{{item.id}}" bindtap="goChild">
+      <plant-thumb src="{{item.photo}}"></plant-thumb>
+      <view class="list-main">
+        <text class="list-title">{{item.name}}</text>
+        <text class="list-sub">{{item.sub}}</text>
+      </view>
+      <text class="list-action">›</text>
+    </view>
+  </view>
+
+  <view class="action-row">
+    <button class="btn-ghost action-btn" bindtap="goLineage">族谱</button>
+    <button class="btn-ghost action-btn" bindtap="goPropagate">用它再育苗</button>
+  </view>
+  <view class="action-row">
+    <button class="btn-ghost action-btn" bindtap="goEdit">编辑</button>
+    <button class="btn-danger action-btn" bindtap="remove">删除</button>
+  </view>
+</view>
+
+<view class="container" wx:elif="{{loadError}}">
+  <view class="card load-error" bindtap="load">{{loadError}}，点此重试</view>
+</view>
+
+<view class="container" wx:elif="{{notFound}}">
+  <view class="empty">
+    <view>育苗记录不存在或已被删除</view>
+    <button class="btn-ghost" bindtap="goBack">返回上一页</button>
+  </view>
+</view>

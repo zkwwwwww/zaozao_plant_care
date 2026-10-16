@@ -25,18 +25,24 @@ exports.main = async () => {
   const ctx = await openContext();
   if (ctx.error) return ctx.error;
   try {
-    const [plants, records, environments, memorials] = await Promise.all([
+    const [plants, records, environments, memorials, seedlings, expenses, tags] = await Promise.all([
       listOwn(ctx.db, 'plants', ctx.openid),
       listOwn(ctx.db, 'care_records', ctx.openid),
       listOwn(ctx.db, 'environments', ctx.openid),
-      listOwn(ctx.db, 'memorials', ctx.openid)
+      listOwn(ctx.db, 'memorials', ctx.openid),
+      listOwn(ctx.db, 'seedlings', ctx.openid),
+      listOwn(ctx.db, 'expenses', ctx.openid),
+      listOwn(ctx.db, 'tags', ctx.openid)
     ]);
     return ok({
       exportedAt: new Date().toISOString(),
       plants,
       records,
       environments,
-      memorials
+      memorials,
+      seedlings,
+      expenses,
+      tags
     });
   } catch (error) {
     console.error('exportUserData failed');

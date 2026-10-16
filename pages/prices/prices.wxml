@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
+
+  <empty-state
+    wx:if="{{guest}}"
+    image="/assets/illustrations/empty-plants.png"
+    title="看看植物们一共值多少"
+    description="价格只在这里汇总，主页不显示。登录并录入价格后即可查看"
+  ></empty-state>
+
+  <block wx:else>
+    <view class="card summary">
+      <view class="summary-item">
+        <text class="summary-label">在养植物总价</text>
+        <text class="summary-num">¥{{total}}</text>
+        <text class="summary-sub">{{pricedCount}} 株计入{{unpricedCount ? '，' + unpricedCount + ' 株未填价格' : ''}}</text>
+      </view>
+      <view class="summary-item" wx:if="{{topPlant}}" data-id="{{topPlant.id}}" bindtap="goDetail">
+        <text class="summary-label">最贵的植物</text>
+        <text class="summary-num small">{{topPlant.name}}</text>
+        <text class="summary-sub">¥{{topPlant.price}}</text>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{list.length}}">
+      <view class="section-title">单价（从高到低）</view>
+      <view class="list-row" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+        <plant-thumb src="{{item.photo}}"></plant-thumb>
+        <view class="list-main">
+          <text class="list-title">{{item.name}}</text>
+          <text class="list-sub" wx:if="{{item.sub}}">{{item.sub}}</text>
+        </view>
+        <text class="list-side">¥{{item.price}}</text>
+      </view>
+    </view>
+
+    <empty-state
+      wx:elif="{{!loading && !loadError}}"
+      compact="{{true}}"
+      image="/assets/illustrations/empty-records.png"
+      title="还没有填价格的植物"
+      description="在植物编辑页填写价格后，会汇总到这里"
+    ></empty-state>
+  </block>
+</view>
