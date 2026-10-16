@@ -15,13 +15,15 @@ Page({
     plants: [],
     envMap: {},
     totalPlants: 0,
-    stats: { count: 0, seedlings: 0, waterToday: 0, overdue: 0 },
+    visiblePlantCount: 0,
+    stats: { count: 0, seedlings: 0, overdue: 0 },
     todo: { total: 0, text: '' },
+    todayTasks: [],
+    monthlyCare: { total: 0, activeDays: 0, topName: '暂无', overdue: 0 },
     tagBar: [],
     tagFilter: '',
     density: 2,
     hasMore: false,
-    seasonText: '',
     loading: false,
     loadError: '',
     account: { nickName: '', avatarUrl: '', status: 'anonymous', summary: '未登录' },
@@ -65,11 +67,13 @@ Page({
         plants: [],
         hasMore: false,
         totalPlants: 0,
+        visiblePlantCount: 0,
         tagBar: [],
         tagFilter: '',
+        stats: { count: 0, seedlings: 0, overdue: 0 },
         todo: { total: 0, text: '' },
-        stats: { count: 0, seedlings: 0, waterToday: 0, overdue: 0 },
-        seasonText: reminder.seasonWaterText()
+        todayTasks: [],
+        monthlyCare: { total: 0, activeDays: 0, topName: '暂无', overdue: 0 }
       });
       return;
     }
@@ -110,8 +114,40 @@ Page({
     const tagIds = bundle.tags.map(tag => tag.id);
     const groups = reminder.dueTodayGroups(plants);
     const today = format.today();
-    const waterToday = groups[0].items.filter(t => t.due === today).length;
+    const todayGroups = groups.map(group => ({
+      label: group.label,
+      items: group.items.filter(task => task.due === today)
+    }));
+    const todayTasks = [];
+    todayGroups.forEach(group => group.items.forEach(task => {
+      todayTasks.push({
+        key: task.plantId + '_' + task.type,
+        plantId: task.plantId,
+        plantName: task.plantName,
+        photo: task.photo || '',
+        label: group.label
+      });
+    }));
+    const todaySummary = todayGroups
+      .filter(group => group.items.length)
+      .map(group => group.label + ' ' + group.items.length)
+      .join(' · ');
+    if (todayTasks.length) {
+      todayTasks.unshift({ key: 'summary', summary: true, text: todaySummary });
+    }
     const overdue = groups.reduce((sum, group) => sum + group.items.filter(t => t.overdue).length, 0);
+    const monthPrefix = today.slice(0, 7);
+    const monthlyRecords = [];
+    const careCounts = {};
+    bundle.plants.forEach(plant => {
+      (plant.records || []).forEach(record => {
+        if ((record.date || '').slice(0, 7) !== monthPrefix) return;
+        monthlyRecords.push(record);
+        careCounts[plant.id] = (careCounts[plant.id] || 0) + 1;
+      });
+    });
+    const topPlantId = Object.keys(careCounts).sort((a, b) => careCounts[b] - careCounts[a])[0];
+    const topCarePlant = topPlantId ? bundle.plants.find(plant => plant.id === topPlantId) : null;
 
     const filter = this.data.tagFilter;
     const validFilter = !filter || filter === constants.UNTAGGED.id || tagIds.indexOf(filter) >= 0 ? filter : '';
@@ -148,15 +184,22 @@ Page({
       plants: page.items,
       hasMore: page.hasMore,
       totalPlants: plants.length,
+      visiblePlantCount: visible.length,
       tagFilter: validFilter,
       tagBar: [{ id: '', name: '全部' }].concat(bundle.tags, [constants.UNTAGGED]),
       envMap,
-      stats: { count: plants.length, seedlings: bundle.seedlings.length, waterToday, overdue },
+      stats: { count: plants.length, seedlings: bundle.seedlings.length, overdue },
       todo: {
-        total: groups.reduce((sum, group) => sum + group.items.length, 0),
-        text: groups.filter(group => group.items.length).map(group => group.label + ' ' + group.items.length).join(' · ')
+        total: todayGroups.reduce((sum, group) => sum + group.items.length, 0),
+        text: todaySummary
       },
-      seasonText: reminder.seasonWaterText()
+      todayTasks,
+      monthlyCare: {
+        total: monthlyRecords.length,
+        activeDays: Array.from(new Set(monthlyRecords.map(record => record.date))).length,
+        topName: topCarePlant ? topCarePlant.name : '暂无',
+        overdue
+      }
     });
   },
 
@@ -184,48 +227,9 @@ Page({
     });
   },
 
-  // 对当前筛选下的植物各记一条今天的养护
-  batchCare() {
-    if (!account.requireLogin()) {
-      account.promptLogin();
-      return;
-    }
-    const targets = (this._visiblePlants || []).filter(p => p.status !== '死亡');
-    if (!targets.length) {
-      wx.showToast({ title: '当前没有可养护的植物', icon: 'none' });
-      return;
-    }
-    const types = constants.CARE_TYPES;
-    const scope = (this.data.tagBar.find(tag => tag.id === this.data.tagFilter) || { name: '全部' }).name;
-    wx.showActionSheet({
-      itemList: types,
-      success: (res) => {
-        const type = types[res.tapIndex];
-        wx.showModal({
-          title: '批量' + type,
-          content: '为「' + scope + '」下的 ' + targets.length + ' 株植物各记一条今天的' + type + '记录？',
-          confirmText: '确定',
-          confirmColor: '#2e7d5b',
-          success: async (modal) => {
-            if (!modal.confirm) return;
-            wx.showLoading({ title: '记录中', mask: true });
-            try {
-              const result = await dataApi.batchCare(targets.map(p => p.id), type);
-              wx.hideLoading();
-              wx.showToast({ title: '已记录 ' + result.saved + ' 株', icon: 'success' });
-              this.loadData();
-            } catch (error) {
-              wx.hideLoading();
-              wx.showToast({ title: error.message || '记录失败，请重试', icon: 'none' });
-            }
-          }
-        });
-      }
-    });
-  },
-
-  goTodo() {
-    wx.navigateTo({ url: '/pages/todo/todo' });
+  goCareReminders() {
+    wx.setStorageSync('careEntrySection', 'reminder');
+    wx.switchTab({ url: '/pages/reminders/reminders' });
   },
 
   goTags() {
@@ -238,10 +242,6 @@ Page({
 
   goExpenses() {
     wx.navigateTo({ url: '/pages/expenses/expenses' });
-  },
-
-  goPrices() {
-    wx.navigateTo({ url: '/pages/prices/prices' });
   },
 
   goDetail(e) {
@@ -379,6 +379,12 @@ Page({
   },
 
   goReminders() {
+    wx.setStorageSync('careEntrySection', 'care');
+    wx.switchTab({ url: '/pages/reminders/reminders' });
+  },
+
+  goCareRecords() {
+    wx.setStorageSync('careEntrySection', 'records');
     wx.switchTab({ url: '/pages/reminders/reminders' });
   },
 

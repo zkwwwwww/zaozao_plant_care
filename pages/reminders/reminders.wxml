@@ -1,70 +1,87 @@
 <view class="container">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
-  <view class="card load-hint" wx:elif="{{loading}}">正在读取提醒…</view>
+  <view class="card load-hint" wx:elif="{{loading}}">正在读取养护数据…</view>
 
-  <!-- 季节提示 -->
-  <view class="card season-card">
-    <view class="season-title">🌦 {{seasonText}}</view>
-    <view class="season-legend">
-      <view class="lg-item"><text class="lg-dot green"></text>春/秋 10天</view>
-      <view class="lg-item"><text class="lg-dot amber"></text>夏 5天</view>
-      <view class="lg-item"><text class="lg-dot blue"></text>冬 15天</view>
-    </view>
-    <view class="season-note">每株植物可单独设置养护间隔和提前提醒天数；未设置时提前 1 天提醒。</view>
-  </view>
-
-  <!-- 逾期总览 -->
-  <view class="card overdue-bar" wx:if="{{overdueCount>0}}">
-    <text class="ob-text">⚠ 共 {{overdueCount}} 项已逾期</text>
-  </view>
-
-  <scroll-view class="reminder-tabs" scroll-x enhanced show-scrollbar="{{false}}">
-    <view class="reminder-tabs-inner">
-      <view
-        class="reminder-tab {{activeView===item.key ? 'is-active' : ''}}"
-        wx:for="{{tabs}}"
-        wx:key="key"
-        data-key="{{item.key}}"
-        bindtap="switchView"
-      >{{item.label}}</view>
-    </view>
-  </scroll-view>
-
-  <!-- 全部：按到期时间排序 -->
-  <view class="card" wx:if="{{activeView==='all'}}">
-    <section-header title="全部待办"></section-header>
-    <task-row
-      wx:for="{{flatTasks}}"
+  <view class="section-tabs">
+    <view
+      class="section-tab {{activeSection===item.key ? 'is-active' : ''}}"
+      wx:for="{{sections}}"
       wx:key="key"
-      item-id="{{item.plantId}}"
-      task-type="{{item.type}}"
-      photo="{{item.photo}}"
-      title="{{item.plantName}} · {{item.label}}"
-      subtitle="到期 {{item.due}}"
-      status-text="{{item.dueText}}"
-      status-class="{{item.cls}}"
-      show-complete="{{true}}"
-      bind:select="goDetail"
-      bind:complete="completeTask"
-    ></task-row>
-    <empty-state
-      wx:if="{{flatTasks.length===0}}"
-      compact="{{true}}"
-      image="/assets/illustrations/empty-reminders.png"
-      title="{{guest ? '浇水、施肥和换盆会汇总在这里' : '当前没有近期或逾期的养护任务'}}"
-      description="{{guest ? '上方是当前季节的默认间隔。登录后会按你的植物计算到期任务' : '完成养护后及时记录，下次到期日会自动更新'}}"
-    ></empty-state>
+      data-key="{{item.key}}"
+      bindtap="switchSection"
+    >{{item.label}}</view>
   </view>
 
-  <!-- 按时间：突出逾期时长 -->
-  <block wx:if="{{activeView==='time'}}">
-    <view class="card grouped-card" wx:for="{{timeGroups}}" wx:for-item="group" wx:key="key">
-      <view class="group-title">
-        <text>{{group.label}}</text>
-        <text class="group-count">{{group.items.length}} 项</text>
+  <!-- 单株与批量养护 -->
+  <block wx:if="{{activeSection==='care'}}">
+    <view class="card care-intro">
+      <view>
+        <text class="care-title">记录今天的养护</text>
+        <text class="care-desc">选择植物可批量操作，单独记录可填写备注和照片</text>
       </view>
+      <button class="batch-care-btn" bindtap="batchCare" disabled="{{busy || !selectedCareCount}}">
+        批量养护{{selectedCareCount ? '（' + selectedCareCount + '）' : ''}}
+      </button>
+    </view>
+    <scroll-view class="care-filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="care-filter-inner">
+        <text
+          class="care-filter {{careFilter===item.key ? 'is-on' : ''}}"
+          wx:for="{{careFilters}}"
+          wx:key="key"
+          data-key="{{item.key}}"
+          bindtap="selectCareFilter"
+        >{{item.label}}</text>
+      </view>
+    </scroll-view>
+    <view class="select-bar" wx:if="{{carePlants.length}}">
+      <text>已选 {{selectedCareCount}} 株</text>
+      <text class="select-all" bindtap="selectAllCare">{{allCareSelected ? '取消全选' : '全选当前'}}</text>
+    </view>
+    <view class="card care-list" wx:if="{{carePlants.length}}">
+      <view class="care-row" wx:for="{{carePlants}}" wx:key="id">
+        <view class="care-check {{item.selected ? 'is-on' : ''}}" data-id="{{item.id}}" bindtap="toggleCareSelection">
+          {{item.selected ? '✓' : ''}}
+        </view>
+        <plant-thumb src="{{item.photo}}"></plant-thumb>
+        <view class="care-main" data-id="{{item.id}}" bindtap="goDetail">
+          <text class="care-name">{{item.name}}</text>
+          <text class="care-sub">{{item.sub}}</text>
+        </view>
+        <button class="single-care-btn" data-id="{{item.id}}" bindtap="startCare">养护</button>
+      </view>
+    </view>
+    <empty-state
+      wx:if="{{!carePlants.length && !loading}}"
+      compact="{{true}}"
+      image="/assets/illustrations/empty-plants.png"
+      title="还没有可养护的植物"
+      description="添加植物后，可以在这里进行单株或批量养护"
+    ></empty-state>
+  </block>
+
+  <!-- 养护提醒 -->
+  <block wx:if="{{activeSection==='reminder'}}">
+    <view class="card overdue-bar" wx:if="{{overdueCount>0}}">
+      <text class="ob-text">⚠ 共 {{overdueCount}} 项已逾期</text>
+    </view>
+
+    <scroll-view class="reminder-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="reminder-tabs-inner">
+        <view
+          class="reminder-tab {{activeView===item.key ? 'is-active' : ''}}"
+          wx:for="{{tabs}}"
+          wx:key="key"
+          data-key="{{item.key}}"
+          bindtap="switchView"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+
+    <view class="card" wx:if="{{activeView==='all'}}">
+      <section-header title="全部待办"></section-header>
       <task-row
-        wx:for="{{group.items}}"
+        wx:for="{{flatTasks}}"
         wx:key="key"
         item-id="{{item.plantId}}"
         task-type="{{item.type}}"
@@ -77,54 +94,105 @@
         bind:select="goDetail"
         bind:complete="completeTask"
       ></task-row>
+      <empty-state
+        wx:if="{{flatTasks.length===0}}"
+        compact="{{true}}"
+        image="/assets/illustrations/empty-reminders.png"
+        title="当前没有近期或逾期的养护任务"
+        description="完成养护后及时记录，下次到期日会自动更新"
+      ></empty-state>
     </view>
+
+    <block wx:if="{{activeView==='time'}}">
+      <view class="card grouped-card" wx:for="{{timeGroups}}" wx:for-item="group" wx:key="key">
+        <view class="group-title"><text>{{group.label}}</text><text class="group-count">{{group.items.length}} 项</text></view>
+        <task-row
+          wx:for="{{group.items}}"
+          wx:key="key"
+          item-id="{{item.plantId}}"
+          task-type="{{item.type}}"
+          photo="{{item.photo}}"
+          title="{{item.plantName}} · {{item.label}}"
+          subtitle="到期 {{item.due}}"
+          status-text="{{item.dueText}}"
+          status-class="{{item.cls}}"
+          show-complete="{{true}}"
+          bind:select="goDetail"
+          bind:complete="completeTask"
+        ></task-row>
+      </view>
+    </block>
+
+    <block wx:if="{{activeView==='plant'}}">
+      <view class="card group-card" wx:for="{{groups}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+        <view class="group-head">
+          <plant-thumb src="{{item.photo}}" size="small"></plant-thumb>
+          <text class="g-name">{{item.name}}</text>
+          <text class="g-int">提前 {{item.advanceDays}} 天</text>
+        </view>
+        <view class="g-tasks">
+          <view class="g-task" wx:for="{{item.tasks}}" wx:for-item="t" wx:key="type">
+            <text class="g-type">{{t.label}}</text>
+            <view class="g-tinfo"><text class="g-tdate">到期 {{t.due}}</text></view>
+            <text class="tag {{t.cls}}">{{t.dueText}}</text>
+            <view class="task-complete" catchtap="completeTask" data-id="{{item.id}}" data-type="{{t.type}}">完成</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:if="{{activeView==='type'}}">
+      <view class="card grouped-card" wx:for="{{typeGroups}}" wx:for-item="group" wx:key="type">
+        <view class="group-title"><text>{{group.label}}</text><text class="group-count">{{group.items.length}} 项</text></view>
+        <task-row
+          wx:for="{{group.items}}"
+          wx:key="key"
+          item-id="{{item.plantId}}"
+          task-type="{{item.type}}"
+          photo="{{item.photo}}"
+          title="{{item.plantName}}"
+          subtitle="到期 {{item.due}}"
+          status-text="{{item.dueText}}"
+          status-class="{{item.cls}}"
+          show-complete="{{true}}"
+          bind:select="goDetail"
+          bind:complete="completeTask"
+        ></task-row>
+      </view>
+    </block>
   </block>
 
-  <!-- 按植物分组 -->
-  <block wx:if="{{activeView==='plant'}}">
-    <view class="card group-card" wx:for="{{groups}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
-      <view class="group-head">
-        <plant-thumb src="{{item.photo}}" size="small"></plant-thumb>
-        <text class="g-name">{{item.name}}</text>
-        <text class="g-int">提前 {{item.advanceDays}} 天</text>
-      </view>
-      <view class="g-tasks">
-        <view class="g-task" wx:for="{{item.tasks}}" wx:for-item="t" wx:key="type">
-          <text class="g-type">{{t.label}}</text>
-          <view class="g-tinfo">
-            <text class="g-tdate">到期 {{t.due}}</text>
-          </view>
-          <text class="tag {{t.cls}}">{{t.dueText}}</text>
-          <view class="task-complete" catchtap="completeTask" data-id="{{item.id}}" data-type="{{t.type}}">完成</view>
+  <!-- 养护记录与备注 -->
+  <block wx:if="{{activeSection==='records'}}">
+    <view class="record-filters">
+      <picker range="{{recordPlants}}" range-key="name" value="{{recordPlantIndex}}" bindchange="onRecordPlant">
+        <view class="record-filter">{{recordPlants[recordPlantIndex].name}} ▾</view>
+      </picker>
+      <picker range="{{recordTypes}}" value="{{recordTypeIndex}}" bindchange="onRecordType">
+        <view class="record-filter">{{recordTypes[recordTypeIndex]}} ▾</view>
+      </picker>
+    </view>
+    <view class="card record-list" wx:if="{{careRecords.length}}">
+      <view class="record-row" wx:for="{{careRecords}}" wx:key="key">
+        <plant-thumb src="{{item.photo}}"></plant-thumb>
+        <view class="record-main" data-id="{{item.plantId}}" bindtap="goDetail">
+          <text class="record-name">{{item.plantName}} · {{item.type}}</text>
+          <text class="record-note">{{item.content || '无备注'}}</text>
+        </view>
+        <view class="record-actions">
+          <text class="record-date">{{item.date}}</text>
+          <text class="record-edit" data-id="{{item.id}}" data-plant-id="{{item.plantId}}" catchtap="editRecord">编辑</text>
         </view>
       </view>
     </view>
+    <empty-state
+      wx:if="{{!careRecords.length && !loading}}"
+      compact="{{true}}"
+      image="/assets/illustrations/empty-records.png"
+      title="还没有养护记录"
+      description="完成养护时可以补充备注和照片，记录会汇总在这里"
+    ></empty-state>
   </block>
-
-  <!-- 按养护类型分组 -->
-  <block wx:if="{{activeView==='type'}}">
-    <view class="card grouped-card" wx:for="{{typeGroups}}" wx:for-item="group" wx:key="type">
-      <view class="group-title">
-        <text>{{group.label}}</text>
-        <text class="group-count">{{group.items.length}} 项</text>
-      </view>
-      <task-row
-        wx:for="{{group.items}}"
-        wx:key="key"
-        item-id="{{item.plantId}}"
-        task-type="{{item.type}}"
-        photo="{{item.photo}}"
-        title="{{item.plantName}}"
-        subtitle="到期 {{item.due}}"
-        status-text="{{item.dueText}}"
-        status-class="{{item.cls}}"
-        show-complete="{{true}}"
-        bind:select="goDetail"
-        bind:complete="completeTask"
-      ></task-row>
-    </view>
-  </block>
-
 </view>
 
 <guest-gate show="{{guest}}"></guest-gate>

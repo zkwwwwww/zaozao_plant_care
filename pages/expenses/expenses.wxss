@@ -1,9 +1,9 @@
 /* pages/expenses/expenses.wxss */
-.summary { display: flex; gap: 24rpx; }
+.summary { display: flex; gap: 12rpx; }
 .summary-item { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .summary-label { color: #8a9b90; font-size: 24rpx; }
-.summary-num { margin-top: 8rpx; color: #26352c; font-size: 40rpx; font-weight: 700; }
-.summary-num.small { font-size: 28rpx; line-height: 56rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.summary-num { margin-top: 8rpx; color: #26352c; font-size: 34rpx; font-weight: 700; }
+.summary-num.small { font-size: 23rpx; line-height: 52rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .chart { display: flex; align-items: flex-end; gap: 12rpx; height: 280rpx; margin: 32rpx 0 16rpx; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
@@ -32,3 +32,8 @@
 .chart.is-dense { gap: 4rpx; }
 .chart.is-dense .bar { width: 80%; }
 .bar-label { white-space: nowrap; }
+
+.price-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12rpx; }
+.price-head .section-title { display: block; }
+.price-count { display: block; margin-top: 8rpx; color: #8a9b90; font-size: 22rpx; }
+.price-total { color: #2e7d5b; font-size: 34rpx; font-weight: 700; }

@@ -5,7 +5,7 @@
 
   <block wx:else>
   <view class="card">
-    <view class="section-title">为「{{plantName}}」添加记录</view>
+    <view class="section-title">{{isEdit ? '编辑「' + plantName + '」的记录' : '为「' + plantName + '」添加记录'}}</view>
 
     <picker range="{{careTypes}}" value="{{careTypeIndex}}" bindchange="onType">
       <view class="form-item">
@@ -43,7 +43,7 @@
   </view>
 
   <button class="btn-primary" bindtap="save" disabled="{{isSavingPhoto || isSubmitting}}" loading="{{isSubmitting}}">
-    {{isSavingPhoto ? '正在保存照片' : '保存记录'}}
+    {{isSavingPhoto ? '正在保存照片' : (isEdit ? '保存修改' : '保存记录')}}
   </button>
   </block>
 </view>

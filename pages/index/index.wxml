@@ -4,11 +4,13 @@
 
   <!-- 小程序标识与功能 -->
   <view class="card brand">
-    <image class="brand-logo" src="/assets/icons/logo.png" mode="aspectFill"></image>
+    <image class="brand-logo" src="{{account.avatarUrl || '/assets/icons/logo.png'}}" mode="aspectFill"></image>
     <view class="brand-text">
       <text class="brand-name">植早早</text>
       <text class="brand-desc">记录生长与养护，让每一次陪伴都有迹可循。</text>
-      <text class="brand-login {{account.status === 'expired' ? 'is-expired' : ''}}" bindtap="goAccount">{{account.summary}}</text>
+      <text class="brand-login {{account.status === 'expired' ? 'is-expired' : ''}}" bindtap="goAccount">
+        {{account.status === 'valid' ? '你好，' + account.summary : account.summary}}
+      </text>
     </view>
     <view class="feature-row">
       <view class="feature-item" bindtap="goSeedlings">
@@ -17,11 +19,7 @@
       </view>
       <view class="feature-item" bindtap="goExpenses">
         <text class="feature-title">花费</text>
-        <text class="feature-desc">日周月年统计</text>
-      </view>
-      <view class="feature-item" bindtap="goPrices">
-        <text class="feature-title">价格</text>
-        <text class="feature-desc">总价与最贵</text>
+        <text class="feature-desc">花费与植物价格</text>
       </view>
       <view class="feature-item" bindtap="goMemorial">
         <text class="feature-title">纪念碑</text>
@@ -30,42 +28,56 @@
     </view>
   </view>
 
-  <!-- 统计卡片 -->
-  <view class="card stats">
-    <view class="stat-item">
-      <text class="stat-num">{{stats.count}}</text>
-      <text class="stat-label">植物</text>
+  <!-- 数据与待办合并为紧凑概览 -->
+  <view class="card dashboard">
+    <view class="stats">
+      <view class="stat-item">
+        <text class="stat-num">{{stats.count}}</text>
+        <text class="stat-label">植物</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item" bindtap="goSeedlings">
+        <text class="stat-num">{{stats.seedlings}}</text>
+        <text class="stat-label">育苗</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item" bindtap="goCareReminders">
+        <text class="stat-num {{stats.overdue>0?'danger':''}}">{{stats.overdue}}</text>
+        <text class="stat-label">逾期待办</text>
+      </view>
     </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="goSeedlings">
-      <text class="stat-num">{{stats.seedlings}}</text>
-      <text class="stat-label">育苗</text>
-    </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="goTodo">
-      <text class="stat-num {{stats.waterToday>0?'warn':''}}">{{stats.waterToday}}</text>
-      <text class="stat-label">今日需浇水</text>
-    </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="goTodo">
-      <text class="stat-num {{stats.overdue>0?'danger':''}}">{{stats.overdue}}</text>
-      <text class="stat-label">逾期待办</text>
-    </view>
-  </view>
 
-  <!-- 今日待办聚合 -->
-  <view class="card todo-row" wx:if="{{totalPlants>0}}" bindtap="goTodo">
-    <view class="todo-main">
+    <view class="month-care" wx:if="{{totalPlants>0}}" bindtap="goCareRecords">
+      <text class="month-care-title">本月养护</text>
+      <text class="month-care-summary">{{monthlyCare.total}} 次 · {{monthlyCare.activeDays}} 个记录日{{monthlyCare.topName === '暂无' ? '' : ' · 常养 ' + monthlyCare.topName}}</text>
+      <text class="month-care-more">›</text>
+    </view>
+
+    <view class="todo-row" wx:if="{{totalPlants>0}}" bindtap="goCareReminders">
       <text class="todo-title">今日待办</text>
-      <text class="todo-desc" wx:if="{{todo.total}}">{{todo.text}}</text>
+      <swiper
+        class="todo-swiper"
+        wx:if="{{todayTasks.length}}"
+        vertical="{{true}}"
+        circular="{{true}}"
+        autoplay="{{todayTasks.length > 1}}"
+        interval="4000"
+        duration="450"
+      >
+        <swiper-item wx:for="{{todayTasks}}" wx:key="key">
+          <view class="todo-slide">
+            <text class="todo-slide-text summary" wx:if="{{item.summary}}">{{item.text}}</text>
+            <block wx:else>
+              <image wx:if="{{item.photo}}" class="todo-slide-photo" src="{{item.photo}}" mode="aspectFill"></image>
+              <view wx:else class="todo-slide-photo placeholder">🌱</view>
+              <text class="todo-slide-text">{{item.plantName}} · {{item.label}}</text>
+            </block>
+          </view>
+        </swiper-item>
+      </swiper>
       <text class="todo-desc" wx:else>今天没有到期的养护</text>
+      <text class="todo-count {{todo.total ? 'is-on' : ''}}">{{todo.total ? todo.total + ' 项 ›' : '›'}}</text>
     </view>
-    <text class="todo-count {{todo.total ? 'is-on' : ''}}">{{todo.total ? todo.total + ' 项 ›' : '›'}}</text>
-  </view>
-
-  <!-- 季节浇水提示 -->
-  <view class="card season-tip">
-    <text class="tip-text">💧 {{seasonText}}</text>
   </view>
 
   <!-- 植物图片墙 -->
@@ -78,8 +90,8 @@
     </scroll-view>
   </view>
   <view class="batch-row" wx:if="{{totalPlants>0}}">
-    <text class="batch-count">{{plants.length}} 株</text>
-    <text class="batch-btn" bindtap="batchCare">批量养护</text>
+    <text class="batch-count">{{visiblePlantCount}} 株</text>
+    <text class="batch-btn" bindtap="goReminders">前往养护</text>
   </view>
 
   <view class="grid cols-{{density}}" wx:if="{{plants.length>0}}">
@@ -118,7 +130,7 @@
   ></empty-state>
 
   <view class="add-bar" wx:if="{{totalPlants>0}}" bindtap="goAdd">
-    <text class="add-btn">＋ 添加植物</text>
+    <text class="add-btn" aria-role="button" aria-label="添加植物">＋</text>
   </view>
 </view>
 

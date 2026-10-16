@@ -8,6 +8,8 @@ const media = require('../../utils/media');
 Page({
   data: {
     plantId: '',
+    recordId: '',
+    isEdit: false,
     plantName: '',
     careTypes: constants.CARE_TYPES,
     careTypeIndex: 0,
@@ -33,6 +35,31 @@ Page({
     }
     const plant = bundle.plants.find(item => item.id === options.plantId);
     if (plant) {
+      const record = options.recordId
+        ? (plant.records || []).find(item => item.id === options.recordId)
+        : null;
+      if (options.recordId && !record) {
+        this.setData({ loadError: '养护记录不存在或已被删除' });
+        return;
+      }
+      if (record) {
+        const recordTypeIndex = constants.CARE_TYPES.indexOf(record.type);
+        wx.setNavigationBarTitle({ title: '编辑养护记录' });
+        this.setData({
+          plantId: options.plantId,
+          plantName: plant.name,
+          recordId: record.id,
+          isEdit: true,
+          careTypeIndex: Math.max(0, recordTypeIndex),
+          form: {
+            type: recordTypeIndex >= 0 ? record.type : constants.CARE_TYPES[0],
+            date: record.date || format.today(),
+            content: record.content || ''
+          },
+          photo: record.photo || ''
+        });
+        return;
+      }
       const requestedType = options.type ? decodeURIComponent(options.type) : '';
       const careTypeIndex = constants.CARE_TYPES.indexOf(requestedType);
       const type = careTypeIndex >= 0 ? requestedType : constants.CARE_TYPES[0];
@@ -105,7 +132,7 @@ Page({
       return;
     }
     if (this.data.isSubmitting) return;
-    const { plantId, form, photo } = this.data;
+    const { plantId, recordId, form, photo } = this.data;
     if (!form.date) {
       wx.showToast({ title: '请选择日期', icon: 'none' });
       return;
@@ -114,13 +141,14 @@ Page({
     wx.showLoading({ title: '保存中', mask: true });
     try {
       await dataApi.saveRecord({
+        id: recordId || '',
         plantId,
         type: form.type,
         date: form.date,
         content: form.content.trim(),
         photo: photo || ''
       });
-      wx.showToast({ title: '已记录', icon: 'success' });
+      wx.showToast({ title: recordId ? '已更新' : '已记录', icon: 'success' });
       wx.navigateBack();
     } catch (error) {
       this.setData({ isSubmitting: false });

@@ -15,9 +15,7 @@
     "pages/lineage/lineage",
     "pages/expenses/expenses",
     "pages/expense-edit/expense-edit",
-    "pages/tags/tags",
-    "pages/todo/todo",
-    "pages/prices/prices"
+    "pages/tags/tags"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -46,7 +44,7 @@
       },
       {
         "pagePath": "pages/reminders/reminders",
-        "text": "提醒",
+        "text": "养护",
         "iconPath": "assets/icons/tab-reminder.png",
         "selectedIconPath": "assets/icons/tab-reminder-active.png"
       },

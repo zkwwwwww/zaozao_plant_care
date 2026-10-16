@@ -23,9 +23,14 @@ Page({
     categories: [],
     items: [],
     allTotal: '0.00',
+    plantValue: '0.00',
+    pricedCount: 0,
+    unpricedCount: 0,
+    priceItems: [],
     topPlant: null,
     hasData: false,
-    hasMore: false
+    expenseHasMore: false,
+    priceHasMore: false
   },
 
   onShow() {
@@ -42,11 +47,29 @@ Page({
     try {
       const bundle = await dataApi.loadBundle();
       this._expenses = bundle.expenses;
-      const top = expense.mostExpensive(bundle.plants);
+      const activePlants = bundle.plants.filter(plant => !plant.memorialized && plant.status !== '死亡');
+      const pricedPlants = activePlants
+        .filter(plant => Number(plant.price) > 0)
+        .sort((a, b) => Number(b.price) - Number(a.price));
+      const top = expense.mostExpensive(activePlants);
+      const plantValueCents = pricedPlants.reduce((sum, plant) => sum + Math.round(Number(plant.price) * 100), 0);
+      this._allPriceItems = pricedPlants.map(plant => ({
+        id: plant.id,
+        name: plant.name,
+        sub: plant.variety || plant.purchaseWay || '',
+        photo: plant.photos[0] || '',
+        price: format.money(plant.price)
+      }));
+      const pricePage = pagination.slice(this._allPriceItems, 1);
       this.setData({
         loading: false,
         hasData: bundle.expenses.length > 0,
         allTotal: expense.sum(bundle.expenses),
+        plantValue: format.money(plantValueCents / 100),
+        pricedCount: pricedPlants.length,
+        unpricedCount: activePlants.length - pricedPlants.length,
+        priceItems: pricePage.items,
+        priceHasMore: pricePage.hasMore,
         topPlant: top ? { id: top.id, name: top.name, price: format.money(top.price), photo: top.photos[0] || '' } : null
       });
       this.render(this.data.selectedKey);
@@ -77,7 +100,7 @@ Page({
       periodTotal: expense.sum(inPeriod),
       categories: expense.categoryTotals(inPeriod, constants.EXPENSE_CATEGORIES),
       items: page.items,
-      hasMore: page.hasMore
+      expenseHasMore: page.hasMore
     });
   },
 
@@ -99,15 +122,29 @@ Page({
       periodTotal: expense.sum(picked),
       categories: expense.categoryTotals(picked, constants.EXPENSE_CATEGORIES),
       items: page.items,
-      hasMore: page.hasMore
+      expenseHasMore: page.hasMore
     });
   },
 
   onReachBottom() {
-    if (!this.data.hasMore) return;
-    const next = Math.floor(this.data.items.length / pagination.PAGE_SIZE) + 1;
-    const page = pagination.slice(this._allItems, next);
-    this.setData({ items: page.items, hasMore: page.hasMore });
+    const next = {};
+    if (this.data.expenseHasMore) {
+      const expensePage = pagination.slice(
+        this._allItems,
+        Math.floor(this.data.items.length / pagination.PAGE_SIZE) + 1
+      );
+      next.items = expensePage.items;
+      next.expenseHasMore = expensePage.hasMore;
+    }
+    if (this.data.priceHasMore) {
+      const pricePage = pagination.slice(
+        this._allPriceItems,
+        Math.floor(this.data.priceItems.length / pagination.PAGE_SIZE) + 1
+      );
+      next.priceItems = pricePage.items;
+      next.priceHasMore = pricePage.hasMore;
+    }
+    if (Object.keys(next).length) this.setData(next);
   },
 
   onRangeStart(e) {
@@ -154,6 +191,10 @@ Page({
 
   goPlant() {
     if (this.data.topPlant) wx.navigateTo({ url: '/pages/plant-detail/plant-detail?id=' + this.data.topPlant.id });
+  },
+
+  goPricePlant(e) {
+    wx.navigateTo({ url: '/pages/plant-detail/plant-detail?id=' + e.currentTarget.dataset.id });
   }
 });
 
