@@ -4,7 +4,9 @@ const dataApi = require('../../services/data');
 const constants = require('../../utils/constants');
 const pagination = require('../../utils/pagination');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     guest: false,
     loading: false,

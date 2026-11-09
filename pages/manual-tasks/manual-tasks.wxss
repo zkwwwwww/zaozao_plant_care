@@ -1,0 +1,47 @@
+.plant-name { display: block; color: #26352c; font-size: 34rpx; font-weight: 700; }
+.hint { display: block; margin-top: 10rpx; color: #8a9b90; font-size: 22rpx; line-height: 1.5; }
+.add-row { display: flex; gap: 16rpx; align-items: center; }
+.task-input {
+  flex: 1;
+  height: 76rpx;
+  padding: 0 20rpx;
+  border-radius: 14rpx;
+  background: #f4f7f5;
+  font-size: 26rpx;
+}
+.add-btn {
+  width: auto;
+  margin: 0;
+  padding: 0 28rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  border-radius: 38rpx;
+  background: #2e7d5b;
+  color: #ffffff;
+  font-size: 26rpx;
+}
+.add-btn::after { border: none; }
+.task-row {
+  display: flex;
+  align-items: center;
+  min-height: 96rpx;
+  border-bottom: 1rpx solid #f2f5f3;
+}
+.task-row:last-child { border-bottom: none; }
+.check {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 16rpx;
+  border: 2rpx solid #b8c5bd;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 22rpx;
+  line-height: 36rpx;
+  text-align: center;
+}
+.check.is-on { border-color: #2e7d5b; background: #2e7d5b; }
+.task-main { flex: 1; min-width: 0; }
+.task-title { display: block; color: #26352c; font-size: 28rpx; }
+.task-title.is-done { color: #8a9b90; text-decoration: line-through; }
+.task-date { display: block; margin-top: 4rpx; color: #b9cdc1; font-size: 20rpx; }
+.task-remove { margin-left: 16rpx; color: #b34e48; font-size: 24rpx; }

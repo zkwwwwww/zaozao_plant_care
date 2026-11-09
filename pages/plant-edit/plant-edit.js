@@ -5,7 +5,9 @@ const reminder = require('../../utils/reminder');
 const constants = require('../../utils/constants');
 const media = require('../../utils/media');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     id: '',
     isEdit: false,
@@ -15,6 +17,7 @@ Page({
       status: '健康',
       price: '',
       purchaseWay: '线上网店',
+      giftFrom: '',
       planting: '土培',
       environmentId: '',
       location: '',
@@ -29,7 +32,10 @@ Page({
     photos: [],
     tags: [],
     tagIds: [],
+    reminderIgnores: {},
+    manualTasks: [],
     wasDead: false,
+    showGiftFrom: false,
     envs: [],
     envIndex: 0,
     envName: '',
@@ -46,6 +52,10 @@ Page({
 
   async onLoad(options) {
     if (!account.requireLogin()) return;
+    if (!options.id) {
+      if (options.name) this.setData({ 'form.name': String(options.name).slice(0, 40) });
+      if (options.photo) this.setData({ photos: [options.photo] });
+    }
     let bundle;
     try {
       bundle = await dataApi.loadBundle();
@@ -65,6 +75,7 @@ Page({
             status: plant.status || '健康',
             price: plant.price !== undefined && plant.price !== '' ? String(plant.price) : '',
             purchaseWay: plant.purchaseWay || '线上网店',
+            giftFrom: plant.giftFrom || '',
             planting: plant.planting || '土培',
             environmentId: plant.environmentId || '',
             location: plant.location || '',
@@ -78,7 +89,10 @@ Page({
           },
           photos: plant.photos || [],
           tagIds: plant.tags || [],
-          wasDead: plant.status === '死亡' || plant.memorialized
+          reminderIgnores: plant.reminderIgnores || {},
+          manualTasks: plant.manualTasks || [],
+          wasDead: plant.status === '死亡' || plant.memorialized,
+          showGiftFrom: (plant.purchaseWay || '') === '朋友赠送'
         });
       }
     }
@@ -133,9 +147,12 @@ Page({
 
   onPurchaseWay(e) {
     const purchaseIndex = Number(e.detail.value);
+    const purchaseWay = constants.PURCHASE_OPTIONS[purchaseIndex];
     this.setData({
       purchaseIndex,
-      'form.purchaseWay': constants.PURCHASE_OPTIONS[purchaseIndex]
+      'form.purchaseWay': purchaseWay,
+      showGiftFrom: purchaseWay === '朋友赠送',
+      'form.giftFrom': purchaseWay === '朋友赠送' ? this.data.form.giftFrom : ''
     });
   },
 
@@ -271,6 +288,7 @@ Page({
         status: form.status,
         price: form.price === '' ? '' : Number(form.price),
         purchaseWay: form.purchaseWay,
+        giftFrom: form.purchaseWay === '朋友赠送' ? form.giftFrom.trim() : '',
         planting: form.planting,
         environmentId: form.environmentId,
         location: form.location.trim(),

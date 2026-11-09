@@ -54,6 +54,8 @@ function reminderAdvanceDaysFor(plant) {
   return Math.min(MAX_ADVANCE_DAYS, Math.max(0, Math.round(value)));
 }
 
+const CARE_TYPE_NAME = { water: '浇水', fertilize: '施肥', repot: '换盆' };
+
 // 从养护记录里取某类型最近一次日期，取不到则回退到 companionStart 或购买日
 function lastCareDate(plant, type) {
   const records = (plant.records || []).filter(r => r.type === type && format.toDate(r.date));
@@ -67,22 +69,37 @@ function lastCareDate(plant, type) {
   return '';
 }
 
+// 提醒起算日：取「最近同类型记录 / 一键忽略日」中较新的；忽略会延后一个周期
+function reminderBaseDate(plant, type) {
+  const careName = CARE_TYPE_NAME[type] || type;
+  const last = lastCareDate(plant, careName);
+  const ignored = plant && plant.reminderIgnores && plant.reminderIgnores[type];
+  if (format.toDate(ignored) && (!last || ignored > last)) return ignored;
+  return last;
+}
+
+function intervalForType(plant, type) {
+  if (type === 'water') return waterIntervalFor(plant);
+  if (type === 'fertilize') return fertIntervalFor(plant);
+  if (type === 'repot') return repotIntervalFor(plant);
+  return 0;
+}
+
 // 某植物某提醒项的下一次日期
 // type: 'water' | 'fertilize' | 'repot'
 function nextDueDate(plant, type) {
-  let last = '', interval = 0;
-  if (type === 'water') {
-    last = lastCareDate(plant, '浇水');
-    interval = waterIntervalFor(plant);
-  } else if (type === 'fertilize') {
-    last = lastCareDate(plant, '施肥');
-    interval = fertIntervalFor(plant);
-  } else if (type === 'repot') {
-    last = lastCareDate(plant, '换盆');
-    interval = repotIntervalFor(plant);
-  }
-  if (!last) return '';
+  const last = reminderBaseDate(plant, type);
+  const interval = intervalForType(plant, type);
+  if (!last || !interval) return '';
   return format.addDays(last, interval);
+}
+
+// 一键忽略：把该类型起算日设为今天，下次到期顺延一个周期
+function withIgnoredReminder(plant, type, ignoreDate) {
+  const day = format.toDate(ignoreDate) ? ignoreDate : format.today();
+  const reminderIgnores = Object.assign({}, (plant && plant.reminderIgnores) || {});
+  reminderIgnores[type] = day;
+  return Object.assign({}, plant, { reminderIgnores });
 }
 
 // 汇总某植物待办：近期窗口内的未来任务 + 所有逾期任务
@@ -146,13 +163,17 @@ module.exports = {
   SEASONS,
   DEFAULT_ADVANCE_DAYS,
   MAX_ADVANCE_DAYS,
+  CARE_TYPE_NAME,
   currentSeason,
   waterIntervalFor,
   fertIntervalFor,
   repotIntervalFor,
   reminderAdvanceDaysFor,
   lastCareDate,
+  reminderBaseDate,
+  intervalForType,
   nextDueDate,
+  withIgnoredReminder,
   plantTasks,
   dueTodayGroups,
   seasonWaterText

@@ -5,7 +5,9 @@ const format = require('../../utils/format');
 const constants = require('../../utils/constants');
 const media = require('../../utils/media');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     plantId: '',
     recordId: '',
@@ -156,5 +158,34 @@ Page({
     } finally {
       wx.hideLoading();
     }
+  },
+
+  remove() {
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
+    if (!this.data.isEdit || !this.data.recordId || this.data.isSubmitting) return;
+    wx.showModal({
+      title: '删除养护记录',
+      content: '删除后会按该植物最新记录重算提醒，确定吗？',
+      confirmText: '删除',
+      confirmColor: '#c0554f',
+      success: async (res) => {
+        if (!res.confirm) return;
+        this.setData({ isSubmitting: true });
+        wx.showLoading({ title: '删除中', mask: true });
+        try {
+          await dataApi.deleteRecord(this.data.recordId);
+          wx.showToast({ title: '已删除', icon: 'success' });
+          wx.navigateBack();
+        } catch (error) {
+          this.setData({ isSubmitting: false });
+          wx.showToast({ title: error.message || '删除失败，请重试', icon: 'none' });
+        } finally {
+          wx.hideLoading();
+        }
+      }
+    });
   }
 });

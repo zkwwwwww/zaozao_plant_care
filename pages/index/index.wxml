@@ -1,17 +1,20 @@
+<notice-center></notice-center>
 <view class="container {{totalPlants ? 'has-add' : ''}}">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="loadData">{{loadError}}，点此重试</view>
   <view class="card load-hint" wx:elif="{{loading}}">正在读取植物…</view>
 
-  <!-- 小程序标识与功能 -->
-  <view class="card brand">
-    <image class="brand-logo" src="{{account.avatarUrl || '/assets/icons/logo.png'}}" mode="aspectFill"></image>
-    <view class="brand-text">
-      <text class="brand-name">植早早</text>
-      <text class="brand-desc">记录生长与养护，让每一次陪伴都有迹可循。</text>
-      <text class="brand-login {{account.status === 'expired' ? 'is-expired' : ''}}" bindtap="goAccount">
-        {{account.status === 'valid' ? '你好，' + account.summary : account.summary}}
+  <!-- 主页问候：放大昵称，品牌迁至「我的」 -->
+  <view class="card hello" bindtap="goAccount">
+    <image class="hello-avatar" src="{{account.avatarUrl || '/assets/icons/logo.png'}}" mode="aspectFill"></image>
+    <view class="hello-text">
+      <text class="hello-name">{{account.status === 'valid' ? account.nickName || account.summary : '你好'}}</text>
+      <text class="hello-sub {{account.status === 'expired' ? 'is-expired' : ''}}">
+        {{account.status === 'valid' ? '今天也要好好照顾它们' : account.summary}}
       </text>
     </view>
+  </view>
+
+  <view class="card feature-card">
     <view class="feature-row">
       <view class="feature-item" bindtap="goSeedlings">
         <text class="feature-title">育苗</text>
@@ -24,6 +27,10 @@
       <view class="feature-item" bindtap="goMemorial">
         <text class="feature-title">纪念碑</text>
         <text class="feature-desc">离开也能留下</text>
+      </view>
+      <view class="feature-item" bindtap="goBatchEntry">
+        <text class="feature-title">批量录入</text>
+        <text class="feature-desc">一次添加多株</text>
       </view>
     </view>
   </view>

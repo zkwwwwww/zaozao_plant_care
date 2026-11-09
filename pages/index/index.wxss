@@ -7,46 +7,43 @@
   padding-bottom: 132rpx;
 }
 
-/* 小程序标识 */
-.brand {
+/* 主页问候：昵称优先 */
+.hello {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  padding: 16rpx 22rpx 12rpx;
+  padding: 28rpx 24rpx;
   margin-bottom: 16rpx;
 }
-.brand-logo {
-  width: 112rpx;
-  height: 112rpx;
-  border-radius: 28rpx;
-  margin-right: 20rpx;
+.hello-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 48rpx;
+  margin-right: 22rpx;
   flex-shrink: 0;
+  background: #eef4f0;
 }
-.brand-text {
-  flex: 1;
-  min-width: 0;
-}
-.brand-name {
+.hello-text { flex: 1; min-width: 0; }
+.hello-name {
   display: block;
-  font-size: 32rpx;
-  font-weight: 700;
+  overflow: hidden;
   color: #26352c;
+  font-size: 44rpx;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.brand-desc {
+.hello-sub {
   display: block;
-  margin-top: 4rpx;
-  font-size: 22rpx;
-  line-height: 1.4;
+  margin-top: 8rpx;
   color: #6b7a70;
+  font-size: 24rpx;
 }
-.brand-login {
-  display: block;
-  margin-top: 4rpx;
-  font-size: 20rpx;
-  color: #8a9b90;
-}
-.brand-login.is-expired {
-  color: #9b6819;
+.hello-sub.is-expired { color: #9b6819; }
+
+.feature-card {
+  padding: 8rpx 12rpx 16rpx;
+  margin-bottom: 16rpx;
 }
 
 .login-blur {
@@ -205,26 +202,24 @@
 }
 .feature-row {
   display: flex;
+  flex-wrap: wrap;
   width: 100%;
-  margin-top: 14rpx;
-  padding-top: 12rpx;
-  border-top: 1rpx solid #eef1ef;
 }
 .feature-item {
-  flex: 1;
-  min-height: 60rpx;
+  width: 25%;
+  min-height: 88rpx;
   text-align: center;
-  padding: 0 6rpx;
+  padding: 12rpx 6rpx;
 }
 .feature-title {
   display: block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-weight: 600;
   color: #2e7d5b;
 }
 .feature-desc {
   display: block;
-  margin-top: 2rpx;
+  margin-top: 4rpx;
   font-size: 18rpx;
   line-height: 1.3;
   color: #8a9b90;

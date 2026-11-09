@@ -2,6 +2,7 @@ const account = require('./account');
 const profile = require('../utils/profile');
 const storage = require('../utils/storage');
 const constants = require('../utils/constants');
+const batchCare = require('./batch-care');
 
 function call(name, data) {
   return new Promise((resolve, reject) => {
@@ -118,6 +119,7 @@ function toPlant(doc, records) {
     status: constants.normalizeStatus(doc.status),
     price: doc.price === 0 ? 0 : (doc.price || ''),
     purchaseWay: doc.purchaseWay || '',
+    giftFrom: doc.giftFrom || '',
     planting: doc.planting || '',
     environmentId: doc.environmentId || '',
     location: doc.location || '',
@@ -130,6 +132,8 @@ function toPlant(doc, records) {
     customFertInterval: doc.customFertInterval || 0,
     customRepotInterval: doc.customRepotInterval || 0,
     reminderAdvanceDays: doc.reminderAdvanceDays == null ? 1 : Number(doc.reminderAdvanceDays),
+    reminderIgnores: doc.reminderIgnores && typeof doc.reminderIgnores === 'object' ? doc.reminderIgnores : {},
+    manualTasks: Array.isArray(doc.manualTasks) ? doc.manualTasks : [],
     memorialized: !!doc.memorialized,
     memorialType: doc.memorialType || '',
     memorialDate: doc.memorialDate || '',
@@ -232,7 +236,10 @@ async function loadBundle(options) {
   const cacheValid = cachedBundle
     && cachedOpenid === openid
     && Date.now() - cachedAt < BUNDLE_CACHE_TTL_MS;
-  if (!force && cacheValid) return cachedBundle;
+  if (!force && cacheValid) {
+    require('./notifications').observeBundle(cachedBundle);
+    return cachedBundle;
+  }
   if (pendingBundle) return pendingBundle;
   const version = cacheVersion;
   const request = loadBundleNow()
@@ -241,6 +248,7 @@ async function loadBundle(options) {
         cachedBundle = bundle;
         cachedAt = Date.now();
         cachedOpenid = openid;
+        if (openid === (account.getSession() || {}).openid) require('./notifications').observeBundle(bundle);
       }
       return bundle;
     })
@@ -273,29 +281,13 @@ async function loadBundleNow() {
 }
 
 async function savePlant(plant) {
-  const photos = await uploadPhotos(plant.photos, 'plants');
-  const result = await call('savePlant', {
-    id: plant.id || '',
-    name: plant.name,
-    variety: plant.variety,
-    status: plant.status,
-    price: plant.price,
-    purchaseWay: plant.purchaseWay,
-    planting: plant.planting,
-    environmentId: plant.environmentId,
-    location: plant.location,
-    companionStart: plant.companionStart,
-    purchaseDate: plant.purchaseDate,
-    description: plant.description,
+  const photos = await uploadPhotos(plant.photos || [], 'plants');
+  const result = await call('savePlant', Object.assign(plantPayload(plant), {
     photos,
-    tags: plant.tags || [],
-    customWaterInterval: plant.customWaterInterval,
-    customFertInterval: plant.customFertInterval,
-    customRepotInterval: plant.customRepotInterval,
-    reminderAdvanceDays: plant.reminderAdvanceDays,
     clientId: plant.clientId || ''
-  });
+  }));
   invalidateBundle();
+  require('./notifications').signal();
   return result.plant;
 }
 
@@ -311,6 +303,7 @@ async function saveRecord(record) {
     clientId: record.clientId || ''
   });
   invalidateBundle();
+  require('./notifications').signal();
   return result.record;
 }
 
@@ -325,18 +318,20 @@ async function saveSeedling(seedling) {
 function mutate(name, data) {
   return call(name, data).then(result => {
     invalidateBundle();
+    require('./notifications').signal();
     return result;
   });
 }
 
 function plantPayload(plant) {
-  return {
+  const payload = {
     id: plant.id || '',
     name: plant.name,
     variety: plant.variety,
     status: plant.status,
     price: plant.price,
     purchaseWay: plant.purchaseWay,
+    giftFrom: plant.purchaseWay === '朋友赠送' ? (plant.giftFrom || '') : '',
     planting: plant.planting,
     environmentId: plant.environmentId,
     location: plant.location,
@@ -350,6 +345,15 @@ function plantPayload(plant) {
     customRepotInterval: plant.customRepotInterval,
     reminderAdvanceDays: plant.reminderAdvanceDays
   };
+  if (!plant.id) {
+    payload.reminderIgnores = plant.reminderIgnores || {};
+    payload.manualTasks = Array.isArray(plant.manualTasks) ? plant.manualTasks : [];
+  }
+  return payload;
+}
+
+async function ignoreReminder(plant, type) {
+  return mutate('savePlant', { action: 'ignoreReminder', id: plant.id, type });
 }
 
 module.exports = {
@@ -364,7 +368,12 @@ module.exports = {
   restorePlant: (plantId) => mutate('restorePlant', { plantId }),
   deletePlant: (plantId) => mutate('deletePlant', { plantId }),
   deleteRecord: (id) => mutate('deleteRecord', { id }),
+  ignoreReminder,
+  addManualTask: (id, taskId, title) => mutate('savePlant', { action: 'addManualTask', id, taskId, title }),
+  setManualTask: (id, taskId, done) => mutate('savePlant', { action: 'setManualTask', id, taskId, done }),
+  removeManualTask: (id, taskId) => mutate('savePlant', { action: 'removeManualTask', id, taskId }),
   exportData: () => call('exportUserData'),
+  cleanupExport: fileID => call('exportUserData', { action: 'cleanup', fileID }),
   migrate: (payload) => mutate('migrateLocalData', payload),
   saveSeedling,
   deleteSeedling: (id) => mutate('manageSeedling', { action: 'delete', id }),
@@ -373,6 +382,9 @@ module.exports = {
   saveTag: (tag) => mutate('manageTag', tag).then(result => result.tag),
   deleteTag: (id) => mutate('manageTag', { action: 'delete', id }),
   mergeEnvironmentTag: (environmentId) => mutate('manageTag', { action: 'mergeEnvironment', environmentId }),
-  batchCare: (plantIds, type) => mutate('batchCare', { plantIds, type }),
+  completeCareTasks: (tasks, options) => batchCare.completeTasks(tasks, mutate, options),
+  batchCare: (plantIds, type, options) => batchCare.completeTasks(
+    plantIds.map(plantId => ({ key: plantId + '_' + type, plantId, type })), mutate, options
+  ),
   plantPayload
 };

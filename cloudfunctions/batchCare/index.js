@@ -1,60 +1,88 @@
+const crypto = require('crypto');
 const { fail, ok, text, day, openContext, ensure } = require('./runtime');
 
-const TYPES = ['浇水', '施肥', '修剪', '换盆', '防治病虫害', '测量'];
-const MAX_PLANTS = 100;
+const TYPES = ['浇水', '施肥', '修剪', '换盆', '防治病虫害', '测量', 'manual'];
+const MAX_TASKS = 100;
 
 function chinaToday() {
-  const now = new Date(Date.now() + 8 * 3600000);
-  return now.toISOString().slice(0, 10);
+  return new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
 }
 
-exports.main = async (event) => {
+function recordId(openid, requestId, task, date) {
+  return 'batch_' + crypto.createHash('sha256')
+    .update(JSON.stringify([openid, requestId, task.plantId, task.type, date])).digest('hex').slice(0, 48);
+}
+
+async function complete(db, openid, task, date, requestId, multiple) {
+  return db.runTransaction(async transaction => {
+    const plantRef = transaction.collection('plants').doc(task.plantId);
+    const snapshot = await plantRef.get();
+    const plant = snapshot.data;
+    if (!plant || plant._openid !== openid || plant.deleted || plant.memorialized || plant.status === '死亡') return 'skipped';
+    const now = db.serverDate();
+    if (task.type === 'manual') {
+      const tasks = Array.isArray(plant.manualTasks) ? plant.manualTasks.slice() : [];
+      const index = tasks.findIndex(item => item.id === task.taskId);
+      if (index < 0) return 'skipped';
+      if (!tasks[index].done) {
+        tasks[index] = Object.assign({}, tasks[index], { done: true });
+        await plantRef.update({ data: { manualTasks: tasks, updatedAt: now } });
+      }
+      return 'saved';
+    }
+    const ref = transaction.collection('care_records').doc(recordId(openid, requestId, task, date));
+    const existing = await ref.get();
+    // Stable IDs make an interrupted request safe to retry, including concurrent retries.
+    if (existing.data) return existing.data.deleted ? 'skipped' : 'saved';
+    await ref.set({ data: {
+      _openid: openid, plantId: task.plantId, type: task.type, date,
+      content: multiple ? '批量养护' : '', photo: '', deleted: false, createdAt: now, updatedAt: now
+    } });
+    return 'saved';
+  });
+}
+
+exports.main = async event => {
   const ctx = await openContext();
   if (ctx.error) return ctx.error;
-  const { db, openid } = ctx;
   const input = event || {};
-  if (TYPES.indexOf(input.type) < 0) return fail('请选择养护类型');
-  const ids = [];
-  (Array.isArray(input.plantIds) ? input.plantIds : []).forEach(item => {
-    const id = text(item, 64);
-    if (id && ids.indexOf(id) < 0) ids.push(id);
-  });
-  if (!ids.length) return fail('没有可养护的植物');
-  if (ids.length > MAX_PLANTS) return fail('一次最多批量养护 ' + MAX_PLANTS + ' 株');
-
+  const source = Array.isArray(input.tasks) ? input.tasks :
+    (Array.isArray(input.plantIds) ? input.plantIds : []).map(plantId => ({ plantId, type: input.type }));
+  if (!source.length) return fail('请先选择养护事项');
+  if (source.length > MAX_TASKS) return fail('每批最多处理 ' + MAX_TASKS + ' 项');
+  const tasks = [];
+  const seen = new Set();
+  for (const item of source) {
+    if (!item || !text(item.plantId, 64) || TYPES.indexOf(item.type) < 0 ||
+      (item.type === 'manual' && !text(item.taskId, 64))) return fail('养护事项不完整');
+    const task = {
+      plantId: text(item.plantId, 64), type: item.type, taskId: text(item.taskId, 64),
+      key: text(item.key, 160) || text(item.plantId, 64) + '_' + item.type
+    };
+    const signature = JSON.stringify([task.plantId, task.type, task.taskId]);
+    if (!seen.has(signature)) tasks.push(task);
+    seen.add(signature);
+  }
+  const date = day(input.date) || chinaToday();
+  const requestId = text(input.requestId, 64) || crypto.randomBytes(16).toString('hex');
   try {
-    await ensure(db, 'plants');
-    await ensure(db, 'care_records');
-    const _ = db.command;
-    const snap = await db.collection('plants')
-      .where({ _openid: openid, _id: _.in(ids), deleted: false, memorialized: false })
-      .limit(MAX_PLANTS)
-      .get();
-    const targets = snap.data.filter(plant => plant.status !== '死亡');
-    if (!targets.length) return fail('没有可养护的植物');
-
-    const date = day(input.date) || chinaToday();
-    const now = db.serverDate();
-    const rows = targets.map(plant => ({
-      _openid: openid,
-      plantId: plant._id,
-      type: input.type,
-      date,
-      content: targets.length > 1 ? '批量养护' : '',
-      photo: '',
-      deleted: false,
-      createdAt: now,
-      updatedAt: now
-    }));
-    let saved = 0;
-    for (let i = 0; i < rows.length; i += 10) {
-      const results = await Promise.all(rows.slice(i, i + 10).map(row =>
-        db.collection('care_records').add({ data: row }).then(() => true, () => false)
-      ));
-      saved += results.filter(Boolean).length;
+    await ensure(ctx.db, 'plants');
+    await ensure(ctx.db, 'care_records');
+    const results = [];
+    for (let i = 0; i < tasks.length; i += 10) {
+      for (const result of await Promise.all(tasks.slice(i, i + 10).map(async task => {
+        try {
+          return { key: task.key, status: await complete(ctx.db, ctx.openid, task, date, requestId, tasks.length > 1) };
+        } catch (error) {
+          return { key: task.key, status: 'failed' };
+        }
+      }))) results.push(result);
     }
-    if (!saved) return fail('批量养护失败，请稍后重试');
-    return ok({ saved, skipped: ids.length - saved, date });
+    return ok({
+      saved: results.filter(item => item.status === 'saved').length,
+      skipped: results.filter(item => item.status === 'skipped').length,
+      failed: results.filter(item => item.status === 'failed').length, results, date
+    });
   } catch (error) {
     console.error('batchCare failed');
     return fail('批量养护失败，请稍后重试');

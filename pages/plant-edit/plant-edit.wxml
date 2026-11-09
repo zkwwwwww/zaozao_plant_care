@@ -1,3 +1,4 @@
+<notice-center></notice-center>
 <view class="container">
 
   <!-- 照片区 -->
@@ -58,6 +59,11 @@
         <text class="form-unit">▾</text>
       </view>
     </picker>
+
+    <view class="form-item" wx:if="{{showGiftFrom}}">
+      <text class="form-label">赠予人</text>
+      <input class="form-input" placeholder="可选，记下是谁送的" placeholder-class="form-placeholder" value="{{form.giftFrom}}" data-field="giftFrom" bindinput="onInput" />
+    </view>
 
     <picker range="{{plantingOptions}}" value="{{plantingIndex}}" bindchange="onPlanting">
       <view class="form-item">

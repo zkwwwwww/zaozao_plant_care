@@ -16,7 +16,9 @@ function motherLabel(item, plants, seedlings) {
   return '';
 }
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     guest: false,
     loading: false,

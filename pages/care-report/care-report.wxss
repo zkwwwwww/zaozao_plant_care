@@ -1,0 +1,44 @@
+.hero-title { display: block; font-size: 40rpx; font-weight: 700; color: #26352c; }
+.hero-sub { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 24rpx; }
+.segmented {
+  display: flex;
+  margin-bottom: 24rpx;
+  padding: 6rpx;
+  border-radius: 18rpx;
+  background: #e9efeb;
+}
+.segmented-item {
+  flex: 1;
+  padding: 16rpx 0;
+  border-radius: 14rpx;
+  color: #6b7a70;
+  font-size: 26rpx;
+  text-align: center;
+}
+.segmented-item.is-on {
+  background: #ffffff;
+  color: #2e7d5b;
+  font-weight: 700;
+}
+.metric-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+.metric {
+  width: 50%;
+  padding: 18rpx 8rpx;
+}
+.metric-num {
+  display: block;
+  color: #26352c;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+.metric-label {
+  display: block;
+  margin-top: 6rpx;
+  color: #8a9b90;
+  font-size: 22rpx;
+}
+.tip-title { display: block; color: #2e7d5b; font-size: 26rpx; font-weight: 700; }
+.tip-desc { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 24rpx; line-height: 1.6; }

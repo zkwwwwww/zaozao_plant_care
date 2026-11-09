@@ -1,0 +1,17 @@
+.share-page { padding: 48rpx 36rpx 72rpx; background: radial-gradient(ellipse at 90% 8%, #e0ecd5, transparent 48%), linear-gradient(180deg, #f7f7ee, #f4f7f5); min-height: 100vh; }
+.share-hero { text-align: center; padding: 28rpx 20rpx 48rpx; }
+.share-eyebrow { display: block; color: #6b7a70; font-size: 24rpx; letter-spacing: 6rpx; }
+.share-logo { display: block; width: 148rpx; height: 148rpx; margin: 28rpx auto 20rpx; border-radius: 36rpx; }
+.share-title { display: block; color: #2e7d5b; font-size: 32rpx; font-weight: 700; letter-spacing: 8rpx; }
+.share-lead { display: block; margin: 24rpx 0; color: #26352c; font-size: 60rpx; line-height: 1.35; font-weight: 700; }
+.share-lead text { display: block; }
+.share-description { display: block; color: #6b7a70; font-size: 26rpx; line-height: 1.8; }
+.share-features { padding: 0 24rpx; border-radius: 24rpx; background: rgba(255, 255, 255, 0.82); }
+.share-features > view { position: relative; padding: 28rpx 0 28rpx 68rpx; border-bottom: 1rpx solid #e9efeb; }
+.share-features > view:last-child { border-bottom: none; }
+.feature-number { position: absolute; left: 0; top: 28rpx; color: #8aa97b; font-size: 26rpx; }
+.feature-title { display: block; color: #26352c; font-size: 29rpx; font-weight: 700; }
+.feature-copy { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 24rpx; line-height: 1.7; }
+.share-actions { margin-top: 32rpx; }
+.share-help { display: block; padding: 20rpx; text-align: center; color: #2e7d5b; font-size: 24rpx; }
+.share-footer { display: block; margin-top: 30rpx; text-align: center; color: #8a9b90; font-size: 22rpx; line-height: 1.7; }

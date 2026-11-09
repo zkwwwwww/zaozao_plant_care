@@ -111,6 +111,7 @@ async function run() {
 function promptOnce() {
   if (prompted || !needsMigration()) return Promise.resolve(false);
   prompted = true;
+  const resumeNotices = require('./notifications').suspend();
   return new Promise((resolve) => {
     wx.showModal({
       title: '迁移本机数据',
@@ -137,7 +138,7 @@ function promptOnce() {
       },
       fail: () => resolve(false)
     });
-  });
+  }).finally(resumeNotices);
 }
 
 module.exports = {

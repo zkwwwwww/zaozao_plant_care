@@ -56,3 +56,14 @@ test('plantTasks excludes distant future tasks but always keeps overdue tasks', 
 test('plantTasks skips plants without a valid base date', () => {
   assert.deepEqual(reminder.plantTasks(plant({ purchaseDate: '', companionStart: '' })), []);
 });
+
+test('ignoring a reminder delays the next due by one interval', () => {
+  const overdue = plant({
+    purchaseDate: format.addDays(format.today(), -20),
+    customWaterInterval: 5
+  });
+  assert.equal(reminder.plantTasks(overdue, { upcomingDays: 0 }).some(t => t.type === 'water' && t.overdue), true);
+  const ignored = reminder.withIgnoredReminder(overdue, 'water', format.today());
+  assert.equal(reminder.nextDueDate(ignored, 'water'), format.addDays(format.today(), 5));
+  assert.equal(reminder.plantTasks(ignored, { upcomingDays: 0 }).some(t => t.type === 'water'), false);
+});

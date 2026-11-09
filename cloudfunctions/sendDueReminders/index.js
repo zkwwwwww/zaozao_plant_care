@@ -41,7 +41,9 @@ function dueTasks(plant, records, today) {
   ];
   const tasks = [];
   specs.forEach(spec => {
-    const last = lastDate(records, spec[1], plant);
+    const care = lastDate(records, spec[1], plant);
+    const ignored = plant.reminderIgnores && plant.reminderIgnores[spec[0]];
+    const last = /^\d{4}-\d{2}-\d{2}$/.test(ignored || '') && ignored > care ? ignored : care;
     const due = last ? addDays(last, spec[2]) : '';
     const advance = plant.reminderAdvanceDays == null
       ? 1

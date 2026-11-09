@@ -1,3 +1,4 @@
+<notice-center></notice-center>
 <view class="container">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
 

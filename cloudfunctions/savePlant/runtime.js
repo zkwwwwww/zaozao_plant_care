@@ -80,6 +80,7 @@ function plantView(doc) {
     status: doc.status || '健康',
     price: doc.price === 0 ? 0 : (doc.price || ''),
     purchaseWay: doc.purchaseWay || '',
+    giftFrom: doc.giftFrom || '',
     planting: doc.planting || '',
     environmentId: doc.environmentId || '',
     location: doc.location || '',
@@ -92,6 +93,8 @@ function plantView(doc) {
     customFertInterval: doc.customFertInterval || 0,
     customRepotInterval: doc.customRepotInterval || 0,
     reminderAdvanceDays: doc.reminderAdvanceDays == null ? 1 : Number(doc.reminderAdvanceDays),
+    reminderIgnores: doc.reminderIgnores && typeof doc.reminderIgnores === 'object' ? doc.reminderIgnores : {},
+    manualTasks: Array.isArray(doc.manualTasks) ? doc.manualTasks : [],
     memorialized: !!doc.memorialized,
     memorialType: doc.memorialType || '',
     memorialDate: doc.memorialDate || ''

@@ -2,7 +2,9 @@
 const account = require('../../services/account');
 const dataApi = require('../../services/data');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     id: '',
     isEdit: false,

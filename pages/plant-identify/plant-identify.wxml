@@ -1,0 +1,33 @@
+<notice-center></notice-center>
+<view class="container">
+  <view class="card hero">
+    <text class="hero-title">我的植物识别</text>
+    <text class="hero-sub">拍照 / 上传后给出配土、光线、浇水、通风建议</text>
+  </view>
+
+  <view class="card">
+    <view class="photo-box" bindtap="pickPhoto">
+      <image wx:if="{{photo}}" src="{{photo}}" mode="aspectFill"></image>
+      <view wx:else class="photo-empty">
+        <text class="plus">＋</text>
+        <text>选择植物照片</text>
+      </view>
+    </view>
+    <button class="btn-primary" bindtap="runIdentify" disabled="{{!photo || loading}}" loading="{{loading}}">开始识别</button>
+  </view>
+
+  <view class="card" wx:if="{{result}}">
+    <text class="result-name">{{result.name}}</text>
+    <text class="result-desc">{{result.desc}}</text>
+    <view class="tip-row" wx:for="{{result.tips}}" wx:key="label">
+      <text class="tip-label">{{item.label}}</text>
+      <text class="tip-text">{{item.text}}</text>
+    </view>
+    <button class="btn-ghost" bindtap="savePlant">保存为新植物</button>
+  </view>
+
+  <view class="card tip">
+    <text class="tip-title">Agent API 待接入</text>
+    <text class="tip-desc">识别服务暂未开放，建议仅作示意参考。你仍可以带上照片，手动填写植物名称并建档。</text>
+  </view>
+</view>

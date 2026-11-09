@@ -2,8 +2,14 @@ const account = require('../../services/account');
 const dataApi = require('../../services/data');
 const migrate = require('../../services/migrate');
 const profile = require('../../utils/profile');
+const format = require('../../utils/format');
+const notifications = require('../../services/notifications');
+const releases = require('../../config/releases');
+const exportFile = require('../../services/export-file');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     cloudReady: false,
     loading: true,
@@ -15,7 +21,12 @@ Page({
     openidMask: '',
     error: '',
     needPrivacy: false,
-    canMigrate: false
+    canMigrate: false,
+    longestCompanion: null,
+    updateNoticesEnabled: true,
+    currentVersion: releases.current.version,
+    exporting: false,
+    exportedFile: null
   },
 
   onLoad() {
@@ -31,6 +42,10 @@ Page({
 
   onAgreePrivacy() {
     this.setData({ needPrivacy: false });
+  },
+
+  refresh() {
+    this.onShow();
   },
 
   onUnload() {
@@ -50,16 +65,83 @@ Page({
       openidMask: !signedOut && session ? profile.maskOpenId(session.openid) : '',
       loading: false,
       error: account.cloudReady() ? '' : '云开发未配置，暂时无法登录',
-      canMigrate: migrate.needsMigration()
+      canMigrate: migrate.needsMigration(),
+      updateNoticesEnabled: notifications.updatesEnabled()
     };
     if (signedOut) {
+      this._exportedFile = null;
+      next.exportedFile = null;
       next.nickName = '';
       next.avatarUrl = '';
+      next.longestCompanion = null;
     } else if (view.nickName || view.avatarUrl) {
       if (!this.data.nickName) next.nickName = view.nickName;
       if (!this.data.avatarUrl) next.avatarUrl = view.avatarUrl;
     }
     this.setData(next);
+    if (view.status === 'valid') this.loadCompanion();
+  },
+
+  async loadCompanion() {
+    try {
+      const bundle = await dataApi.loadBundle();
+      if (!this._alive) return;
+      let best = null;
+      bundle.plants.forEach((plant) => {
+        if (plant.memorialized || plant.status === '死亡') return;
+        const start = plant.companionStart || plant.purchaseDate;
+        if (!format.toDate(start)) return;
+        const days = format.diffDays(start, format.today());
+        if (days < 0) return;
+        if (!best || days > best.days) {
+          best = {
+            id: plant.id,
+            name: plant.name,
+            photo: (plant.photos && plant.photos[0]) || '',
+            days
+          };
+        }
+      });
+      this.setData({ longestCompanion: best });
+    } catch (error) {
+      // 陪伴信息失败不打断账号页
+    }
+  },
+
+  goPlant(e) {
+    const id = e.currentTarget.dataset.id;
+    if (id) wx.navigateTo({ url: '/pages/plant-detail/plant-detail?id=' + id });
+  },
+
+  goBatchEntry() {
+    wx.navigateTo({ url: '/pages/batch-entry/batch-entry' });
+  },
+
+  goCareReport() {
+    wx.navigateTo({ url: '/pages/care-report/care-report' });
+  },
+
+  goSeason() {
+    wx.navigateTo({ url: '/pages/season-plants/season-plants' });
+  },
+
+  goIdentify() {
+    wx.navigateTo({ url: '/pages/plant-identify/plant-identify' });
+  },
+
+  goUpdates() {
+    wx.navigateTo({ url: '/pages/updates/updates' });
+  },
+
+  goAppIntro() { wx.navigateTo({ url: '/pages/share/share' }); },
+
+  onUpdateNotices(e) {
+    notifications.setUpdatesEnabled(e.detail.value);
+    this.setData({ updateNoticesEnabled: e.detail.value });
+  },
+
+  refreshNoticeSettings() {
+    this.setData({ updateNoticesEnabled: notifications.updatesEnabled() });
   },
 
   onHide() {
@@ -125,20 +207,34 @@ Page({
   },
 
   async exportData() {
-    if (!this.data.authorized) return;
+    if (!this.data.authorized || this.data.exporting) return;
+    this.setData({ exporting: true });
+    let payload;
     wx.showLoading({ title: '导出中', mask: true });
     try {
-      const payload = await dataApi.exportData();
-      const text = JSON.stringify(payload);
-      wx.setClipboardData({
-        data: text.length > 100000 ? text.slice(0, 100000) : text,
-        success: () => wx.showToast({ title: text.length > 100000 ? '数据较大，已复制前一部分' : '已复制到剪贴板', icon: 'none' })
-      });
+      payload = await dataApi.exportData();
+      const file = await exportFile.downloadExport(payload);
+      this._exportedFile = file;
+      this.setData({ exportedFile: { name: file.name, sheetCount: file.sheetCount, rowCount: file.rowCount } });
+      wx.hideLoading();
+      await exportFile.openExport(file);
     } catch (error) {
       wx.showToast({ title: error.message || '导出失败，请重试', icon: 'none' });
     } finally {
       wx.hideLoading();
+      this.setData({ exporting: false });
+      if (payload && payload.fileID) dataApi.cleanupExport(payload.fileID).catch(() => {});
     }
+  },
+
+  async openExport() {
+    if (!this.data.authorized || !this._exportedFile) return;
+    try { await exportFile.openExport(this._exportedFile); }
+    catch (error) { wx.showToast({ title: error.message, icon: 'none' }); }
+  },
+
+  shareExport() {
+    if (this.data.authorized && this._exportedFile) exportFile.shareExport(this._exportedFile);
   },
 
   async migrateLocal() {

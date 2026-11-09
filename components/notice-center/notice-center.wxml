@@ -1,0 +1,32 @@
+<view class="notice-overlay" wx:if="{{notice}}" catchtouchmove="preventMove">
+  <view class="notice-backdrop"></view>
+  <view class="notice-card {{notice.celebrate ? 'is-celebrating' : ''}}" aria-role="dialog" aria-label="{{notice.title}}">
+    <view class="confetti" wx:if="{{notice.celebrate}}">
+      <view class="confetti-piece" wx:for="{{confetti}}" wx:key="id" style="{{item.style}}"></view>
+    </view>
+    <view class="notice-art" wx:if="{{notice.celebrate}}">
+      <view class="sprout-stem"></view><view class="sprout-leaf left"></view><view class="sprout-leaf right"></view>
+      <view class="sprout-ground"></view>
+    </view>
+    <text class="notice-kicker">{{notice.kind === 'release' ? '新版本来了' : '今天的生长小报'}}</text>
+    <text class="notice-title">{{notice.title}}</text>
+    <text class="notice-description">{{notice.description}}</text>
+    <scroll-view class="notice-content" scroll-y wx:if="{{notice.kind === 'release' || notice.kind === 'daily'}}">
+      <view class="release-row" wx:for="{{notice.changes}}" wx:key="*this"><text class="release-dot"></text><text>{{item}}</text></view>
+      <view class="notice-group {{group.key}}" wx:for="{{notice.groups}}" wx:for-item="group" wx:key="key" wx:if="{{group.count}}">
+        <view class="group-heading"><text>{{group.label}}</text><text>{{group.count}} 项</text></view>
+        <view class="notice-task" wx:for="{{group.items}}" wx:key="key">
+          <text class="task-title">{{item.plantName}} · {{item.label}}</text><text class="task-time">{{item.text}}</text>
+        </view>
+        <text class="more-hint" wx:if="{{group.count > group.items.length}}">还有 {{group.count - group.items.length}} 项，可在全部待办中查看</text>
+      </view>
+    </scroll-view>
+    <view class="notice-progress" wx:if="{{notice.progress.total}}">
+      <view class="progress-label"><text>今日照顾进度</text><text>{{notice.progress.done}} / {{notice.progress.total}}</text></view>
+      <view class="progress-track"><view class="progress-fill" style="width:{{notice.progress.percent}}%"></view></view>
+    </view>
+    <button class="notice-primary" bindtap="confirm">{{notice.button}}</button>
+    <button class="notice-secondary" wx:if="{{notice.kind === 'daily'}}" bindtap="close">记住了，稍后照顾</button>
+    <button class="notice-secondary" wx:if="{{notice.kind === 'release'}}" bindtap="disableUpdates">以后不再提醒版本更新</button>
+  </view>
+</view>

@@ -4,7 +4,9 @@ const dataApi = require('../../services/data');
 const lineage = require('../../utils/lineage');
 const pagination = require('../../utils/pagination');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     id: '',
     seedling: null,

@@ -3,7 +3,7 @@ const { readFileSync, readdirSync, statSync } = require('node:fs');
 const { join, relative } = require('node:path');
 
 const root = join(__dirname, '..');
-const ignored = new Set(['node_modules', 'miniprogram_npm', 'cloudfunctions']);
+const ignored = new Set(['node_modules', 'miniprogram_npm']);
 const jsFiles = [];
 const jsonFiles = [];
 const wxmlFiles = [];

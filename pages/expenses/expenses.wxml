@@ -1,3 +1,4 @@
+<notice-center></notice-center>
 <view class="container has-fixed-bar">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
 
@@ -9,18 +10,32 @@
   ></empty-state>
 
   <block wx:else>
-    <view class="card summary">
+    <view class="card summary three">
       <view class="summary-item">
-        <text class="summary-label">累计花费</text>
-        <text class="summary-num">¥{{allTotal}}</text>
+        <text class="summary-label">总花费</text>
+        <text class="summary-num">¥{{grandTotal}}</text>
       </view>
       <view class="summary-item">
-        <text class="summary-label">在养植物总价</text>
+        <text class="summary-label">植物花费</text>
         <text class="summary-num">¥{{plantValue}}</text>
       </view>
-      <view class="summary-item" bindtap="goPlant">
-        <text class="summary-label">最贵的植物</text>
-        <text class="summary-num small">{{topPlant ? topPlant.name + ' ¥' + topPlant.price : '还没有填价格'}}</text>
+      <view class="summary-item">
+        <text class="summary-label">其他花费</text>
+        <text class="summary-num">¥{{allTotal}}</text>
+      </view>
+    </view>
+
+    <view class="card pyramid-card" wx:if="{{topPlant}}" bindtap="goPlant">
+      <text class="pyramid-label">价格金字塔 · 最贵的一棵</text>
+      <view class="pyramid">
+        <view class="pyramid-peak">
+          <plant-thumb src="{{topPlant.photo}}"></plant-thumb>
+          <view class="pyramid-copy">
+            <text class="pyramid-name">{{topPlant.name}}</text>
+            <text class="pyramid-price">¥{{topPlant.price}}</text>
+          </view>
+        </view>
+        <view class="pyramid-base"></view>
       </view>
     </view>
 
@@ -79,10 +94,14 @@
     <view class="card price-card">
       <view class="price-head">
         <view>
-          <text class="section-title">植物价格</text>
+          <text class="section-title">植物花费排行</text>
           <text class="price-count">{{pricedCount}} 株计入{{unpricedCount ? '，' + unpricedCount + ' 株未填' : ''}}</text>
         </view>
         <text class="price-total">¥{{plantValue}}</text>
+      </view>
+      <view class="sort-row">
+        <text class="sort-chip {{priceSortKey==='price' ? 'is-on' : ''}}" data-key="price" bindtap="switchPriceSort">按价格{{priceSortKey==='price' ? (priceSortAsc ? '↑' : '↓') : ''}}</text>
+        <text class="sort-chip {{priceSortKey==='time' ? 'is-on' : ''}}" data-key="time" bindtap="switchPriceSort">按时间{{priceSortKey==='time' ? (priceSortAsc ? '↑' : '↓') : ''}}</text>
       </view>
       <view class="list-row" wx:for="{{priceItems}}" wx:key="id" data-id="{{item.id}}" bindtap="goPricePlant">
         <plant-thumb src="{{item.photo}}"></plant-thumb>

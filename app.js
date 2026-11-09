@@ -1,15 +1,20 @@
 // app.js
 const envConfig = require('./config/env');
 const account = require('./services/account');
+const notifications = require('./services/notifications');
 
 App({
-  onLaunch() {
+  onLaunch(options) {
+    this.globalData.singlePage = !!(options && options.scene === 1154);
+    if (this.globalData.singlePage) return;
     account.syncTabBar();
     this.initCloud();
   },
 
   onShow() {
+    if (this.globalData.singlePage) return;
     account.syncTabBar();
+    notifications.signal();
   },
 
   initCloud() {
@@ -19,10 +24,12 @@ App({
       env: envConfig.envId,
       traceUser: true
     });
-    account.restore().catch(() => {});
+    this.globalData.sessionReady = account.restore().catch(() => {});
   },
 
   globalData: {
-    cloudReady: false
+    singlePage: false,
+    cloudReady: false,
+    sessionReady: null
   }
 });

@@ -1,0 +1,25 @@
+<notice-center></notice-center>
+<view class="container">
+  <view class="card hero">
+    <text class="hero-title">养护报告</text>
+    <text class="hero-sub">看看这段时间的照顾，也看看当下的陪伴。</text>
+  </view>
+
+  <view class="card">
+    <view class="segmented">
+      <text class="segmented-item {{range==='month' ? 'is-on' : ''}}" data-range="month" bindtap="switchRange">本月</text>
+      <text class="segmented-item {{range==='year' ? 'is-on' : ''}}" data-range="year" bindtap="switchRange">本年</text>
+    </view>
+    <view class="metric-grid">
+      <view class="metric" wx:for="{{metrics}}" wx:key="label">
+        <text class="metric-num">{{item.value}}</text>
+        <text class="metric-label">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card tip">
+    <text class="tip-title">这些数字怎么算？</text>
+    <text class="tip-desc">“期间”统计本月或本年至今天的记录，包含已告别植物的养护；“当前”仅统计在养植物。其他花费不含植物购买价格。开花、结果暂不统计。</text>
+  </view>
+</view>

@@ -1,0 +1,14 @@
+.season-title { display: block; color: #26352c; font-size: 34rpx; font-weight: 700; }
+.hint { display: block; margin-top: 10rpx; color: #8a9b90; font-size: 22rpx; line-height: 1.5; }
+.picker-field {
+  margin-top: 20rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 14rpx;
+  background: #f4f7f5;
+  color: #26352c;
+  font-size: 26rpx;
+}
+.rec-head { display: flex; align-items: center; justify-content: space-between; }
+.rec-name { color: #26352c; font-size: 30rpx; font-weight: 700; }
+.rec-meta { display: block; margin-top: 12rpx; color: #6b7a70; font-size: 24rpx; line-height: 1.5; }
+.rec-btn { margin-top: 20rpx; }

@@ -6,7 +6,9 @@ const format = require('../../utils/format');
 const expense = require('../../utils/expense');
 const pagination = require('../../utils/pagination');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     guest: false,
     loading: false,
@@ -24,9 +26,12 @@ Page({
     items: [],
     allTotal: '0.00',
     plantValue: '0.00',
+    grandTotal: '0.00',
     pricedCount: 0,
     unpricedCount: 0,
     priceItems: [],
+    priceSortKey: 'price',
+    priceSortAsc: false,
     topPlant: null,
     hasData: false,
     expenseHasMore: false,
@@ -48,30 +53,32 @@ Page({
       const bundle = await dataApi.loadBundle();
       this._expenses = bundle.expenses;
       const activePlants = bundle.plants.filter(plant => !plant.memorialized && plant.status !== '死亡');
-      const pricedPlants = activePlants
-        .filter(plant => Number(plant.price) > 0)
-        .sort((a, b) => Number(b.price) - Number(a.price));
+      const pricedPlants = activePlants.filter(plant => Number(plant.price) > 0);
       const top = expense.mostExpensive(activePlants);
       const plantValueCents = pricedPlants.reduce((sum, plant) => sum + Math.round(Number(plant.price) * 100), 0);
-      this._allPriceItems = pricedPlants.map(plant => ({
+      const otherTotal = expense.sum(bundle.expenses);
+      const plantValue = format.money(plantValueCents / 100);
+      const grandCents = plantValueCents + Math.round(Number(otherTotal) * 100);
+      this._pricedPlants = pricedPlants.map(plant => ({
         id: plant.id,
         name: plant.name,
         sub: plant.variety || plant.purchaseWay || '',
-        photo: plant.photos[0] || '',
-        price: format.money(plant.price)
+        photo: (plant.photos && plant.photos[0]) || '',
+        price: format.money(plant.price),
+        priceValue: Number(plant.price),
+        time: plant.purchaseDate || plant.companionStart || ''
       }));
-      const pricePage = pagination.slice(this._allPriceItems, 1);
       this.setData({
         loading: false,
-        hasData: bundle.expenses.length > 0,
-        allTotal: expense.sum(bundle.expenses),
-        plantValue: format.money(plantValueCents / 100),
+        hasData: bundle.expenses.length > 0 || pricedPlants.length > 0,
+        allTotal: otherTotal,
+        plantValue,
+        grandTotal: format.money(grandCents / 100),
         pricedCount: pricedPlants.length,
         unpricedCount: activePlants.length - pricedPlants.length,
-        priceItems: pricePage.items,
-        priceHasMore: pricePage.hasMore,
-        topPlant: top ? { id: top.id, name: top.name, price: format.money(top.price), photo: top.photos[0] || '' } : null
+        topPlant: top ? { id: top.id, name: top.name, price: format.money(top.price), photo: (top.photos && top.photos[0]) || '' } : null
       });
+      this.renderPricePage(1);
       this.render(this.data.selectedKey);
     } catch (error) {
       this.setData({ loading: false, loadError: error.message || '读取失败，请重试' });
@@ -175,6 +182,35 @@ Page({
       return;
     }
     this.render(key);
+  },
+
+  switchPriceSort(e) {
+    const key = e.currentTarget.dataset.key;
+    if (key === this.data.priceSortKey) {
+      this.setData({ priceSortAsc: !this.data.priceSortAsc });
+    } else {
+      this.setData({ priceSortKey: key, priceSortAsc: false });
+    }
+    this.renderPricePage(1);
+  },
+
+  renderPricePage(pageNumber) {
+    const key = this.data.priceSortKey;
+    const asc = this.data.priceSortAsc;
+    const rows = (this._pricedPlants || []).slice().sort((a, b) => {
+      if (key === 'time') {
+        const left = a.time || '';
+        const right = b.time || '';
+        return asc ? left.localeCompare(right) : right.localeCompare(left);
+      }
+      return asc ? a.priceValue - b.priceValue : b.priceValue - a.priceValue;
+    });
+    this._allPriceItems = rows;
+    const page = pagination.slice(rows, pageNumber);
+    this.setData({
+      priceItems: page.items,
+      priceHasMore: page.hasMore
+    });
   },
 
   goAdd() {

@@ -1,0 +1,20 @@
+<notice-center></notice-center>
+<view class="container">
+  <view class="card">
+    <view class="section-title">当前时令</view>
+    <text class="season-title">{{season.name}} · {{region}}</text>
+    <text class="hint">内置季节推荐供你参考，目前各地区展示同一份清单；请结合当地温度和种植环境选择。</text>
+    <picker range="{{regions}}" value="{{regionIndex}}" bindchange="onRegion">
+      <view class="picker-field">地区：{{region}} ▾</view>
+    </picker>
+  </view>
+
+  <view class="card" wx:for="{{items}}" wx:key="name">
+    <view class="rec-head">
+      <text class="rec-name">{{item.name}}</text>
+      <text class="tag tag-green">{{item.place}}</text>
+    </view>
+    <text class="rec-meta">{{item.season}} · {{item.tip}}</text>
+    <button class="btn-ghost rec-btn" data-name="{{item.name}}" bindtap="quickAdd">一键录入</button>
+  </view>
+</view>

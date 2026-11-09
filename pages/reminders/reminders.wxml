@@ -1,3 +1,4 @@
+<notice-center></notice-center>
 <view class="container">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
   <view class="card load-hint" wx:elif="{{loading}}">正在读取养护数据…</view>
@@ -19,7 +20,7 @@
         <text class="care-title">记录今天的养护</text>
         <text class="care-desc">选择植物可批量操作，单独记录可填写备注和照片</text>
       </view>
-      <button class="batch-care-btn" bindtap="batchCare" disabled="{{busy || !selectedCareCount}}">
+      <button class="batch-care-btn" bindtap="batchCare" disabled="{{busy || loading || loadError || !selectedCareCount}}">
         批量养护{{selectedCareCount ? '（' + selectedCareCount + '）' : ''}}
       </button>
     </view>
@@ -36,7 +37,7 @@
     </scroll-view>
     <view class="select-bar" wx:if="{{carePlants.length}}">
       <text>已选 {{selectedCareCount}} 株</text>
-      <text class="select-all" bindtap="selectAllCare">{{allCareSelected ? '取消全选' : '全选当前'}}</text>
+      <text class="select-all" bindtap="selectAllCare">{{allCareSelected ? '取消全选' : '全选筛选结果'}}</text>
     </view>
     <view class="card care-list" wx:if="{{carePlants.length}}">
       <view class="care-row" wx:for="{{carePlants}}" wx:key="id">
@@ -62,6 +63,26 @@
 
   <!-- 养护提醒 -->
   <block wx:if="{{activeSection==='reminder'}}">
+    <view class="card reminder-batch" wx:if="{{taskCount}}">
+      <view class="care-intro">
+        <view><text class="care-title">待维护清单 · {{taskCount}} 项</text><text class="care-desc">多选或整组完成，不必逐株记录</text></view>
+        <button class="batch-care-btn" bindtap="toggleBatchSelection" disabled="{{busy || loading || loadError}}">{{batchSelecting ? '退出多选' : '批量维护'}}</button>
+      </view>
+      <block wx:if="{{batchSelecting}}">
+        <view class="task-selection-actions">
+          <text data-scope="due" bindtap="selectTaskScope">全选今日 / 逾期</text>
+          <text data-scope="all" bindtap="selectTaskScope">全选清单</text>
+          <text data-scope="none" bindtap="selectTaskScope">取消全选</text>
+        </view>
+        <view class="care-intro"><text class="care-desc">已选 {{selectedTaskCount}} 项，包含未翻页的事项</text><button class="batch-care-btn" bindtap="completeSelectedTasks" disabled="{{busy || loading || loadError || !selectedTaskCount}}">批量完成</button></view>
+      </block>
+      <text class="care-desc" wx:if="{{batchProgress}}">{{batchProgress}}</text>
+    </view>
+    <view class="card" wx:if="{{upcomingWindow}}"><text class="care-desc">正在显示今天、逾期和未来两天的养护事项。</text><text class="section-more" bindtap="usePlantWindow">按每株设置显示</text></view>
+    <view class="card" wx:if="{{manualTaskPlants.length}}">
+      <section-header title="管理手动任务"></section-header>
+      <view class="list-row" wx:for="{{manualTaskPlants}}" wx:key="id" data-id="{{item.id}}" bindtap="goManualTasks"><text class="list-title">{{item.name}}</text><text class="list-action">{{item.count}} 项，前往勾选 ›</text></view>
+    </view>
     <view class="card overdue-bar" wx:if="{{overdueCount>0}}">
       <text class="ob-text">⚠ 共 {{overdueCount}} 项已逾期</text>
     </view>
@@ -85,14 +106,21 @@
         wx:key="key"
         item-id="{{item.plantId}}"
         task-type="{{item.type}}"
+        task-id="{{item.taskId || ''}}"
+        task-key="{{item.key}}"
+        selectable="{{batchSelecting}}"
+        selected="{{item.selected}}"
         photo="{{item.photo}}"
         title="{{item.plantName}} · {{item.label}}"
-        subtitle="到期 {{item.due}}"
+        subtitle="{{item.due ? '到期 ' + item.due : '手动任务，无到期日'}}"
         status-text="{{item.dueText}}"
         status-class="{{item.cls}}"
-        show-complete="{{true}}"
+        show-complete="{{!batchSelecting}}"
+        show-ignore="{{!batchSelecting && item.type!=='manual'}}"
+        bind:check="toggleTaskSelection"
         bind:select="goDetail"
         bind:complete="completeTask"
+        bind:ignore="ignoreTask"
       ></task-row>
       <empty-state
         wx:if="{{flatTasks.length===0}}"
@@ -105,58 +133,74 @@
 
     <block wx:if="{{activeView==='time'}}">
       <view class="card grouped-card" wx:for="{{timeGroups}}" wx:for-item="group" wx:key="key">
-        <view class="group-title"><text>{{group.label}}</text><text class="group-count">{{group.items.length}} 项</text></view>
+        <view class="group-title"><text>{{group.label}}</text><button class="group-complete" data-time="{{group.key}}" bindtap="completeTaskGroup" disabled="{{busy || loading || loadError}}">整组完成</button></view>
         <task-row
           wx:for="{{group.items}}"
           wx:key="key"
           item-id="{{item.plantId}}"
           task-type="{{item.type}}"
+          task-id="{{item.taskId || ''}}"
+          task-key="{{item.key}}"
+          selectable="{{batchSelecting}}"
+          selected="{{item.selected}}"
           photo="{{item.photo}}"
           title="{{item.plantName}} · {{item.label}}"
-          subtitle="到期 {{item.due}}"
+          subtitle="{{item.due ? '到期 ' + item.due : '手动任务，无到期日'}}"
           status-text="{{item.dueText}}"
           status-class="{{item.cls}}"
-          show-complete="{{true}}"
+          show-complete="{{!batchSelecting}}"
+          show-ignore="{{!batchSelecting && item.type!=='manual'}}"
+          bind:check="toggleTaskSelection"
           bind:select="goDetail"
           bind:complete="completeTask"
+          bind:ignore="ignoreTask"
         ></task-row>
       </view>
     </block>
 
     <block wx:if="{{activeView==='plant'}}">
-      <view class="card group-card" wx:for="{{groups}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <view class="card group-card" wx:for="{{groups}}" wx:key="id">
         <view class="group-head">
           <plant-thumb src="{{item.photo}}" size="small"></plant-thumb>
-          <text class="g-name">{{item.name}}</text>
-          <text class="g-int">提前 {{item.advanceDays}} 天</text>
+          <text class="g-name" data-id="{{item.id}}" bindtap="goDetail">{{item.name}}</text>
+          <button class="group-complete" data-plant="{{item.id}}" bindtap="completeTaskGroup" disabled="{{busy || loading || loadError}}">整株完成</button>
         </view>
         <view class="g-tasks">
-          <view class="g-task" wx:for="{{item.tasks}}" wx:for-item="t" wx:key="type">
-            <text class="g-type">{{t.label}}</text>
-            <view class="g-tinfo"><text class="g-tdate">到期 {{t.due}}</text></view>
-            <text class="tag {{t.cls}}">{{t.dueText}}</text>
-            <view class="task-complete" catchtap="completeTask" data-id="{{item.id}}" data-type="{{t.type}}">完成</view>
-          </view>
+          <task-row wx:for="{{item.tasks}}" wx:for-item="t" wx:key="key"
+            item-id="{{item.id}}" task-type="{{t.type}}" task-id="{{t.taskId || ''}}" task-key="{{t.key}}"
+            title="{{t.label}}" subtitle="{{t.due ? '到期 ' + t.due : '手动任务，无到期日'}}"
+            photo="{{item.photo}}" status-text="{{t.dueText}}" status-class="{{t.cls}}"
+            selectable="{{batchSelecting}}" selected="{{t.selected}}"
+            show-complete="{{!batchSelecting}}" show-ignore="{{!batchSelecting && t.type!=='manual'}}"
+            bind:check="toggleTaskSelection" bind:select="goDetail" bind:complete="completeTask" bind:ignore="ignoreTask"
+          ></task-row>
         </view>
       </view>
     </block>
 
     <block wx:if="{{activeView==='type'}}">
       <view class="card grouped-card" wx:for="{{typeGroups}}" wx:for-item="group" wx:key="type">
-        <view class="group-title"><text>{{group.label}}</text><text class="group-count">{{group.items.length}} 项</text></view>
+        <view class="group-title"><text>{{group.label}}</text><button class="group-complete" data-type="{{group.type}}" bindtap="completeTaskGroup" disabled="{{busy || loading || loadError}}">整组完成</button></view>
         <task-row
           wx:for="{{group.items}}"
           wx:key="key"
           item-id="{{item.plantId}}"
           task-type="{{item.type}}"
+          task-id="{{item.taskId || ''}}"
+          task-key="{{item.key}}"
+          selectable="{{batchSelecting}}"
+          selected="{{item.selected}}"
           photo="{{item.photo}}"
           title="{{item.plantName}}"
-          subtitle="到期 {{item.due}}"
+          subtitle="{{item.due ? '到期 ' + item.due : '手动任务，无到期日'}}"
           status-text="{{item.dueText}}"
           status-class="{{item.cls}}"
-          show-complete="{{true}}"
+          show-complete="{{!batchSelecting}}"
+          show-ignore="{{!batchSelecting && item.type!=='manual'}}"
+          bind:check="toggleTaskSelection"
           bind:select="goDetail"
           bind:complete="completeTask"
+          bind:ignore="ignoreTask"
         ></task-row>
       </view>
     </block>
@@ -182,6 +226,7 @@
         <view class="record-actions">
           <text class="record-date">{{item.date}}</text>
           <text class="record-edit" data-id="{{item.id}}" data-plant-id="{{item.plantId}}" catchtap="editRecord">编辑</text>
+          <text class="record-delete" data-id="{{item.id}}" catchtap="deleteRecord">删除</text>
         </view>
       </view>
     </view>

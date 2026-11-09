@@ -1,4 +1,13 @@
+<notice-center bind:updatesdisabled="refreshNoticeSettings"></notice-center>
 <view class="container">
+  <view class="card brand-banner">
+    <image class="brand-logo" src="/assets/icons/logo.png" mode="aspectFill"></image>
+    <view class="brand-copy">
+      <text class="brand-name">植早早</text>
+      <text class="brand-desc">记录生长与养护，让每一次陪伴都有迹可循。</text>
+    </view>
+  </view>
+
   <view class="card account-card">
     <button
       wx:if="{{needPrivacy}}"
@@ -31,9 +40,69 @@
     <text class="account-note" wx:else>账号身份由当前微信自动绑定，登录状态保留 7 天。</text>
 
     <view class="btn-primary {{submitting || loading ? 'is-disabled' : ''}}" bindtap="submit">{{authorized ? '更新资料' : (expired ? '重新登录' : '授权登录')}}</view>
-    <view class="btn-ghost" wx:if="{{authorized}}" bindtap="exportData">导出云端数据</view>
+    <button class="btn-ghost" wx:if="{{authorized}}" bindtap="exportData" disabled="{{exporting}}">{{exporting ? '正在生成表格…' : '导出 Excel 表格'}}</button>
+    <view class="export-result" wx:if="{{authorized && exportedFile}}">
+      <text class="export-name">{{exportedFile.name}}</text><text class="export-hint">{{exportedFile.sheetCount}} 张工作表 · {{exportedFile.rowCount}} 条数据。照片仅保留引用。</text>
+      <view class="export-actions"><button class="btn-ghost" bindtap="openExport">打开表格</button><button class="btn-ghost" bindtap="shareExport">发送到微信</button></view>
+    </view>
     <view class="btn-ghost" wx:if="{{authorized && canMigrate}}" bindtap="migrateLocal">迁移本机数据</view>
     <view class="btn-ghost is-danger" wx:if="{{authorized}}" bindtap="signOut">退出登录</view>
+  </view>
+
+  <view class="card companion-card" wx:if="{{authorized && longestCompanion}}">
+    <text class="section-title">最长陪伴</text>
+    <view class="companion-row" data-id="{{longestCompanion.id}}" bindtap="goPlant">
+      <plant-thumb src="{{longestCompanion.photo}}"></plant-thumb>
+      <view class="companion-main">
+        <text class="companion-name">{{longestCompanion.name}}</text>
+        <text class="companion-days">已陪伴 {{longestCompanion.days}} 天</text>
+      </view>
+      <text class="companion-more">›</text>
+    </view>
+  </view>
+
+  <view class="card menu-card" wx:if="{{authorized}}">
+    <text class="section-title">更多能力</text>
+    <view class="menu-row" bindtap="goBatchEntry">
+      <view class="menu-copy">
+        <text class="menu-title">一键批量录入</text>
+        <text class="menu-desc">同品种或多照片，一次添加多株</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-row" bindtap="goCareReport">
+      <view class="menu-copy">
+        <text class="menu-title">养护报告</text>
+        <text class="menu-desc">月 / 年陪伴与养护汇总</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-row" bindtap="goSeason">
+      <view class="menu-copy">
+        <text class="menu-title">地区时令推荐</text>
+        <text class="menu-desc">按季节看看适合种什么</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-row" bindtap="goIdentify">
+      <view class="menu-copy">
+        <text class="menu-title">我的植物识别</text>
+        <text class="menu-desc">拍照识别，稍候接入 Agent API</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="card menu-card">
+    <text class="section-title">通知与分享</text>
+    <view class="menu-row">
+      <view class="menu-copy"><text class="menu-title">版本更新提醒</text><text class="menu-desc">在这台设备上提醒，关闭后仍可查看更新记录</text></view>
+      <switch checked="{{updateNoticesEnabled}}" color="#2e7d5b" bindchange="onUpdateNotices" aria-label="版本更新提醒" />
+    </view>
+    <view class="menu-row" bindtap="goUpdates"><view class="menu-copy"><text class="menu-title">更新记录</text><text class="menu-desc">当前版本 {{currentVersion}}</text></view><text class="menu-arrow">›</text></view>
+    <button class="btn-ghost" open-type="share">分享植早早给朋友</button>
+    <view class="menu-row" bindtap="goAppIntro"><view class="menu-copy"><text class="menu-title">应用介绍与朋友圈分享</text><text class="menu-desc">分享整个小程序，不公开个人记录</text></view><text class="menu-arrow">›</text></view>
+    <text class="share-help" bindtap="showShareHelp">分享没有反应？查看使用说明</text>
   </view>
 
   <view class="card status-card" wx:if="{{loading}}">正在读取微信账号…</view>

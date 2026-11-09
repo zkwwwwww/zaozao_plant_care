@@ -125,3 +125,73 @@
   color: #2e7d5b;
   font-weight: 600;
 }
+
+.brand-banner {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 28rpx 24rpx;
+}
+.brand-logo {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 22rpx;
+  flex-shrink: 0;
+  background: #eef4f0;
+}
+.brand-copy { flex: 1; min-width: 0; }
+.brand-name {
+  display: block;
+  color: #26352c;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+.brand-desc {
+  display: block;
+  margin-top: 6rpx;
+  color: #6b7a70;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.companion-card .section-title,
+.menu-card .section-title {
+  margin-bottom: 8rpx;
+}
+.companion-row,
+.menu-row {
+  display: flex;
+  align-items: center;
+  min-height: 96rpx;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f2f5f3;
+}
+.menu-row:last-child { border-bottom: none; }
+.companion-main,
+.menu-copy { flex: 1; min-width: 0; margin: 0 16rpx; }
+.companion-name,
+.menu-title {
+  display: block;
+  color: #26352c;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.companion-days,
+.menu-desc {
+  display: block;
+  margin-top: 6rpx;
+  color: #8a9b90;
+  font-size: 22rpx;
+}
+.companion-more,
+.menu-arrow {
+  color: #b9cdc1;
+  font-size: 36rpx;
+  line-height: 1;
+}
+.export-result { width: 100%; margin-top: 20rpx; padding: 20rpx; border-radius: 16rpx; background: #eef4f0; }
+.export-name { display: block; overflow-wrap: anywhere; color: #26352c; font-size: 25rpx; }
+.export-hint { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 22rpx; line-height: 1.6; }
+.export-actions { display: flex; gap: 16rpx; }
+.export-actions button { flex: 1; min-width: 0; padding: 0; font-size: 24rpx; }
+.share-help { display: block; padding: 18rpx 0; color: #2e7d5b; font-size: 24rpx; text-align: center; }

@@ -10,7 +10,12 @@ const profile = require('../../utils/profile');
 
 const DENSITY_KEY = 'homeDensity';
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
+  onShareTimeline() {
+    return { title: '植早早，记录植物生长与陪伴', query: '', imageUrl: '/assets/icons/logo.png' };
+  },
   data: {
     plants: [],
     envMap: {},
@@ -256,6 +261,14 @@ Page({
 
   goMemorial() {
     wx.navigateTo({ url: '/pages/memorial/memorial' });
+  },
+
+  goBatchEntry() {
+    if (!account.requireLogin()) {
+      account.promptLogin();
+      return;
+    }
+    wx.navigateTo({ url: '/pages/batch-entry/batch-entry' });
   },
 
   goAccount() {

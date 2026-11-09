@@ -1,0 +1,10 @@
+<notice-center></notice-center>
+<view class="container">
+  <view class="page-title">植早早更新记录</view>
+  <text class="updates-intro">每一次小改进，都是为了让照顾植物更轻松。</text>
+  <view class="card release-card" wx:for="{{releases}}" wx:key="version">
+    <view class="release-meta"><text class="release-version">{{item.version}}</text><text>{{item.date}}</text></view>
+    <text class="release-title">{{item.title}}</text>
+    <view class="release-item" wx:for="{{item.changes}}" wx:for-item="change" wx:key="*this"><text class="release-mark"></text><text>{{change}}</text></view>
+  </view>
+</view>

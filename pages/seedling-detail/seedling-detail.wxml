@@ -1,3 +1,4 @@
+<notice-center></notice-center>
 <view class="container" wx:if="{{seedling}}">
   <view class="card hero">
     <swiper class="hero-swiper" wx:if="{{seedling.photos.length}}" indicator-dots="{{seedling.photos.length > 1}}" circular="{{seedling.photos.length > 1}}">

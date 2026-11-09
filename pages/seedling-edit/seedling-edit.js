@@ -24,7 +24,9 @@ function gridText(rows, cols) {
   return '格位 A1 – ' + rowLetter(r - 1) + c + '，共 ' + r * c + ' 格';
 }
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     id: '',
     isEdit: false,

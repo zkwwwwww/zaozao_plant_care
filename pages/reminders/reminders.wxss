@@ -26,6 +26,10 @@
 .care-intro > view:first-child { flex: 1; min-width: 0; margin-right: 16rpx; }
 .care-title { display: block; color: #26352c; font-size: 30rpx; font-weight: 700; }
 .care-desc { display: block; margin-top: 8rpx; color: #8a9b90; font-size: 22rpx; }
+.task-selection-actions { display: flex; flex-wrap: wrap; gap: 16rpx; margin: 20rpx 0; }
+.task-selection-actions text { padding: 12rpx 16rpx; border-radius: 16rpx; background: #eef4f0; color: #2e7d5b; font-size: 23rpx; }
+.group-complete { width: auto; margin: 0; padding: 0 18rpx; border-radius: 22rpx; background: #eef4f0; color: #2e7d5b; font-size: 22rpx; line-height: 52rpx; }
+.group-complete::after { border: none; }
 .batch-care-btn,
 .single-care-btn {
   width: auto;
@@ -97,6 +101,7 @@
 .record-date { color: #8a9b90; font-size: 21rpx; line-height: 40rpx; }
 .record-note { display: block; overflow: hidden; margin-top: 8rpx; color: #6b7a70; font-size: 23rpx; text-overflow: ellipsis; white-space: nowrap; }
 .record-edit { margin-left: 18rpx; color: #2e7d5b; font-size: 23rpx; line-height: 40rpx; }
+.record-delete { margin-left: 16rpx; color: #b34e48; font-size: 23rpx; line-height: 40rpx; }
 .record-photo { display: none !important; }
 .overdue-bar { background: #fbe9e7; border: 1rpx solid #f2d3cf; }
 .ob-text { font-size: 26rpx; color: #c0554f; font-weight: 600; }
@@ -152,17 +157,18 @@
 .task-name { font-size: 28rpx; font-weight: 600; }
 .task-date { font-size: 22rpx; color: #8a9b90; margin-top: 4rpx; }
 .task-actions { display: flex; align-items: center; margin-left: 12rpx; }
+.task-ignore,
 .task-complete {
   flex: 0 0 auto;
   height: 32rpx;
   padding: 0 12rpx;
   border-radius: 16rpx;
-  background: #eef4f0;
-  color: #2e7d5b;
   font-size: 20rpx;
   line-height: 32rpx;
   text-align: center;
 }
+.task-ignore { background: #f4f7f5; color: #6b7a70; }
+.task-complete { background: #eef4f0; color: #2e7d5b; }
 
 /* 分组 */
 .group-card { padding: 24rpx; }

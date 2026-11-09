@@ -13,7 +13,9 @@ function tagNames(plant, tags) {
   return names.length ? names : [constants.UNTAGGED.name];
 }
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     id: '',
     plant: null,
@@ -28,10 +30,13 @@ Page({
     tagNames: [],
     priceText: '未填',
     childCount: 0,
+    manualTasks: [],
+    memorialHint: '',
     notFound: false,
     loading: false,
     loadError: '',
-    hasMoreRecords: false
+    hasMoreRecords: false,
+    taskBusy: false
   },
 
   onLoad(options) {
@@ -87,7 +92,10 @@ Page({
       statusCls: constants.statusClass(plant.status),
       tagNames: tagNames(plant, bundle.tags),
       priceText: plant.price !== '' && plant.price != null ? '¥' + format.money(plant.price) : '未填',
-      childCount: bundle.seedlings.filter(item => item.motherType === 'plant' && item.motherId === id).length
+      childCount: bundle.seedlings.filter(item => item.motherType === 'plant' && item.motherId === id).length,
+      manualTasks: (plant.manualTasks || []).filter(item => !item.done).concat(
+        (plant.manualTasks || []).filter(item => item.done)
+      ).slice(0, 5)
     });
     if (this._pendingMemorial && !plant.memorialized) {
       this.openMemorialDialog(this._pendingMemorial);
@@ -126,6 +134,19 @@ Page({
     wx.navigateTo({ url: '/pages/note-edit/note-edit?plantId=' + this.data.id });
   },
 
+  goManualTasks() {
+    wx.navigateTo({ url: '/pages/manual-tasks/manual-tasks?plantId=' + this.data.id });
+  },
+
+  editRecord(e) {
+    const recordId = e.currentTarget.dataset.id;
+    if (!recordId) return;
+    wx.navigateTo({
+      url: '/pages/note-edit/note-edit?plantId=' + encodeURIComponent(this.data.id)
+        + '&recordId=' + encodeURIComponent(recordId)
+    });
+  },
+
   // 展示图片
   previewPhoto(e) {
     const current = e.currentTarget.dataset.src;
@@ -137,23 +158,70 @@ Page({
     wx.previewImage({ current, urls: [current] });
   },
 
-  // 纪念：送人 / 去世
+  async ignoreTask(e) {
+    if (this.data.taskBusy) return;
+    const type = (e.detail && e.detail.type) || e.currentTarget.dataset.type;
+    const plant = this.data.plant;
+    if (!plant || !type) return;
+    this.setData({ taskBusy: true });
+    wx.showLoading({ title: '忽略中', mask: true });
+    try {
+      await dataApi.ignoreReminder(plant, type);
+      wx.showToast({ title: '已延后一周期', icon: 'success' });
+      this.loadDetail();
+    } catch (error) {
+      wx.showToast({ title: error.message || '忽略失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+      this.setData({ taskBusy: false });
+    }
+  },
+
+  async toggleManualTask(e) {
+    if (this.data.taskBusy) return;
+    const taskId = e.currentTarget.dataset.id;
+    const plant = this.data.plant;
+    if (!plant || !taskId) return;
+    const task = (plant.manualTasks || []).find(item => item.id === taskId);
+    if (!task) return;
+    this.setData({ taskBusy: true });
+    wx.showLoading({ title: '保存中', mask: true });
+    try {
+      await dataApi.setManualTask(plant.id, taskId, !task.done);
+      wx.showToast({ title: '已更新', icon: 'success' });
+      this.loadDetail();
+    } catch (error) {
+      wx.showToast({ title: error.message || '保存失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+      this.setData({ taskBusy: false });
+    }
+  },
+
+  // 植物告别：送人 / 去世（温馨化）
   onMemorial() {
     const plant = this.data.plant;
     if (!plant) return;
     const types = constants.MEMORIAL_TYPES;
     wx.showActionSheet({
-      itemList: types,
+      itemList: ['送给新的主人', '让它去往更好的地方'],
       success: (res) => {
-        const type = types[res.tapIndex];
-        this.openMemorialDialog(type);
+        this.openMemorialDialog(types[res.tapIndex]);
       }
     });
   },
 
   openMemorialDialog(type) {
-    // 使用简单的弹层
-    this.setData({ showMemorial: true, memorialType: type, memorialDate: format.today(), memorialNote: '' });
+    const hint = type === '送人'
+      ? '愿它在新的家里继续生长。'
+      : '让它去往更好的地方，纪念碑会替你记得这段陪伴。';
+    this.setData({
+      showMemorial: true,
+      memorialType: type,
+      memorialHint: hint,
+      memorialDate: format.today(),
+      memorialNote: ''
+    });
   },
 
   onMemorialDate(e) {

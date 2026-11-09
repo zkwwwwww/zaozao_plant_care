@@ -4,7 +4,9 @@ const dataApi = require('../../services/data');
 const constants = require('../../utils/constants');
 const format = require('../../utils/format');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     id: '',
     isEdit: false,

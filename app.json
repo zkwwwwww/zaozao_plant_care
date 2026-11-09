@@ -15,7 +15,14 @@
     "pages/lineage/lineage",
     "pages/expenses/expenses",
     "pages/expense-edit/expense-edit",
-    "pages/tags/tags"
+    "pages/tags/tags",
+    "pages/batch-entry/batch-entry",
+    "pages/manual-tasks/manual-tasks",
+    "pages/care-report/care-report",
+    "pages/season-plants/season-plants",
+    "pages/plant-identify/plant-identify",
+    "pages/updates/updates",
+    "pages/share/share"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -61,7 +68,8 @@
     "guest-gate": "/components/guest-gate/guest-gate",
     "plant-thumb": "/components/plant-thumb/plant-thumb",
     "section-header": "/components/section-header/section-header",
-    "task-row": "/components/task-row/task-row"
+    "task-row": "/components/task-row/task-row",
+    "notice-center": "/components/notice-center/notice-center"
   },
   "style": "v2",
   "__usePrivacyCheck__": true,

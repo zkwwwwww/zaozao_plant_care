@@ -3,7 +3,9 @@ const account = require('../../services/account');
 const dataApi = require('../../services/data');
 const pagination = require('../../utils/pagination');
 
-Page({
+const definePage = require('../../services/page');
+
+definePage({
   data: {
     envs: [],
     guest: false,

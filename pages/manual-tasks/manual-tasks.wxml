@@ -1,0 +1,38 @@
+<notice-center></notice-center>
+<view class="container" wx:if="{{plant}}">
+  <view class="card">
+    <text class="plant-name">{{plant.name}}</text>
+    <text class="hint">手动任务只展示与勾选完成，不会触发浇水 / 施肥 / 换盆提醒。</text>
+  </view>
+
+  <view class="card">
+    <view class="section-title">添加任务</view>
+    <view class="add-row">
+      <input class="task-input" placeholder="如上水苔柱、缓苗观察" value="{{draft}}" bindinput="onDraft" maxlength="40" />
+      <button class="add-btn" bindtap="addTask" disabled="{{busy}}">添加</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">任务列表（{{tasks.length}} / 50）</view>
+    <view class="task-row" wx:for="{{tasks}}" wx:key="id">
+      <view class="check {{item.done ? 'is-on' : ''}}" data-id="{{item.id}}" bindtap="toggleTask">{{item.done ? '✓' : ''}}</view>
+      <view class="task-main">
+        <text class="task-title {{item.done ? 'is-done' : ''}}">{{item.title}}</text>
+        <text class="task-date">{{item.createdAt || ''}}</text>
+      </view>
+      <text class="task-remove" data-id="{{item.id}}" bindtap="removeTask">删除</text>
+    </view>
+    <empty-state
+      wx:if="{{!tasks.length}}"
+      compact="{{true}}"
+      image="/assets/illustrations/empty-reminders.png"
+      title="还没有手动任务"
+      description="把它当成备忘清单，和正式养护记录分开"
+    ></empty-state>
+  </view>
+</view>
+
+<view class="container" wx:elif="{{loadError}}">
+  <view class="card load-error">{{loadError}}</view>
+</view>

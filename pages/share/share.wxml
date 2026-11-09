@@ -1,0 +1,21 @@
+<notice-center wx:if="{{!singlePage}}"></notice-center>
+<view class="share-page">
+  <view class="share-hero">
+    <text class="share-eyebrow">从一株植物开始</text>
+    <image class="share-logo" src="/assets/icons/logo.png" mode="aspectFit"></image>
+    <text class="share-title">植早早</text>
+    <view class="share-lead"><text>生长有记录，</text><text>照顾有回应。</text></view>
+    <text class="share-description">把植物的档案、养护和陪伴，留在自己的小花园里。</text>
+  </view>
+  <view class="share-features">
+    <view><text class="feature-number">01</text><text class="feature-title">记下每一株</text><text class="feature-copy">照片、品种、环境，还有一起度过的日子。</text></view>
+    <view><text class="feature-number">02</text><text class="feature-title">照顾不遗漏</text><text class="feature-copy">看看今天与近期的待办，批量记录已经完成的养护。</text></view>
+    <view><text class="feature-number">03</text><text class="feature-title">回看成长</text><text class="feature-copy">整理养护记录、育苗与花费，让陪伴有迹可循。</text></view>
+  </view>
+  <view class="share-actions" wx:if="{{!singlePage}}">
+    <button class="btn-primary" bindtap="enterApp">进入我的小花园</button>
+    <button class="btn-ghost" open-type="share">分享植早早</button>
+    <text class="share-help" bindtap="showShareHelp">如何分享到朋友圈？</text>
+  </view>
+  <text class="share-footer">{{singlePage ? '点击下方“前往小程序”，开始记录自己的植物。' : '分享的是应用介绍，不会公开你的私人记录。'}}</text>
+</view>

@@ -1,3 +1,4 @@
+<notice-center></notice-center>
 <view class="container" wx:if="{{plant}}">
 
   <!-- 照片轮播 -->
@@ -55,6 +56,10 @@
         <text class="info-label">购买途径</text>
         <text class="info-value">{{plant.purchaseWay || '未填'}}</text>
       </view>
+      <view class="info-item" wx:if="{{plant.purchaseWay==='朋友赠送'}}">
+        <text class="info-label">赠予人</text>
+        <text class="info-value">{{plant.giftFrom || '未填写'}}</text>
+      </view>
       <view class="info-item">
         <text class="info-label">所在位置</text>
         <text class="info-value">{{plant.location || '未填'}}</text>
@@ -82,12 +87,25 @@
     <task-row
       wx:for="{{tasks}}"
       wx:key="type"
+      item-id="{{plant.id}}"
+      task-type="{{item.type}}"
       photo="{{plant.photos[0]}}"
       title="{{item.label}}"
       subtitle="下次到期 {{item.due}}"
       status-text="{{item.dueText}}"
       status-class="{{item.cls}}"
+      show-ignore="{{true}}"
+      bind:ignore="ignoreTask"
     ></task-row>
+  </view>
+
+  <!-- 手动任务 -->
+  <view class="card" wx:if="{{manualTasks.length}}">
+    <section-header title="手动任务" more-text="管理" bind:more="goManualTasks"></section-header>
+    <view class="manual-row" wx:for="{{manualTasks}}" wx:key="id">
+      <text class="manual-title {{item.done ? 'is-done' : ''}}">{{item.title}}</text>
+      <text class="manual-action" data-id="{{item.id}}" bindtap="toggleManualTask">{{item.done ? '撤销' : '完成'}}</text>
+    </view>
   </view>
 
   <!-- 操作按钮 -->
@@ -100,8 +118,11 @@
     <button class="btn-ghost action-btn" bindtap="goPropagate">用它育苗</button>
   </view>
   <view class="action-row" wx:if="{{!plant.memorialized}}">
-    <button class="btn-danger action-btn" bindtap="onMemorial">🕯️ 送人 / 去世纪念</button>
-    <button class="btn-danger action-btn ghost" bindtap="deletePlant">删除</button>
+    <button class="btn-ghost action-btn" bindtap="goManualTasks">手动任务</button>
+    <button class="btn-danger action-btn soft" bindtap="onMemorial">🌿 植物告别</button>
+  </view>
+  <view class="action-row" wx:if="{{!plant.memorialized}}">
+    <button class="btn-danger action-btn ghost" bindtap="deletePlant">删除植物</button>
   </view>
 
   <!-- 养护记录时间线 -->
@@ -110,13 +131,14 @@
     <view class="record-list" wx:if="{{records.length>0}}">
       <view class="record-item" wx:for="{{records}}" wx:key="id">
         <view class="record-dot"></view>
-        <view class="record-body">
+        <view class="record-body" data-id="{{item.id}}" bindtap="editRecord">
           <view class="record-head">
             <text class="record-type">{{item.type}}</text>
             <text class="record-date">{{item.date}}</text>
           </view>
           <text class="record-content" wx:if="{{item.content}}">{{item.content}}</text>
-          <image class="record-photo" wx:if="{{item.photo}}" src="{{item.photo}}" mode="aspectFill" bindtap="previewNotePhoto" data-src="{{item.photo}}"></image>
+          <image class="record-photo" wx:if="{{item.photo}}" src="{{item.photo}}" mode="aspectFill" catchtap="previewNotePhoto" data-src="{{item.photo}}"></image>
+          <text class="record-edit-hint">点按编辑或删除</text>
         </view>
       </view>
     </view>
@@ -129,17 +151,18 @@
     ></empty-state>
   </view>
 
-  <!-- 纪念弹层 -->
+  <!-- 植物告别弹层 -->
   <view class="mask" wx:if="{{showMemorial}}" bindtap="cancelMemorial"></view>
   <view class="dialog" wx:if="{{showMemorial}}">
-    <view class="dialog-title">建立纪念碑 · {{memorialType}}</view>
+    <view class="dialog-title">植物告别 · {{memorialType}}</view>
+    <view class="dialog-hint">{{memorialHint}}</view>
     <picker mode="date" value="{{memorialDate}}" bindchange="onMemorialDate">
       <view class="dialog-field">日期：{{memorialDate}} ▾</view>
     </picker>
-    <textarea class="dialog-textarea" placeholder="写一句纪念语（可选）" value="{{memorialNote}}" bindinput="onMemorialNote" maxlength="200"></textarea>
+    <textarea class="dialog-textarea" placeholder="写一句想对它说的话（可选）" value="{{memorialNote}}" bindinput="onMemorialNote" maxlength="200"></textarea>
     <view class="dialog-actions">
-      <button class="btn-ghost" bindtap="cancelMemorial">取消</button>
-      <button class="btn-primary" bindtap="confirmMemorial">确认建立</button>
+      <button class="btn-ghost" bindtap="cancelMemorial">再想想</button>
+      <button class="btn-primary" bindtap="confirmMemorial">温柔告别</button>
     </view>
   </view>
 

@@ -1,3 +1,4 @@
+<notice-center></notice-center>
 <view class="container">
   <view class="empty" wx:if="{{loadError}}">
     <view>{{loadError}}</view>
@@ -45,5 +46,6 @@
   <button class="btn-primary" bindtap="save" disabled="{{isSavingPhoto || isSubmitting}}" loading="{{isSubmitting}}">
     {{isSavingPhoto ? '正在保存照片' : (isEdit ? '保存修改' : '保存记录')}}
   </button>
+  <button class="btn-danger" wx:if="{{isEdit}}" bindtap="remove" disabled="{{isSubmitting}}">删除这条记录</button>
   </block>
 </view>

@@ -25,3 +25,7 @@
 }
 .add-plus { font-size: 56rpx; color: #2e7d5b; line-height: 1; }
 .add-text { font-size: 24rpx; color: #8a9b90; margin-top: 8rpx; }
+
+.btn-danger {
+  margin-top: 24rpx;
+}

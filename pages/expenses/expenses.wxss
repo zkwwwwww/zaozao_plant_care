@@ -1,9 +1,44 @@
 /* pages/expenses/expenses.wxss */
 .summary { display: flex; gap: 12rpx; }
+.summary.three .summary-num { font-size: 30rpx; }
 .summary-item { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.summary-label { color: #8a9b90; font-size: 24rpx; }
+.summary-label { color: #8a9b90; font-size: 22rpx; }
 .summary-num { margin-top: 8rpx; color: #26352c; font-size: 34rpx; font-weight: 700; }
 .summary-num.small { font-size: 23rpx; line-height: 52rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pyramid-card { overflow: hidden; }
+.pyramid-label { display: block; margin-bottom: 20rpx; color: #8a9b90; font-size: 22rpx; }
+.pyramid { display: flex; flex-direction: column; align-items: center; }
+.pyramid-peak {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  min-width: 420rpx;
+  max-width: 100%;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx 20rpx 12rpx 12rpx;
+  background: linear-gradient(180deg, #e8f5ee 0%, #d7ebe0 100%);
+}
+.pyramid-copy { min-width: 0; }
+.pyramid-name { display: block; color: #26352c; font-size: 30rpx; font-weight: 700; }
+.pyramid-price { display: block; margin-top: 6rpx; color: #2e7d5b; font-size: 28rpx; font-weight: 700; }
+.pyramid-base {
+  width: 78%;
+  height: 28rpx;
+  margin-top: 8rpx;
+  border-radius: 0 0 24rpx 24rpx;
+  background: linear-gradient(180deg, #cfe6d8 0%, #b7d7c4 100%);
+}
+
+.sort-row { display: flex; gap: 12rpx; margin-bottom: 12rpx; }
+.sort-chip {
+  padding: 8rpx 18rpx;
+  border-radius: 24rpx;
+  background: #f2f5f3;
+  color: #6b7a70;
+  font-size: 22rpx;
+}
+.sort-chip.is-on { background: #e2f2e9; color: #2e7d5b; font-weight: 600; }
 
 .chart { display: flex; align-items: flex-end; gap: 12rpx; height: 280rpx; margin: 32rpx 0 16rpx; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }

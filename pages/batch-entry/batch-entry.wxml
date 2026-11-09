@@ -1,0 +1,78 @@
+<notice-center></notice-center>
+<view class="container">
+  <view class="card">
+    <view class="section-title">录入模式</view>
+    <view class="mode-row">
+      <text class="mode-chip {{mode==='variety' ? 'is-on' : ''}}" data-mode="variety" bindtap="switchMode">同品种批量</text>
+      <text class="mode-chip {{mode==='photos' ? 'is-on' : ''}}" data-mode="photos" bindtap="switchMode">多照片批量</text>
+    </view>
+    <text class="hint" wx:if="{{mode==='variety'}}">先填品种与数量，再可为每株补照片。</text>
+    <text class="hint" wx:else>一次选多张照片，每张生成一株，可再改名称。</text>
+  </view>
+
+  <view class="card">
+    <view class="section-title">共用信息</view>
+    <view class="form-item">
+      <text class="form-label">名称前缀 *</text>
+      <input class="form-input" placeholder="如：龟背竹" value="{{baseName}}" bindinput="onBaseName" />
+    </view>
+    <view class="form-item" wx:if="{{mode==='variety'}}">
+      <text class="form-label">品种</text>
+      <input class="form-input" placeholder="可选" value="{{variety}}" bindinput="onVariety" />
+    </view>
+    <view class="form-item" wx:if="{{mode==='variety'}}">
+      <text class="form-label">数量</text>
+      <input class="form-input" type="number" placeholder="2–20" value="{{count}}" bindinput="onCount" />
+      <text class="form-unit">株</text>
+    </view>
+    <picker mode="date" value="{{purchaseDate}}" bindchange="onDate">
+      <view class="form-item">
+        <text class="form-label">购买日期</text>
+        <text class="form-input">{{purchaseDate}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+    <picker range="{{plantingOptions}}" value="{{plantingIndex}}" bindchange="onPlanting">
+      <view class="form-item">
+        <text class="form-label">种植形式</text>
+        <text class="form-input">{{planting}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+    <picker range="{{envs}}" range-key="name" value="{{envIndex}}" bindchange="onEnv">
+      <view class="form-item">
+        <text class="form-label">生长环境</text>
+        <text class="form-input {{envName?'':'form-placeholder'}}">{{envName || '选择环境'}}</text>
+        <text class="form-unit">▾</text>
+      </view>
+    </picker>
+    <view class="form-item tag-field">
+      <text class="form-label">标签</text>
+      <view class="tag-choices">
+        <text class="tag-choice {{item.selected ? 'is-on' : ''}}" wx:for="{{tags}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleTag">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">植株列表（{{items.length}}）</view>
+    <button class="btn-ghost" wx:if="{{mode==='photos'}}" bindtap="pickPhotos">选择照片</button>
+    <button class="btn-ghost" wx:if="{{mode==='variety'}}" bindtap="rebuildVariety">按数量生成列表</button>
+    <view class="batch-row" wx:for="{{items}}" wx:key="key">
+      <view class="batch-photo" bindtap="pickItemPhoto" data-index="{{index}}">
+        <image wx:if="{{item.photo}}" src="{{item.photo}}" mode="aspectFill"></image>
+        <text wx:else>＋</text>
+      </view>
+      <input class="batch-name" value="{{item.name}}" data-index="{{index}}" bindinput="onItemName" disabled="{{submitting || item.savedId}}" />
+      <text class="hint" wx:if="{{item.savedId}}">已录入</text>
+      <text class="batch-remove" data-index="{{index}}" bindtap="removeItem">删</text>
+    </view>
+    <text class="hint" wx:if="{{!items.length}}">还没有待录入植株</text>
+  </view>
+
+  <text class="hint" wx:if="{{savedCount}}">已成功录入 {{savedCount}} / {{items.length}} 株，重试不会重复添加</text>
+  <text class="hint">离开页面时草稿会保留在这台设备上。</text>
+  <button class="btn-primary" bindtap="submit" loading="{{submitting}}" disabled="{{submitting || processingPhotos || !items.length}}">
+    {{savedCount ? '继续录入剩余 ' + (items.length - savedCount) : '录入 ' + items.length}} 株植物
+  </button>
+</view>
