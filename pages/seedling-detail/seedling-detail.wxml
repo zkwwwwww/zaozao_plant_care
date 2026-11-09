@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container" wx:if="{{seedling}}">
   <view class="card hero">
@@ -66,3 +68,4 @@
     <button class="btn-ghost" bindtap="goBack">返回上一页</button>
   </view>
 </view>
+</block>

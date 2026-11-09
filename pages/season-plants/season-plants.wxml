@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="card">
@@ -18,3 +20,4 @@
     <button class="btn-ghost rec-btn" data-name="{{item.name}}" bindtap="quickAdd">一键录入</button>
   </view>
 </view>
+</block>

@@ -13,9 +13,6 @@ const DENSITY_KEY = 'homeDensity';
 const definePage = require('../../services/page');
 
 definePage({
-  onShareTimeline() {
-    return { title: '植早早，记录植物生长与陪伴', query: '', imageUrl: '/assets/icons/logo.png' };
-  },
   data: {
     plants: [],
     envMap: {},

@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="card">
@@ -33,3 +35,4 @@
 
   <button class="btn-danger" wx:if="{{isEdit}}" bindtap="deleteEnv">删除该环境</button>
 </view>
+</block>

@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center bind:updatesdisabled="refreshNoticeSettings"></notice-center>
 <view class="container">
   <view class="card brand-banner">
@@ -111,3 +113,4 @@
     <view class="retry" wx:if="{{cloudReady}}" bindtap="refresh">重试</view>
   </view>
 </view>
+</block>

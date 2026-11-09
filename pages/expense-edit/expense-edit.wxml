@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="card">
@@ -28,3 +30,4 @@
   <button class="btn-primary" bindtap="save" disabled="{{isSubmitting}}" loading="{{isSubmitting}}">保存</button>
   <button class="btn-danger" wx:if="{{isEdit}}" bindtap="remove">删除这笔花费</button>
 </view>
+</block>

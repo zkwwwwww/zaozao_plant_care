@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center wx:if="{{!singlePage}}"></notice-center>
 <view class="share-page">
   <view class="share-hero">
@@ -19,3 +21,4 @@
   </view>
   <text class="share-footer">{{singlePage ? '点击下方“前往小程序”，开始记录自己的植物。' : '分享的是应用介绍，不会公开你的私人记录。'}}</text>
 </view>
+</block>

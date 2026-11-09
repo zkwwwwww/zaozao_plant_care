@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
 
@@ -142,3 +144,4 @@
     {{isSavingPhoto ? '正在保存照片' : (isEdit ? '保存修改' : '添加植物')}}
   </button>
 </view>
+</block>

@@ -3,6 +3,54 @@
   "packOptions": {
     "ignore": [
       {
+        "value": "doc-fetch-resources",
+        "type": "folder"
+      },
+      {
+        "value": ".git",
+        "type": "folder"
+      },
+      {
+        "value": "node_modules",
+        "type": "folder"
+      },
+      {
+        "value": "project.private.config.json",
+        "type": "file"
+      },
+      {
+        "value": ".gitignore",
+        "type": "file"
+      },
+      {
+        "value": ".DS_Store",
+        "type": "file"
+      },
+      {
+        "value": "package.json",
+        "type": "file"
+      },
+      {
+        "value": "package-lock.json",
+        "type": "file"
+      },
+      {
+        "value": "README.md",
+        "type": "file"
+      },
+      {
+        "value": "BACKEND_RECOMMENDATION.md",
+        "type": "file"
+      },
+      {
+        "value": "NEXT_DEVELOPMENT_PROMPT.md",
+        "type": "file"
+      },
+      {
+        "value": "config/env.example.js",
+        "type": "file"
+      },
+      {
         "value": "cloudfunctions",
         "type": "folder"
       },

@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="empty" wx:if="{{loadError}}">
@@ -49,3 +51,4 @@
   <button class="btn-danger" wx:if="{{isEdit}}" bindtap="remove" disabled="{{isSubmitting}}">删除这条记录</button>
   </block>
 </view>
+</block>

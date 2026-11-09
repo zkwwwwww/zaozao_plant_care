@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container has-fixed-bar">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
@@ -119,3 +121,4 @@
 <view class="fixed-bar">
   <button class="btn-primary" bindtap="goAdd">＋ 记一笔</button>
 </view>
+</block>

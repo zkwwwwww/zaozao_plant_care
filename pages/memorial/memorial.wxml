@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="load">{{loadError}}，点此重试</view>
@@ -29,3 +31,4 @@
     description="在植物详情中选择“送人 / 去世纪念”即可建立"
   ></empty-state>
 </view>
+</block>

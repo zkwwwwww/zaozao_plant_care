@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="card hero">
@@ -23,3 +25,4 @@
     <text class="tip-desc">“期间”统计本月或本年至今天的记录，包含已告别植物的养护；“当前”仅统计在养植物。其他花费不含植物购买价格。开花、结果暂不统计。</text>
   </view>
 </view>
+</block>

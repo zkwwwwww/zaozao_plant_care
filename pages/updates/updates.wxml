@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="page-title">植早早更新记录</view>
@@ -8,3 +10,4 @@
     <view class="release-item" wx:for="{{item.changes}}" wx:for-item="change" wx:key="*this"><text class="release-mark"></text><text>{{change}}</text></view>
   </view>
 </view>
+</block>

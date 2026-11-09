@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container {{totalPlants ? 'has-add' : ''}}">
   <view class="card load-error" wx:if="{{loadError}}" bindtap="loadData">{{loadError}}，点此重试</view>
@@ -193,3 +195,4 @@
       </view>
     </form>
 </view>
+</block>

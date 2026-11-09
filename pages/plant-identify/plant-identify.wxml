@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="card hero">
@@ -31,3 +33,4 @@
     <text class="tip-desc">识别服务暂未开放，建议仅作示意参考。你仍可以带上照片，手动填写植物名称并建档。</text>
   </view>
 </view>
+</block>

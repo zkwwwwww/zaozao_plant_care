@@ -69,7 +69,8 @@
     "plant-thumb": "/components/plant-thumb/plant-thumb",
     "section-header": "/components/section-header/section-header",
     "task-row": "/components/task-row/task-row",
-    "notice-center": "/components/notice-center/notice-center"
+    "notice-center": "/components/notice-center/notice-center",
+    "share-preview": "/components/share-preview/share-preview"
   },
   "style": "v2",
   "__usePrivacyCheck__": true,

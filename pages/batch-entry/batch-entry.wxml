@@ -1,3 +1,5 @@
+<share-preview wx:if="{{appSharePreview}}" single-page="{{appShareSinglePage}}" bindsharehelp="showShareHelp"></share-preview>
+<block wx:else>
 <notice-center></notice-center>
 <view class="container">
   <view class="card">
@@ -76,3 +78,4 @@
     {{savedCount ? '继续录入剩余 ' + (items.length - savedCount) : '录入 ' + items.length}} 株植物
   </button>
 </view>
+</block>
