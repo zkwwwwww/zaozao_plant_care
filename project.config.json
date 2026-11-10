@@ -39,6 +39,10 @@
         "type": "file"
       },
       {
+        "value": "AGENTS.md",
+        "type": "file"
+      },
+      {
         "value": "BACKEND_RECOMMENDATION.md",
         "type": "file"
       },

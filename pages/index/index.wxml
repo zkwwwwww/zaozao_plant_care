@@ -2,17 +2,43 @@
 <block wx:else>
 <notice-center></notice-center>
 <view class="container {{totalPlants ? 'has-add' : ''}}">
-  <view class="card load-error" wx:if="{{loadError}}" bindtap="loadData">{{loadError}}，点此重试</view>
+  <view class="card load-error" wx:if="{{loadError}}" bindtap="retryLoad">{{loadError}}，点此重试</view>
   <view class="card load-hint" wx:elif="{{loading}}">正在读取植物…</view>
 
-  <!-- 主页问候：放大昵称，品牌迁至「我的」 -->
-  <view class="card hello" bindtap="goAccount">
-    <image class="hello-avatar" src="{{account.avatarUrl || '/assets/icons/logo.png'}}" mode="aspectFill"></image>
-    <view class="hello-text">
-      <text class="hello-name">{{account.status === 'valid' ? account.nickName || account.summary : '你好'}}</text>
-      <text class="hello-sub {{account.status === 'expired' ? 'is-expired' : ''}}">
-        {{account.status === 'valid' ? '今天也要好好照顾它们' : account.summary}}
-      </text>
+  <!-- 私人花园手札：身份与默认季节建议各自可点。 -->
+  <view class="card home-notebook">
+    <view class="home-decoration" aria-hidden="true">
+      <view class="home-leaf leaf-one"></view>
+      <view class="home-leaf leaf-two"></view>
+    </view>
+    <view class="home-identity" bindtap="goAccount" aria-role="button" aria-label="{{homeHeader.name}}，{{homeHeader.statusText}}，{{homeHeader.accountAction}}">
+      <view class="home-avatar-ring">
+        <image class="home-avatar" src="{{avatarFailed ? '/assets/icons/logo.png' : account.avatarUrl || '/assets/icons/logo.png'}}" mode="aspectFill" binderror="onHeaderAvatarError" data-src="{{account.avatarUrl}}" aria-hidden="true"></image>
+      </view>
+      <view class="home-copy">
+        <view class="home-meta">
+          <text class="home-greeting">{{homeHeader.greeting}}</text>
+          <text class="home-date">{{homeHeader.dateText}}</text>
+        </view>
+        <view class="home-name-row">
+          <text class="home-name">{{homeHeader.name}}</text>
+          <text class="home-account-link">{{homeHeader.accountAction}} ›</text>
+        </view>
+        <view class="home-context">
+          <text class="home-status {{homeHeader.statusClass}}">{{homeHeader.statusText}}</text>
+          <text class="home-description">{{homeHeader.description}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="home-season" bindtap="goCareReminders" aria-role="button" aria-label="{{homeHeader.seasonTitle}}，{{homeHeader.seasonText}}，{{homeHeader.seasonNote}}，查看养护提醒">
+      <view class="home-season-text">
+        <text class="home-season-label">{{homeHeader.seasonTitle}}</text>
+        <text class="home-season-rule">{{homeHeader.seasonText}}</text>
+      </view>
+      <view class="home-season-more">
+        <text class="home-season-note">{{homeHeader.seasonNote}}</text>
+        <text class="home-season-arrow">›</text>
+      </view>
     </view>
   </view>
 
@@ -84,7 +110,7 @@
           </view>
         </swiper-item>
       </swiper>
-      <text class="todo-desc" wx:else>今天没有到期的养护</text>
+      <text class="todo-desc" wx:else>今天没有待办，安心看看它们</text>
       <text class="todo-count {{todo.total ? 'is-on' : ''}}">{{todo.total ? todo.total + ' 项 ›' : '›'}}</text>
     </view>
   </view>

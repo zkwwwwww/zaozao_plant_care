@@ -7,39 +7,157 @@
   padding-bottom: 132rpx;
 }
 
-/* 主页问候：昵称优先 */
-.hello {
+/* 私人花园手札 */
+.home-notebook {
+  position: relative;
+  overflow: hidden;
+  min-height: 232rpx;
+  padding: 18rpx 22rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid #e0e9da;
+  border-radius: 24rpx;
+  background: radial-gradient(ellipse at 100% 0, rgba(211, 228, 196, 0.25), transparent 62%), linear-gradient(135deg, #fffdf6, #f8fbf5);
+  box-shadow: 0 4rpx 16rpx rgba(46, 125, 91, 0.04);
+  animation: home-notebook-in 260ms ease-out both;
+}
+.home-decoration {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 128rpx;
+  height: 132rpx;
+  overflow: hidden;
+  pointer-events: none;
+}
+.home-leaf {
+  position: absolute;
+  width: 40rpx;
+  height: 78rpx;
+  border: 1rpx solid rgba(138, 169, 123, 0.08);
+  border-radius: 80% 12% 80% 12%;
+  background: rgba(138, 169, 123, 0.06);
+}
+.home-leaf.leaf-one { top: -22rpx; right: 22rpx; transform: rotate(-40deg); }
+.home-leaf.leaf-two { top: 42rpx; right: -12rpx; transform: rotate(-62deg); }
+.home-identity {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  padding: 28rpx 24rpx;
-  margin-bottom: 16rpx;
+  min-height: 136rpx;
 }
-.hello-avatar {
-  width: 96rpx;
-  height: 96rpx;
-  border-radius: 48rpx;
-  margin-right: 22rpx;
-  flex-shrink: 0;
-  background: #eef4f0;
+.home-avatar-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 88rpx;
+  width: 88rpx;
+  height: 88rpx;
+  padding: 4rpx;
+  margin-right: 18rpx;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #eaf1e4;
 }
-.hello-text { flex: 1; min-width: 0; }
-.hello-name {
+.home-avatar {
   display: block;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #f4f7ef;
+}
+.home-copy { flex: 1; min-width: 0; }
+.home-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  line-height: 28rpx;
+}
+.home-greeting { flex-shrink: 0; color: #6b7a70; font-size: 22rpx; }
+.home-date { margin-left: 12rpx; color: #8a9b90; font-size: 20rpx; white-space: nowrap; }
+.home-name-row { display: flex; align-items: center; min-width: 0; margin-top: 4rpx; }
+.home-name {
+  display: block;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   color: #26352c;
-  font-size: 44rpx;
+  font-size: 36rpx;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 44rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.hello-sub {
-  display: block;
-  margin-top: 8rpx;
-  color: #6b7a70;
-  font-size: 24rpx;
+.home-account-link {
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  color: #2e7d5b;
+  font-size: 22rpx;
+  line-height: 32rpx;
+  white-space: nowrap;
 }
-.hello-sub.is-expired { color: #9b6819; }
+.home-context { display: flex; align-items: center; min-width: 0; margin-top: 6rpx; line-height: 26rpx; }
+.home-status {
+  flex-shrink: 0;
+  padding: 0 7rpx;
+  margin-right: 10rpx;
+  border-radius: 6rpx;
+  color: #6b7a70;
+  background: #eef2eb;
+  font-size: 20rpx;
+  line-height: 26rpx;
+  white-space: nowrap;
+}
+.home-status.active, .home-status.is-active, .home-status.valid, .home-status.is-valid { color: #2e7d5b; background: #e9f2e5; }
+.home-status.expired, .home-status.is-expired { color: #9b6819; background: #f6eedf; }
+.home-status.guest, .home-status.is-guest { color: #6b7a70; background: #eef2eb; }
+.home-description {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #6b7a70;
+  font-size: 22rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home-season {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46rpx;
+  padding-top: 12rpx;
+  margin-top: 12rpx;
+  border-top: 1rpx solid #e5ecdf;
+  line-height: 32rpx;
+}
+.home-season-text { display: flex; align-items: center; flex: 1; min-width: 0; }
+.home-season-label { flex-shrink: 0; color: #2e7d5b; font-size: 22rpx; font-weight: 600; white-space: nowrap; }
+.home-season-rule {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 12rpx;
+  color: #6b7a70;
+  font-size: 22rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home-season-more { display: flex; align-items: center; flex-shrink: 0; margin-left: 12rpx; white-space: nowrap; }
+.home-season-note { color: #6b7a70; font-size: 20rpx; }
+.home-season-arrow { margin-left: 8rpx; color: #2e7d5b; font-size: 24rpx; }
+
+@keyframes home-notebook-in {
+  from { opacity: 0; transform: translateY(4rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-notebook { animation: none; }
+}
 
 .feature-card {
   padding: 8rpx 12rpx 16rpx;

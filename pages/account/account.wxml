@@ -102,8 +102,8 @@
       <switch checked="{{updateNoticesEnabled}}" color="#2e7d5b" bindchange="onUpdateNotices" aria-label="版本更新提醒" />
     </view>
     <view class="menu-row" bindtap="goUpdates"><view class="menu-copy"><text class="menu-title">更新记录</text><text class="menu-desc">当前版本 {{currentVersion}}</text></view><text class="menu-arrow">›</text></view>
-    <button class="btn-ghost" open-type="share">分享植早早给朋友</button>
     <view class="menu-row" bindtap="goAppIntro"><view class="menu-copy"><text class="menu-title">应用介绍与朋友圈分享</text><text class="menu-desc">分享整个小程序，不公开个人记录</text></view><text class="menu-arrow">›</text></view>
+    <button class="btn-ghost share-button" open-type="share">分享植早早给朋友</button>
     <text class="share-help" bindtap="showShareHelp">分享没有反应？查看使用说明</text>
   </view>
 

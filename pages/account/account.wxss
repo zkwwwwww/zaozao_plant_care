@@ -194,4 +194,14 @@
 .export-hint { display: block; margin-top: 10rpx; color: #6b7a70; font-size: 22rpx; line-height: 1.6; }
 .export-actions { display: flex; gap: 16rpx; }
 .export-actions button { flex: 1; min-width: 0; padding: 0; font-size: 24rpx; }
+.menu-card .share-button {
+  width: 288rpx;
+  max-width: 100%;
+  height: 64rpx;
+  padding: 0 24rpx;
+  margin: 20rpx auto 0;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  line-height: 64rpx;
+}
 .share-help { display: block; padding: 18rpx 0; color: #2e7d5b; font-size: 24rpx; text-align: center; }

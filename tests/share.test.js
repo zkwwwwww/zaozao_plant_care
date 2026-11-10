@@ -488,6 +488,47 @@ test('share help describes both native menu entries without asking users to swit
   assert.doesNotMatch(modal.content, /请打开“应用介绍”后/);
 });
 
+test('the account native share button is a compact sibling between the introduction row and share help', () => {
+  const wxml = fs.readFileSync(path.join(root, 'pages/account/account.wxml'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+  const elements = [];
+  const stack = [];
+  for (const match of wxml.matchAll(/<\/?[\w-]+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)) {
+    const source = match[0];
+    const name = source.match(/^<\/?([\w-]+)/)[1];
+    if (source.startsWith('</')) {
+      const element = stack.pop();
+      assert.ok(element);
+      assert.equal(element.name, name);
+      element.end = match.index + source.length;
+    } else {
+      const element = { name, source, start: match.index, end: match.index + source.length, parent: stack.at(-1) };
+      elements.push(element);
+      if (!/\/\s*>$/.test(source)) stack.push(element);
+    }
+  }
+  assert.equal(stack.length, 0);
+  const intro = elements.find(element => /\bbindtap="goAppIntro"/.test(element.source));
+  const button = elements.find(element => element.name === 'button' && /\bopen-type="share"/.test(element.source));
+  const help = elements.find(element => /\bclass="[^"]*\bshare-help\b[^"]*"/.test(element.source));
+  assert.ok(intro && button && help);
+  assert.match(button.source, /\bclass="[^"]*\bshare-button\b[^"]*"/);
+  assert.equal(button.parent, intro.parent);
+  assert.equal(help.parent, intro.parent);
+  assert.ok(intro.end <= button.start);
+  assert.ok(button.end <= help.start);
+  const css = fs.readFileSync(path.join(root, 'pages/account/account.wxss'), 'utf8');
+  const generic = css.match(/(?:^|})\s*\.btn-ghost\s*\{([^}]*)}/);
+  const compact = css.match(/(?:^|})\s*\.menu-card\s+\.share-button\s*\{([^}]*)}/);
+  assert.ok(generic && compact);
+  const height = body => Number(body.match(/\bheight:\s*(\d+)rpx\s*;/)[1]);
+  const fontSize = body => Number(body.match(/\bfont-size:\s*(\d+)rpx\s*;/)[1]);
+  assert.ok(height(compact[1]) < height(generic[1]));
+  assert.ok(fontSize(compact[1]) < fontSize(generic[1]));
+  assert.match(compact[1], /\bwidth:\s*\d+rpx\s*;/);
+  assert.match(compact[1], /\bmax-width:\s*100%\s*;/);
+  assert.match(compact[1], /\bmargin:\s*[^;\s]+\s+auto(?:\s+[^;\s]+)?\s*;/);
+});
+
 function excludedFromUpload(file, rules) {
   return rules.some(rule => rule.type === 'file' ? file === rule.value :
     rule.type === 'folder' && (file === rule.value || file.startsWith(rule.value + '/')));

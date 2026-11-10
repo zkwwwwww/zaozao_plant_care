@@ -7,8 +7,16 @@ const account = require('../../services/account');
 const dataApi = require('../../services/data');
 const migrate = require('../../services/migrate');
 const profile = require('../../utils/profile');
+const engagement = require('../../utils/engagement');
+const homeHeader = require('../../utils/home-header');
 
 const DENSITY_KEY = 'homeDensity';
+
+function accountIdentity() {
+  if (!account.isAuthorized()) return null;
+  const session = account.getSession();
+  return session && typeof session.openid === 'string' ? session.openid : '';
+}
 
 const definePage = require('../../services/page');
 
@@ -29,6 +37,8 @@ definePage({
     loading: false,
     loadError: '',
     account: { nickName: '', avatarUrl: '', status: 'anonymous', summary: '未登录' },
+    homeHeader: homeHeader.buildHeader(),
+    avatarFailed: false,
     showLoginSheet: false,
     guest: false,
     loginExpired: false,
@@ -55,89 +65,174 @@ definePage({
 
   onUnload() {
     this._alive = false;
+    this._loadVersion = (this._loadVersion || 0) + 1;
+  },
+
+  onHide() {
+    this._alive = false;
+    this._loadVersion = (this._loadVersion || 0) + 1;
   },
 
   onShow() {
     this._alive = true;
+    this._loadVersion = (this._loadVersion || 0) + 1;
+    const identity = this.syncLoadIdentity();
     const view = account.displaySession();
-    if (!account.isAuthorized()) {
-      this._bundle = null;
-      this.setData({
-        account: view,
-        showLoginSheet: false,
-        guest: true,
-        plants: [],
-        hasMore: false,
-        totalPlants: 0,
-        visiblePlantCount: 0,
-        tagBar: [],
-        tagFilter: '',
-        stats: { count: 0, seedlings: 0, overdue: 0 },
-        todo: { total: 0, text: '' },
-        todayTasks: [],
-        monthlyCare: { total: 0, activeDays: 0, topName: '暂无', overdue: 0 }
-      });
+    if (identity === null) {
+      this.resetGuest(view);
       return;
     }
+    if (this._displayedIdentity !== identity) this.clearPlants();
+    this.refreshHeader(view);
     this.setData({
-      account: view,
       showLoginSheet: false,
       guest: false
     });
-    this.loadData();
+    return this.loadData();
+  },
+
+  refreshHeader(view) {
+    const next = view || account.displaySession();
+    this.setData({
+      account: next,
+      homeHeader: homeHeader.buildHeader(next),
+      avatarFailed: next.avatarUrl === this.data.account.avatarUrl && this.data.avatarFailed
+    });
+  },
+
+  resetGuest(view) {
+    this.syncLoadIdentity();
+    this.clearPlants();
+    this.refreshHeader(view);
+    this.setData({
+      showLoginSheet: false,
+      guest: true,
+      loading: false,
+      loadError: ''
+    });
+  },
+
+  clearPlants() {
+    this._bundle = null;
+    this._visiblePlants = null;
+    this._displayedIdentity = null;
+    this.setData({
+      plants: [],
+      envMap: {},
+      hasMore: false,
+      totalPlants: 0,
+      visiblePlantCount: 0,
+      tagBar: [],
+      tagFilter: '',
+      stats: { count: 0, seedlings: 0, overdue: 0 },
+      todo: { total: 0, text: '' },
+      todayTasks: [],
+      monthlyCare: { total: 0, activeDays: 0, topName: '暂无', overdue: 0 }
+    });
+  },
+
+  onHeaderAvatarError(event) {
+    const source = event && event.currentTarget && event.currentTarget.dataset && event.currentTarget.dataset.src;
+    if (source && source === this.data.account.avatarUrl && !this.data.avatarFailed) {
+      this.setData({ avatarFailed: true });
+    }
+  },
+
+  waitForSession() {
+    try {
+      const app = typeof getApp === 'function' && getApp();
+      return app && app.globalData && app.globalData.sessionReady;
+    } catch (error) { return null; }
+  },
+
+  isLoadCurrent(version, identity) {
+    return identity !== null && this._alive && this._loadVersion === version && accountIdentity() === identity;
+  },
+
+  syncLoadIdentity() {
+    const identity = accountIdentity();
+    // A shared in-flight bundle must not be reused after an account change.
+    if (typeof this._loadIdentity === 'string' && this._loadIdentity !== identity) {
+      dataApi.invalidateBundle();
+    }
+    this._loadIdentity = identity;
+    return identity;
   },
 
   onPullDownRefresh() {
-    if (account.requireLogin()) this.loadData(true);
+    if (account.requireLogin()) return this.loadData(true);
     else wx.stopPullDownRefresh();
   },
 
+  retryLoad() {
+    return this.loadData(true);
+  },
+
   async loadData(force) {
+    const identity = this.syncLoadIdentity();
+    if (identity === null) {
+      this._loadVersion = (this._loadVersion || 0) + 1;
+      this.resetGuest(account.displaySession());
+      wx.stopPullDownRefresh();
+      return;
+    }
+    if (this._displayedIdentity !== identity) this.clearPlants();
+    this.refreshHeader(account.displaySession());
+    const version = this._loadVersion = (this._loadVersion || 0) + 1;
     this.setData({ loading: true, loadError: '' });
     try {
+      // App startup may still be restoring the current profile from the cloud.
+      await Promise.resolve(this.waitForSession()).catch(() => {});
+      if (!this.isLoadCurrent(version, identity)) return;
+      this.refreshHeader(account.displaySession());
       await migrate.promptOnce();
-      if (!this._alive) return;
-      const bundle = await dataApi.loadBundle({ force: !!force });
-      if (!this._alive) return;
+      if (!this.isLoadCurrent(version, identity)) return;
+      const bundle = await dataApi.loadBundle({ force: force === true });
+      if (!this.isLoadCurrent(version, identity)) return;
       this.renderBundle(bundle);
     } catch (error) {
-      if (!this._alive) return;
+      if (!this.isLoadCurrent(version, identity)) return;
       this.setData({ loading: false, loadError: error.message || '读取失败，请下拉重试' });
     } finally {
-      wx.stopPullDownRefresh();
+      if (this._alive && this._loadVersion === version) {
+        if (accountIdentity() !== identity) this.onShow();
+        else wx.stopPullDownRefresh();
+      }
     }
   },
 
   renderBundle(bundle) {
+    if (!account.isAuthorized()) {
+      this.resetGuest(account.displaySession());
+      return;
+    }
+    this._displayedIdentity = accountIdentity();
     this._bundle = bundle;
     const plants = bundle.plants.filter(p => !p.memorialized);
     const envMap = {};
     bundle.envs.forEach(e => { envMap[e.id] = e; });
     const tagIds = bundle.tags.map(tag => tag.id);
-    const groups = reminder.dueTodayGroups(plants);
     const today = format.today();
-    const todayGroups = groups.map(group => ({
-      label: group.label,
-      items: group.items.filter(task => task.due === today)
-    }));
-    const todayTasks = [];
-    todayGroups.forEach(group => group.items.forEach(task => {
-      todayTasks.push({
-        key: task.plantId + '_' + task.type,
+    const summary = engagement.summaryFor(bundle, today);
+    const dueToday = summary.groups[0].items;
+    const todayTasks = dueToday.map(task => {
+      const plant = plants.find(item => item.id === task.plantId);
+      return {
+        key: task.key,
         plantId: task.plantId,
         plantName: task.plantName,
-        photo: task.photo || '',
-        label: group.label
-      });
-    }));
-    const todaySummary = todayGroups
-      .filter(group => group.items.length)
-      .map(group => group.label + ' ' + group.items.length)
-      .join(' · ');
+        taskId: task.taskId || '',
+        photo: plant && plant.photos && plant.photos[0] || '',
+        label: task.label
+      };
+    });
+    const labelCounts = new Map();
+    dueToday.forEach(task => labelCounts.set(task.label, (labelCounts.get(task.label) || 0) + 1));
+    const todaySummary = Array.from(labelCounts).map(item => item[0] + ' ' + item[1]).join(' · ');
     if (todayTasks.length) {
       todayTasks.unshift({ key: 'summary', summary: true, text: todaySummary });
     }
-    const overdue = groups.reduce((sum, group) => sum + group.items.filter(t => t.overdue).length, 0);
+    const overdue = summary.groups[1].count;
     const monthPrefix = today.slice(0, 7);
     const monthlyRecords = [];
     const careCounts = {};
@@ -192,7 +287,7 @@ definePage({
       envMap,
       stats: { count: plants.length, seedlings: bundle.seedlings.length, overdue },
       todo: {
-        total: todayGroups.reduce((sum, group) => sum + group.items.length, 0),
+        total: dueToday.length,
         text: todaySummary
       },
       todayTasks,
