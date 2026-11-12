@@ -2,6 +2,7 @@ const account = require('./account');
 const format = require('../utils/format');
 const engagement = require('../utils/engagement');
 const releases = require('../config/releases');
+const version = require('../utils/version');
 
 const SETTINGS_KEY = 'updateNoticesEnabled';
 const SEEN_KEY = 'lastSeenRelease';
@@ -60,7 +61,7 @@ async function refresh() {
     if (scope !== nextScope || (active && active.day && active.day !== format.today())) active = null;
     scope = nextScope;
     if (active && active.kind === 'release' && !updatesEnabled()) active = null;
-    if (!active && updatesEnabled() && wx.getStorageSync(SEEN_KEY) !== releases.current.version) {
+    if (!active && updatesEnabled() && version.shouldNotifyRelease(releases.current.version, wx.getStorageSync(SEEN_KEY))) {
       active = {
         kind: 'release', title: releases.current.title,
         description: '植早早 ' + releases.current.version + ' · ' + releases.current.date,

@@ -1,9 +1,20 @@
 // 发布新版本时，在数组开头添加一条面向用户的简短更新记录。
 const releases = [
   {
+    version: '1.2.3',
+    date: '2026-11-12',
+    title: '小花园首页，更清楚也更完整',
+    changes: [
+      '首页卡片更紧凑，补全账号状态、日期和季节养护提示。',
+      '今日待办包含手动任务，头像和切换账号后的资料展示更可靠。',
+      '「我的」分享按钮更小，放在应用介绍下方，分享入口更集中。',
+      '版本号与线上衔接，更新提醒不会再把较旧版本当成新版本。'
+    ]
+  },
+  {
     version: '1.1.3',
     date: '2026-11-10',
-    title: '小花园首页，更清楚也更完整',
+    title: '首页优化（开发上传时误用的版本号）',
     changes: [
       '首页重新整理头像和昵称，补回账号状态、日期和季节养护提示，个人资料入口更好找。',
       '今日待办也会显示手动任务，不再遗漏修剪等自己添加的事项。',
@@ -44,4 +55,5 @@ const releases = [
   }
 ];
 
-module.exports = { releases, current: releases[0] };
+// Last production version confirmed by the project owner, not the CLI.
+module.exports = { releases, current: releases[0], publishedBaseline: '1.2.2' };
